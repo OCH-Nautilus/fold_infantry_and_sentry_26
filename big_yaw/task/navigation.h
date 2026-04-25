@@ -1,0 +1,223 @@
+#ifndef __NAVIGATION_H
+#define __NAVIGATION_H
+
+#define CONST_HEAD0             0XA5     // 帧头
+#define CONST_END0              0XAA     // 帧尾
+
+#define CONST_HEAD1             0XB0     // 帧头
+#define CONST_END1              0XBB    // 帧尾
+
+#define CONST_HEAD2             0XB1    // 帧头
+#define CONST_END2              0XBB    // 帧尾
+
+#define navigation_tx_len   24
+#define decision_tx_len     20
+#include "stdbool.h"
+#include "struct_typedef.h"
+#include "bsp_transmit.h"
+#include "protocol.h"
+#include "main.h"
+#include "decision.h"
+
+typedef enum
+{
+  navi_state_off=0,
+  navi_state_on,
+  
+}Navi_state_t;
+
+
+
+
+//uint8_t m_FrameHead = 0xA5;
+//    float linear_vel_x;
+//    float linear_vel_y;
+//    float angular_z;
+//    float cur_x;
+//    float cur_y;
+//    bool has_path_;
+//    bool get_goal;
+//    
+
+//    uint8_t if_control;
+//    uint8_t seq;
+//    uint8_t arrive_flag;  
+//    uint8_t close_flag;
+//    // uint8_t arrive_flag;
+//    uint8_t m_FrameTail = 0xAA;
+typedef struct
+{
+  float navi_vx;
+  float navi_vy;
+  float navi_dz;
+  
+  
+  float navigate_yaw_target;
+  
+  float current_x;
+  float current_y;
+  
+  uint8_t If_get_path;
+  uint8_t get_goal;
+   
+  uint8_t if_control;
+  uint8_t seq;
+  uint8_t if_arrived;
+  uint8_t close_flag;
+  
+  
+  
+  
+  uint8_t if_lost_navi;
+  
+  Navi_state_t Navi_state;
+ 
+  float yaw_target;//导航目标方向角
+//  uint8_t seq;//包序号
+}navigation_rx_t;
+typedef struct
+{
+  float yaw_diff;
+  float yaw_init_ecd;
+  float relative_ecd;
+  
+}odom_navi_t;
+
+#include <stdint.h>
+
+typedef struct __attribute__((packed)) {
+  uint8_t if_get_msg: 1;                   // 保留位
+  uint8_t IF_Arrived: 1;                 //判断哨兵是否到达指定位置 
+  uint8_t IF_3s_NotHurted: 1;           //判断哨兵是否未受击超过3s
+  uint8_t IF_10s_NotHurted: 1;           //判断哨兵是否未受击超过10s
+  uint8_t IF_5s_NotHurted: 1;           //判断哨兵是否未受击超过5s
+  uint8_t IF_3s_NotFound: 1;             //判断哨兵是否未发现敌人超过3s  
+  uint8_t IF_5s_NotFound: 1;             //判断哨兵是否未发现敌人超过5s
+  uint8_t IF_10s_NotFound: 1;            //判断哨兵是否未发现敌人超过10s
+} sentry_decision_data_1_t;
+
+typedef struct __attribute__((packed)) {
+    
+  uint8_t IF_HP_Less_50: 1;              //判断哨兵是否血量低于50 
+  uint8_t IF_HP_Less_100: 1;             //判断哨兵是否血量低于100
+  uint8_t IF_base_armor_spred: 1;        //判断己方基地护甲是否展开
+  uint8_t IF_outpost_destroyed: 1;       //判断前哨站是否被击毁
+  uint8_t  IF_fire_lock: 1;                //判断发射机构是否锁住
+  uint8_t IF_allowance_less_50: 1;        // 判断允许发弹量是否小于50
+  uint8_t IF_allowance_less_100: 1;        // 判断允许发弹量是否小于100
+  uint8_t IF_HP_recover: 1;               // 判断是否回血完成
+} sentry_decision_data_2_t;
+
+typedef struct __attribute__((packed)) {
+  uint8_t If_on_toss: 1;                  // 判断是否在中央荒地上
+  uint8_t If_need_to_enemy_fortress: 1;   // 判断是否需要上敌方堡垒//todo
+  uint8_t If_stop_navi: 1;                // 判断是否停下来击打敌人
+  uint8_t If_chassis_weak: 1;             // 判断是否进入虚弱模式
+  uint8_t If_get_allow_17: 1;             // 判断是否需要补给区补给弹丸
+  uint8_t IF_fortress_allow_less_50: 1;   //判断堡垒增益点
+  uint8_t IF_energy_Mechanism: 1;         // 判断是否需要给打符的车让位   打符时间到且打符点附近有步兵的时候
+  uint8_t IF_need_to_protect: 1;          // 判断是否需要去保护基地
+} sentry_decision_data_3_t;
+
+typedef struct __attribute__((packed)) {
+uint8_t If_fortress_free: 1;            // 堡垒增益区是否空闲
+  uint8_t If_enemy_outpost_lock: 1;       // 判断敌方前哨站是否停转
+  uint8_t IF_enemy_outpost_destroyed: 1;  // 判断对方前哨站是否被摧毁
+  uint8_t If_moving_v: 1;                 // 判断是否正在过u型弯
+  uint8_t If_chip_base: 1;                // 判断基地是否在吊射基地
+  uint8_t If_hp_less_200: 1;              // 判断血量是否小于300
+  uint8_t If_enemy_small_energy: 1;       // 判断敌方是否开了小能量机关
+  uint8_t If_close_to_enemy_out: 1; // 判断是否距离敌方前哨站较近
+} sentry_decision_data_4_t;
+
+
+typedef struct __attribute__((packed))
+{
+  sentry_decision_data_1_t sentry_decision_data_1;
+  sentry_decision_data_2_t sentry_decision_data_2;
+  sentry_decision_data_3_t sentry_decision_data_3;
+  sentry_decision_data_4_t sentry_decision_data_4;
+}sentry_decision_data_t;
+
+typedef struct
+{
+  uint8_t if_on_vision;
+  int16_t enemy_pos_x;
+  int16_t enemy_pos_y;
+  
+}enemy_pose_t;
+
+
+
+typedef enum
+{
+  navigation_nav_id=1,
+  navigation_decision_id=2,
+}navigation_cmd_id_t;
+
+//1+1+4*4+1+2*2+1=24
+typedef struct 
+{ 
+  uint8_t m_FrameHead;
+  uint8_t nav_cmd_id;
+  float navi_set_x_pos;
+  float navi_set_y_pos;
+  float current_yaw;
+  float current_pitch;
+  enemy_pose_t enemy_pose;
+  uint8_t m_FrameTail;
+  
+}navigation_tx_t;
+
+
+//1+1+4+2+1+2*3+2*2+1=20
+typedef struct
+{
+  uint8_t m_FrameHead;
+  uint8_t decision_cmd_id;
+  sentry_decision_data_t sentry_decision_data;
+  uint16_t game_remain_time;
+  uint8_t game_state;
+  int16_t projectile_allowance_17mm;
+  uint16_t current_hp;
+  uint16_t my_base_hp;
+  int16_t enemy_hero_x;
+  int16_t enemy_hero_y;
+  uint8_t m_FrameTail;
+  
+}Decision_tx_t;
+// 4+4+4+4+4+2+1+1+2+2=28
+typedef struct
+{
+
+ uint8_t navigation_cmd_id;
+ 
+ float Sx;
+ float Sy;
+ float Sx_set;
+ float Sy_set;
+ float steer_real_angle[4];
+ float steer_init_ecd[4];
+ float real_Vx,real_Vy;
+ float real_Vx_c,real_Vy_c;
+ float vx,vy;
+ float Vx_c,Vy_c;
+ float vx_all[4];
+ float init_yaw;  // 检测上电那一刻的陀螺仪值，只是为了里程计计算用,后续考虑
+ float diff_yaw;
+ float diff_angle;
+ bool yaw_update;
+ float yaw_set;
+}location_t;
+
+extern int navi_tx_count;
+extern navigation_tx_t navigation_tx;
+extern navigation_rx_t navigation_rx;
+extern Decision_tx_t Decision_tx;
+extern  uint8_t ninin;
+extern uint8_t navi_state_get;
+extern int navigation_seq;
+void navigation_rx_handle(uint8_t *buff,uint32_t Len,navigation_rx_t *data);
+void Navigation_Tx_Send(navigation_tx_t *data);
+void Decision_Tx_Send(Decision_tx_t *data);
+#endif

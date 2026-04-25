@@ -335,7 +335,7 @@ void infantry_gimbal_mode_key_ctrl()
 		infantry_gimbal_mode_key_fold();
 		break;
 	default:
-		infantry_gimbal_mode_key_idle();
+		gimbal_mode_idle();
 		break;
 	}
 }
@@ -425,7 +425,7 @@ void sentry_gimbal_mode_cruise()
  */
 void sentry_gimbal_mode_fold()
 {
-	GIMBAL.big_yaw_target+=0.01f;
+	GIMBAL.big_yaw_target=;//导航数据控制
 	zero_180(GIMBAL.big_yaw_target);
 
 }

@@ -1393,6 +1393,11 @@
               <FileType>1</FileType>
               <FilePath>..\task\big_gimbal_task.c</FilePath>
             </File>
+            <File>
+              <FileName>navigation.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\task\navigation.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

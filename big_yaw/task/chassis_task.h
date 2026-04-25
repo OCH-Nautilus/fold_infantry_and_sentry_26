@@ -21,15 +21,18 @@ typedef struct
 	int16_t output[4];
 	uint8_t front_set_num;// 底盘当前正方向设定索引
 	float front_set[2];//底盘当前正方向设定
-
+	float front_set_sentry;//底盘当前正方向设定
 }CHASSIS_t;
 
 float speed_limit_top(void);
 float speed_limit_key(void);
 float limit_add_speed(float cur_speed, float speed_ref) ;            
 void chassis_init(void);
-void chassis_assignment(CHASSIS_t *ch);
-void chassis_ecdz(void);
+void infantry_chassis_assignment(CHASSIS_t *ch);
+void infantry_chassis_ecdz(void);
+void sentry_chassis_assignment(CHASSIS_t *ch);
+void sentry_chassis_ecdz(void);
+
 void chassis_speed_calc(CHASSIS_t *ch,int16_t mode);
 void chassis_current_calc(CHASSIS_t *ch);
 void motor_current_up(moto_measure_t *motor_data,int16_t *motor_current_lost,int32_t *motor_current_time) ;

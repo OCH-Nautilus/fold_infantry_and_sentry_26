@@ -45,23 +45,28 @@ typedef struct
 
 void gimbal_init(void);
 void gimbal_pid_calc(void);
-void gimbal_mode_rc_ctrl(void);
-void gimbal_mode_rc_idle(void);
-void gimbal_mode_rc_normal(void);
-void gimbal_mode_rc_vision(void);
-void gimbal_mode_rc_fold(void);
+void infantry_gimbal_mode_rc_ctrl(void);
+void gimbal_mode_idle(void);
+void infantry_gimbal_mode_rc_normal(void);
+void infantry_gimbal_mode_rc_vision(void);
+void infantry_gimbal_mode_rc_fold(void);
+
+
+void infantry_gimbal_mode_key_ctrl(void);
+void infantry_gimbal_mode_key_normal(void);
+void infantry_gimbal_mode_key_fold(void);
+void infantry_gimbal_mode_key_vision(void);
+
+void sentry_gimbal_mode_cruise(void);
+void sentry_gimbal_mode_fold(void); 
+void sentry_gimbal_mode_vision(void);
+
 
 float pitch_protect(float data);
 void gimbal_u_turn(void);
 int Get_Sign(float a);
 float tq_limit(float tq);
 float Modeling_Parameters_cacl(Modeling_Parameters_t Modeling_Parameters);
-void gimbal_mode_key_ctrl(void);
-void gimbal_mode_key_idle(void);
-void gimbal_mode_key_normal(void);
-void gimbal_mode_key_fold(void);
-
-void gimbal_mode_key_vision(void);
 float record_small_yaw_pos(void);
 float record_big_pitch_pos(void);
 void fold_state_judge(void);

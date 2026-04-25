@@ -560,9 +560,10 @@ void sentry_chassis_state_ctrl()
 	switch(mode.chassis_state)
 	{
 		case CHASSIS_IDLE:
-			if(toe_offline[0].communication_state == COMMUNICATION_NONE)
+			if(toe_offline[0].communication_state == COMMUNICATION_NONE||USART_Rx_data.chassis_if_blackout)
 				mode.chassis_state = CHASSIS_IDLE;
-				
+			else
+				mode.chassis_state = CHASSIS_NARIGATION;
 		break;
 		case CHASSIS_NARIGATION:
 			if(toe_offline[0].communication_state == COMMUNICATION_NONE)
@@ -570,9 +571,21 @@ void sentry_chassis_state_ctrl()
 			else 
 				mode.chassis_state = CHASSIS_NARIGATION;
 		break;
-		
+		default:
+			
+		break;
 	}
 }
+
+void sentry_vision_rc_ctrl()
+{
+	if (toe_offline[0].communication_state == COMMUNICATION_NONE)
+		mode.vision_switch_state = VISION_CLOSE;
+	else
+		mode.vision_switch_state = VISION_ARMOR;
+
+}
+
 
 /**
  * @brief Ä¦²ÁÂÖ
@@ -639,7 +652,7 @@ void trigger_state_ctrl(void)
 //					 TRIGGER.cal_protect_start_time = HAL_GetTick();
 //					 mode.trigger_state = TRIGGER_CAL;
 //				 }
-				 else if(((mode.controls_state == RC_ctrl && rc_ctrl.rc.WHEEL_State == DOWN_LONG) || (mode.controls_state == KEY_ctrl && rc_ctrl.mouse.KEY_L_State == PUSH_LONG)) || (mode.vision_switch_state == VISION_ARMOR &&IF_FIRE()))
+				 else if(((mode.controls_state == RC_ctrl && rc_ctrl.rc.WHEEL_State == DOWN_LONG) || (mode.controls_state == KEY_ctrl && rc_ctrl.mouse.KEY_L_State == PUSH_LONG)) || (mode.gimbal_state==GIMBAL_VISION&&mode.vision_switch_state == VISION_ARMOR &&IF_FIRE()))
 				 { 
 				   mode.trigger_state = TRIGGER_LONG;
 				 }

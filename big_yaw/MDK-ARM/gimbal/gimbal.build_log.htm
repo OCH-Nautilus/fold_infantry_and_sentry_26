@@ -22,16 +22,29 @@ Dialog DLL:      TCM.DLL V1.48.0.0
  
 <h2>Project:</h2>
 d:\STM32f407\fold_infantry_and_sentry_26\big_yaw\MDK-ARM\gimbal.uvprojx
-Project File Date:  04/10/2026
+Project File Date:  04/25/2026
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'gimbal'
+compiling navigation.c...
+..\task\navigation.h(20): error:  #5: cannot open source input file "decision.h": No such file or directory
+  #include "decision.h"
+..\task\navigation.c: 0 warnings, 1 error
+compiling chassis_power.c...
+compiling send_current_task.c...
+compiling chassis_task.c...
+..\task\chassis_task.c(143): error:  #29: expected an expression
+  	if ()//导航数据，需要跟随时才有yaw跟随
+..\task\chassis_task.c: 0 warnings, 1 error
+compiling bsp_transmit.c...
 compiling big_gimbal_task.c...
-linking...
-Program Size: Code=82552 RO-data=4176 RW-data=1920 ZI-data=56112  
-FromELF: creating hex file...
-"gimbal\gimbal.axf" - 0 Error(s), 0 Warning(s).
+..\task\big_gimbal_task.c(428): error:  #29: expected an expression
+  	GIMBAL.big_yaw_target=;//导航数据控制
+..\task\big_gimbal_task.c: 0 warnings, 1 error
+compiling vofa.c...
+compiling Steering_UI.c...
+"gimbal\gimbal.axf" - 3 Error(s), 0 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -54,7 +67,8 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.4.0
-Build Time Elapsed:  00:00:04
+Target not created.
+Build Time Elapsed:  00:00:08
 </pre>
 </body>
 </html>

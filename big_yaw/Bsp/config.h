@@ -177,6 +177,8 @@
 
 #define FRONT_SET_1 -173.4f//
 #define FRONT_SET_2  6.6f//
+#define FRONT_SET_SENTRY 0.0f//
+
 #define CHASSIS_MAX_CURRENT 16300
 #define FOLLOW_MAX_CURRENT 4000
 #define FL 3//×óÇ°

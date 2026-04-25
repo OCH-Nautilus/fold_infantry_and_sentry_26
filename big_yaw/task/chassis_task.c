@@ -28,8 +28,16 @@ void chassis_task(void const *argument)
     vTaskDelay(10);
 	for (;;)
 	{
-		chassis_ecdz();
-		chassis_assignment(&CHASSIS);
+		if(USART_Rx_data.mode.bits.infantry_sentry_mode==INFANTRY_CTRL)
+		{
+			infantry_chassis_ecdz();
+			infantry_chassis_assignment(&CHASSIS);
+		}
+		else
+		{
+			sentry_chassis_ecdz();
+			sentry_chassis_assignment(&CHASSIS);
+		}
 		chassis_speed_calc(&CHASSIS, 1);
 		chassis_current_calc(&CHASSIS);
 
@@ -59,20 +67,20 @@ void chassis_init()
 	CHASSIS.last_mode = USART_Rx_data.mode.bits.chassis_mode;
     CHASSIS.front_set[0] = FRONT_SET_1;
     CHASSIS.front_set[1] = FRONT_SET_2;
+	CHASSIS.front_set_sentry = FRONT_SET_SENTRY;
     PID_init(&speed[FL], PID_MOTOR_MODE, PID_MOTOR_KP, PID_MOTOR_KI, PID_MOTOR_KD, PID_MOTOR_IOUT_MAX, PID_MOTOR_OUT_MAX);
 	PID_init(&speed[RL], PID_MOTOR_MODE, PID_MOTOR_KP, PID_MOTOR_KI, PID_MOTOR_KD, PID_MOTOR_IOUT_MAX, PID_MOTOR_OUT_MAX);
 	PID_init(&speed[FR], PID_MOTOR_MODE, PID_MOTOR_KP, PID_MOTOR_KI, PID_MOTOR_KD, PID_MOTOR_IOUT_MAX, PID_MOTOR_OUT_MAX);
 	PID_init(&speed[RR], PID_MOTOR_MODE, PID_MOTOR_KP, PID_MOTOR_KI, PID_MOTOR_KD, PID_MOTOR_IOUT_MAX, PID_MOTOR_OUT_MAX);
 	PID_init(&pid_yaw_follow, PID_YAW_FOLLOW_MODE, PID_YAW_FOLLOW_KP, PID_YAW_FOLLOW_KI, PID_YAW_FOLLOW_KD, PID_YAW_FOLLOW_IOUT_MAX, PID_YAW_FOLLOW_OUT_MAX);
 }
-
 /**
  * @brief 底盘参数赋值
  * @note
  * @param
  */
 int aaa=0;
-void chassis_assignment(CHASSIS_t *ch) 
+void infantry_chassis_assignment(CHASSIS_t *ch) 
 {
 	if (!ch->front_set_num)
 	{aaa++;
@@ -102,37 +110,43 @@ void chassis_assignment(CHASSIS_t *ch)
 	}
 }
 
+void sentry_chassis_assignment(CHASSIS_t *ch) 
+{
+	ch->Vx = 0;//导航传数据
+	ch->Vy = 0;
+}
+
 /**
  * @brief 底盘参数计算
  * @note
  * @param
  */
 float yaw_angle = 0;//此时大小yaw的叠加角度
-//void chassis_ecdz()
-//{
+void sentry_chassis_ecdz()
+{
 
-//	yaw_angle = big_yaw.Angle;
-//	if (yaw_angle > 180.0f)
-//		yaw_angle -= 360.0f;
-//	else if (yaw_angle < -180.0f)
-//		yaw_angle += 360.0f;
+	yaw_angle = big_yaw.Angle;
+	if (yaw_angle > 180.0f)
+		yaw_angle -= 360.0f;
+	else if (yaw_angle < -180.0f)
+		yaw_angle += 360.0f;
 
-//	CHASSIS.crd = yaw_angle - CHASSIS.front_set[CHASSIS.front_set_num];
+	CHASSIS.crd = yaw_angle - CHASSIS.front_set[CHASSIS.front_set_num];
 
-//	if (CHASSIS.crd > 180.0f)
-//		CHASSIS.crd -= 360.0f;
-//	else if (CHASSIS.crd < -180.0f)
-//		CHASSIS.crd += 360.0f;
+	if (CHASSIS.crd > 180.0f)
+		CHASSIS.crd -= 360.0f;
+	else if (CHASSIS.crd < -180.0f)
+		CHASSIS.crd += 360.0f;
 
-//	CHASSIS.diff_angle = -CHASSIS.crd / 360 * 2 * 3.1415926f;
+	CHASSIS.diff_angle = -CHASSIS.crd / 360 * 2 * 3.1415926f;
 
-//	if (USART_Rx_data.mode.bits.chassis_mode == CHASSIS_FOLLOW)
-//		CHASSIS.Vz = PID_calc(&pid_yaw_follow, CHASSIS.crd, 0);
-//	if (USART_Rx_data.mode.bits.chassis_mode == CHASSIS_TOP)
-//		CHASSIS.Vz = 4000;//speed_limit_top() * CHASSIS.Rotate_direction;
-//}
+	if ()//导航数据，需要跟随时才有yaw跟随
+		CHASSIS.Vz = PID_calc(&pid_yaw_follow, CHASSIS.crd, 0);
+	else
+		CHASSIS.Vz = speed_limit_top();//speed_limit_top() * CHASSIS.Rotate_direction;
+}
 
-void chassis_ecdz()
+void infantry_chassis_ecdz()
 {
 	yaw_angle = USART_Rx_data.small_yaw_pos/8192*360.0f-big_yaw.Angle;
 	if (yaw_angle > 180.0f)
