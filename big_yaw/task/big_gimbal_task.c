@@ -425,8 +425,8 @@ void sentry_gimbal_mode_cruise()
  */
 void sentry_gimbal_mode_fold()
 {
-	GIMBAL.big_yaw_target=;//导航数据控制
-	zero_180(GIMBAL.big_yaw_target);
+//	GIMBAL.big_yaw_target=;//导航数据控制
+//	zero_180(GIMBAL.big_yaw_target);
 
 }
 

@@ -95,7 +95,10 @@ void gimbal_task(void const *argument)
 		}
 		else
 		{
-			sentry_gimbal_mode_ctrl();
+			if(mode.controls_state == RC_ctrl)
+				sentry_rc_gimbal_mode_ctrl();
+			else if(mode.controls_state == AUTO_ctrl)
+				sentry_auto_gimbal_mode_ctrl();
 		}
 		fold_state_judge();
 		gimbal_pid_calc();
@@ -571,8 +574,14 @@ void infantry_gimbal_mode_key_fold()
 	GIMBAL.pitch_target = 0;
 	turn_round();
 }
-/********************************哨兵控制层*************************************/
-void sentry_gimbal_mode_ctrl()
+/********************************哨兵自动控制层*************************************/
+
+/**
+ * @brief sentry_auto_gimbal_mode_ctrl
+ * @note
+ * @param
+ */
+void sentry_auto_gimbal_mode_ctrl()
 {
 	switch(mode.gimbal_state)
 	{
@@ -620,11 +629,10 @@ void sentry_gimbal_fold()
 void sentry_gimbal_cruise()
 {
 	GIMBAL.yaw_target += GIMBAL.yaw_cruise_direction*CRUISE_YAW_SPEED;
-	if(GIMBAL.pitch_target>CRUISE_PITCH_MAX)
-		GIMBAL.pitch_target -= CRUISE_PITCH_SPEED;
-	else if(GIMBAL.pitch_target<CRUISE_PITCH_MIN)
-		GIMBAL.pitch_target += CRUISE_PITCH_SPEED;
+	GIMBAL.pitch_target += GIMBAL.pitch_cruise_direction*CRUISE_PITCH_SPEED;
 
+	GIMBAL.yaw_target = zero_180(GIMBAL.yaw_target);
+	GIMBAL.pitch_target = pitch_protect(GIMBAL.pitch_target);
 }
 
 void sentry_gimbal_vision()
@@ -641,6 +649,38 @@ void sentry_gimbal_vision()
 	GIMBAL.big_pitch_target = NORMAL_BIG_PITCH_ANGLE; // 固定角度
 	GIMBAL.yaw_target = zero_180(GIMBAL.yaw_target);
 	GIMBAL.pitch_target = pitch_protect(GIMBAL.pitch_target);
+	GIMBAL.yaw_cruise_direction=1;
+	GIMBAL.pitch_cruise_direction = 1;
+}
+
+/**
+ * @brief sentry_rc_gimbal_mode_ctrl
+ * @note
+ * @param
+ */
+void sentry_rc_gimbal_mode_ctrl()
+{
+	switch (mode.gimbal_state)
+	{
+	case GIMBAL_IDLE:
+		gimbal_mode_idle();
+		break;
+	case GIMBAL_NORMAL:
+		infantry_gimbal_mode_rc_normal();
+		break;
+	case GIMBAL_VISION:
+		infantry_gimbal_mode_rc_vision();
+		break;
+	case GIMBAL_FOLD:
+		infantry_gimbal_mode_rc_fold();
+		break;
+	case GIMBAL_CRUISE:
+		sentry_gimbal_cruise();
+		break;
+	default:
+		gimbal_mode_idle();
+		break;
+	}
 }
 /*********************************其他功能*****************************************/
 /**
@@ -657,7 +697,11 @@ float pitch_protect(float data)
 		data = -37.0f;
 	else if (fabs(small_yaw.ecd-FOLD_SMALL_YAW_ANGLE)>=521&&data < -19.0f)
 		data = -19.0f;
-
+	
+	if(GIMBAL.pitch_target>CRUISE_PITCH_MAX)
+		GIMBAL.pitch_cruise_direction = -1;
+	else if(GIMBAL.pitch_target<CRUISE_PITCH_MIN)
+		GIMBAL.pitch_cruise_direction = 1;
 	
 	return data;
 }

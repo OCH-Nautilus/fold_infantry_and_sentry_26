@@ -13,7 +13,9 @@ typedef enum
 {
 	RC_ctrl=0,
 	KEY_ctrl=1,
+	AUTO_ctrl=2,//ÉÚ±ø
 }controls_t;//²Ù×÷Ä£Ê½
+
 
 
 typedef enum
@@ -104,7 +106,9 @@ void infantry_sentry_ctrl(void);
 void sentry_gimbal_state_ctrl(void);
 void sentry_chassis_state_ctrl(void);	
 void sentry_shoot_state_ctrl(void);
-void trigger_state_ctrl(void) ;              
+void infantry_trigger_state_ctrl(void);      
+void sentry_trigger_state_ctrl(void);
+void sentry_vision_ctrl(void);
 
 extern mode_t mode;
 

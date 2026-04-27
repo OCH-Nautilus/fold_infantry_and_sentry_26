@@ -47,30 +47,30 @@ typedef enum
 //    uint8_t m_FrameTail = 0xAA;
 typedef struct
 {
-  float navi_vx;
-  float navi_vy;
-  float navi_dz;
+
+//消息包原生协议
+  float navi_vx;//目标x速度
+  float navi_vy;//目标y速度
+  float navi_yaw_diff;//正常情况下的yaw增量，加上当前yaw就是目标yaw
+  float current_x;//基于建图坐标系的当前x位置
+  float current_y;//基于建图坐标系的当前y位置
+  uint8_t If_get_path;//导航是否获取到路径
+  uint8_t get_goal;//导航是否获取到目标
+  uint8_t if_arrived;//是否到达目标点 阈值 0.3m
+  uint8_t close_flag;//是否靠近目标点 阈值 1.0m
+  //过洞相关
+  uint8_t need_tunnel;//是否需要过洞 在靠近洞且规划路径需要过洞时为1
+  float tunnel_yaw_error;//过洞情况下的yaw增量，加上当前yaw就是目标yaw
+  
+  uint8_t seq;//包序号
   
   
+//解算以及处理后的一些数据  
   float navigate_yaw_target;
-  
-  float current_x;
-  float current_y;
-  
-  uint8_t If_get_path;
-  uint8_t get_goal;
-   
+ 
   uint8_t if_control;
-  uint8_t seq;
-  uint8_t if_arrived;
-  uint8_t close_flag;
-  
-  
-  
-  
+ 
   uint8_t if_lost_navi;
-  
-  Navi_state_t Navi_state;
  
   float yaw_target;//导航目标方向角
 //  uint8_t seq;//包序号
@@ -158,14 +158,14 @@ typedef enum
 //1+1+4*4+1+2*2+1=24
 typedef struct 
 { 
-  uint8_t m_FrameHead;
-  uint8_t nav_cmd_id;
-  float navi_set_x_pos;
-  float navi_set_y_pos;
-  float current_yaw;
-  float current_pitch;
-  enemy_pose_t enemy_pose;
-  uint8_t m_FrameTail;
+  uint8_t m_FrameHead;//帧头
+  uint8_t nav_cmd_id;//命令字 0x01
+  float navi_set_x_pos; //云台手发布导航目标点x坐标
+  float navi_set_y_pos; //导航目标点y坐标
+  float current_yaw; //当前yaw角
+  float current_pitch; //当前pitch角
+  enemy_pose_t enemy_pose;//视觉识别的地方坐标信息 ，基于当前yaw角的相对坐标系，坐标乘100倍 单位cm
+  uint8_t m_FrameTail;//帧尾
   
 }navigation_tx_t;
 
@@ -173,17 +173,17 @@ typedef struct
 //1+1+4+2+1+2*3+2*2+1=20
 typedef struct
 {
-  uint8_t m_FrameHead;
-  uint8_t decision_cmd_id;
-  sentry_decision_data_t sentry_decision_data;
-  uint16_t game_remain_time;
-  uint8_t game_state;
-  int16_t projectile_allowance_17mm;
-  uint16_t current_hp;
-  uint16_t my_base_hp;
-  int16_t enemy_hero_x;
-  int16_t enemy_hero_y;
-  uint8_t m_FrameTail;
+  uint8_t m_FrameHead;//帧头
+  uint8_t decision_cmd_id;//命令字 0x02
+  sentry_decision_data_t sentry_decision_data;//哨兵决策打包数据，当前全部用1bit表示，打包成4个uint8_t
+  uint16_t game_remain_time;//比赛剩余时间 单位s
+  uint8_t game_state;//比赛状态 直接用裁判系统的，0x04比赛开始
+  int16_t projectile_allowance_17mm;//剩余发弹两
+  uint16_t current_hp;//机器人当前血量
+  uint16_t my_base_hp;//我方基地当前血量
+  int16_t enemy_hero_x;//敌方英雄相对坐标x，单位待商榷
+  int16_t enemy_hero_y;//敌方英雄相对坐标y，单位待商榷
+  uint8_t m_FrameTail;//帧尾
   
 }Decision_tx_t;
 // 4+4+4+4+4+2+1+1+2+2=28

@@ -239,11 +239,19 @@ int next_heat_change(void)
 //枪管热量限制
 void trigger_heat(void)
 {
-// int heat_limit=robot_status.shooter_barrel_heat_limit;
-// int heat=power_heat_data.shooter_17mm_barrel_heat;
-//	
-//	if(heat_limit - heat + next_heat_change() < 20)
-//		mode.tirgger_state = TIRGGER_STATIC;
+int heat_limit=USART_Rx_data.shooter_barrel_heat_limit;
+int heat=USART_Rx_data.shooter_17mm_1_barrel_heat; 
+;
+	
+	if(heat_limit - heat + next_heat_change() < 20)
+	{
+		mode.trigger_state = TRIGGER_STATIC;
+		TRIGGER.weak_flag = 1;
+	}
+	else 
+	{
+		TRIGGER.weak_flag = 0;
+	}
 //			 
 //	 if(robot_status.shooter_barrel_cooling_value == 40 && heat_limit==50)
 //	 {

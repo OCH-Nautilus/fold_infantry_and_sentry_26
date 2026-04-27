@@ -66,20 +66,27 @@ void navigation_rx_handle(uint8_t *buff, uint32_t Len, navigation_rx_t *data)
 
     navi_tx_count = 0;
 
-    u8_to_float Vx, Vy, Vz, Sx, Sy;
+    u8_to_float Vx, Vy, yaw, Sx, Sy,tunnel_yaw;
 
     for (int i = 0; i < 4; i++)
     {
 
       Vx.d[i] = buff[i + 1];
       Vy.d[i] = buff[i + 5];
-      Vz.d[i] = buff[i + 9];
+      yaw.d[i] = buff[i + 9];
       Sx.d[i] = buff[i + 13];
       Sy.d[i] = buff[i + 17];
+      tunnel_yaw.d[i] = buff[i+26];
       
     }
-
-    navi_tx_count = 0;
+    data->If_get_path = buff[21];
+    data->get_goal = buff[22];
+    data->if_arrived=buff[23];
+    data->close_flag=buff[24];
+    data->close_flag=buff[25];
+    
+    data->need_tunnel = buff[30];
+    
 
     
 
@@ -88,31 +95,26 @@ void navigation_rx_handle(uint8_t *buff, uint32_t Len, navigation_rx_t *data)
 
     //      data->navi_vx=0;
     //      data->navi_vy=0;
-    data->navi_dz = Vz.data * 57.3;
+    data->navi_yaw_diff = yaw.data * 57.3;
     data->current_x = Sx.data;
     data->current_y = Sy.data;
 
-
-    data->navi_dz = atan2(Vy.data, Vx.data) * 57.3;
-
-    if (data->navi_dz > 180.0f)
+    if (data->navi_yaw_diff > 180.0f)
     {
-      data->navi_dz -= 360;
+      data->navi_yaw_diff -= 360;
     }
-    else if (data->navi_dz < -180.0f)
+    else if (data->navi_yaw_diff < -180.0f)
     {
-      data->navi_dz += 360;
+      data->navi_yaw_diff += 360;
     }
 
-    if (fabs(data->navi_dz) < 30)
+    if (fabs(data->navi_yaw_diff) < 30)
     {
-      data->navi_dz = 0;
+      data->navi_yaw_diff = 0;
     }
-    data->If_get_path = buff[21];
-    data->if_arrived=buff[25];
-    data->close_flag=buff[26];
-
-    data->navigate_yaw_target = INS.YawTotalAngle + (data->navi_dz);
+    
+    navi_tx_count = 0;
+    data->navigate_yaw_target = INS.YawTotalAngle + (data->navi_yaw_diff);
   }
 }
 

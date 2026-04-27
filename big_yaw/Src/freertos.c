@@ -74,6 +74,7 @@ void StartVOFATask(void const * argument);
 void Transmit_Data_Task(void const * argument);
 void UI_Task(void const * argument);
 
+extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* GetIdleTaskMemory prototype (linked to static allocation support) */
@@ -152,11 +153,11 @@ void MX_FREERTOS_Init(void) {
   VOFATaskHandle = osThreadCreate(osThread(VOFATask), NULL);
 
   /* definition and creation of myTask09 */
-  osThreadDef(myTask09, Transmit_Data_Task, osPriorityAboveNormal, 0, 1024);
+  osThreadDef(myTask09, Transmit_Data_Task, osPriorityAboveNormal, 0, 512);
   myTask09Handle = osThreadCreate(osThread(myTask09), NULL);
 
   /* definition and creation of UI_TASK */
-  osThreadDef(UI_TASK, UI_Task, osPriorityAboveNormal, 0, 1024);
+  osThreadDef(UI_TASK, UI_Task, osPriorityNormal, 0, 1024);
   UI_TASKHandle = osThreadCreate(osThread(UI_TASK), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -174,6 +175,8 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_gimbal_task */
 __weak void gimbal_task(void const * argument)
 {
+  /* init code for USB_DEVICE */
+  MX_USB_DEVICE_Init();
   /* USER CODE BEGIN gimbal_task */
   /* Infinite loop */
   for(;;)

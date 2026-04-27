@@ -25,7 +25,7 @@
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
-#include "usb_otg.h"
+#include "usb_device.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -108,7 +108,6 @@ int main(void)
   MX_USART6_UART_Init();
   MX_USART1_UART_Init();
   MX_RTC_Init();
-  MX_USB_OTG_FS_PCD_Init();
   /* USER CODE BEGIN 2 */
 	can1_user_init();
 	can2_user_init();

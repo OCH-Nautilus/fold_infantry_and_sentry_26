@@ -12,7 +12,7 @@ typedef struct
 	bool flag_shoot_heat_warning; 
 	bool if_cal;     //是否校准
 	bool cal_step[2]; //校准的两个阶段 0为反转,1为偏移量控制
-	
+	bool weak_flag;  //热量限制标志位
 	float initial_ecd;        //校准后初始值
 	float ecd; 
 	float ecd_total;

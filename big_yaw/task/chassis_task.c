@@ -112,8 +112,16 @@ void infantry_chassis_assignment(CHASSIS_t *ch)
 
 void sentry_chassis_assignment(CHASSIS_t *ch) 
 {
-	ch->Vx = 0;//导航传数据
-	ch->Vy = 0;
+	if(USART_Rx_data.mode.bits.controls_mode==CONTROL_AUTO_CTRL)
+	{
+		ch->Vx = 0;//导航传数据
+		ch->Vy = 0;
+	}
+	else
+	{
+		ch->Vx = USART_Rx_data.rc_ctrl_r_vy * SENSITIVITY_CHASSIS_RC_X;
+		ch->Vy =- USART_Rx_data.rc_ctrl_r_vx * SENSITIVITY_CHASSIS_RC_Y;
+	}
 }
 
 /**
@@ -140,7 +148,19 @@ void sentry_chassis_ecdz()
 
 	CHASSIS.diff_angle = -CHASSIS.crd / 360 * 2 * 3.1415926f;
 
-	if ()//导航数据，需要跟随时才有yaw跟随
+	if(USART_Rx_data.mode.bits.controls_mode==CONTROL_RC_CTRL)
+	{
+		if (USART_Rx_data.mode.bits.chassis_mode == CHASSIS_FOLLOW)
+			CHASSIS.Vz = PID_calc(&pid_yaw_follow, -CHASSIS.crd, 0);
+		else if (USART_Rx_data.mode.bits.chassis_mode == CHASSIS_TOP)
+		{
+			if(USART_Rx_data.flag.bits.rotate_direction==1)
+				CHASSIS.Vz = speed_limit_top() ;
+			else
+				CHASSIS.Vz = -speed_limit_top() ;
+		}
+	}
+	else if (USART_Rx_data.mode.bits.controls_mode == CONTROL_AUTO_CTRL&&)//导航数据，需要跟随时才有yaw跟随
 		CHASSIS.Vz = PID_calc(&pid_yaw_follow, CHASSIS.crd, 0);
 	else
 		CHASSIS.Vz = speed_limit_top();//speed_limit_top() * CHASSIS.Rotate_direction;

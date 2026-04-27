@@ -26,6 +26,7 @@ typedef struct
 	uint16_t down_over;//大pitch折叠完成标志位
 	uint16_t angle_limit_flag;//限位标志位
 	int16_t yaw_cruise_direction;//巡航小yaw转动方向
+	int16_t pitch_cruise_direction;//巡航小pitch转动方向
 	uint16_t target_renew_flag;
 	uint16_t big_pitch_allow_flag;
 	float big_pitch_target;//大pitch目标角
@@ -66,10 +67,11 @@ void infantry_gimbal_mode_key_fold(void);
 void infantry_gimbal_mode_key_vision(void);
 
 
-void sentry_gimbal_mode_ctrl(void);
+void sentry_auto_gimbal_mode_ctrl(void);
 void sentry_gimbal_fold(void);
 void sentry_gimbal_cruise(void);
 void sentry_gimbal_vision(void);
+void sentry_rc_gimbal_mode_ctrl(void);
 
 
 

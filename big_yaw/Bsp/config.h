@@ -11,8 +11,8 @@
 
 #define GIMBAL_YAW_SENT
 #define CHASSIS_SENT
-//#define BAT 
-#define CAP
+#define BAT 
+//#define CAP
 /*-------------------------控制模式--------------------------------*/
 #define INFANTRY_CTRL 0
 #define	SENTRY_CTRL 1
@@ -22,6 +22,7 @@
 //操作模式
 #define CONTROL_RC_CTRL 0
 #define CONTROL_KEYBOARD_CTRL 1
+#define CONTROL_AUTO_CTRL 2
 //云台模式
 #define GIMBAL_IDLE 0
 #define GIMBAL_NORMAL 1
