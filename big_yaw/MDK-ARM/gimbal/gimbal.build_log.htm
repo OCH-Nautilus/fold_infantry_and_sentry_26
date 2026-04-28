@@ -21,20 +21,28 @@ Target DLL:      CMSIS_AGDI.dll V1.32.13.0
 Dialog DLL:      TCM.DLL V1.48.0.0
  
 <h2>Project:</h2>
-D:\STM32f407\fold_infantry_and_sentry_26\big_yaw\MDK-ARM\gimbal.uvprojx
+d:\STM32f407\fold_infantry_and_sentry_26\big_yaw\MDK-ARM\gimbal.uvprojx
 Project File Date:  04/26/2026
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'gimbal'
-compiling CAN_receive.c...
-..\Bsp\CAN_receive.c(61): warning:  #188-D: enumerated type mixed with another type
-    						SuperCAP.cap_state = rx_data[5];
-..\Bsp\CAN_receive.c: 1 warning, 0 errors
-linking...
-Program Size: Code=89744 RO-data=4176 RW-data=1820 ZI-data=56668  
-FromELF: creating hex file...
-"gimbal\gimbal.axf" - 0 Error(s), 1 Warning(s).
+compiling navigation.c...
+..\task\navigation.c(65): warning:  #550-D: variable "tunnel_yaw"  was set but never used
+      Algorithm_fp32_u Vx, Vy, yaw, Sx, Sy,tunnel_yaw;
+..\task\navigation.c(134): error:  #20: identifier "receive_gimbal_data" is undefined
+    transform_angle = receive_gimbal_data.current_transform_angle * 2 * 3.14 / 360;
+..\task\navigation.c(144): error:  #20: identifier "vision_frount" is undefined
+    if( receive_gimbal_data.vision_state == vision_frount)
+..\task\navigation.c(169): warning:  #188-D: enumerated type mixed with another type
+    IOIOL = CDC_Transmit_FS(Navigate_Tx_buff, navigation_tx_len);
+..\task\navigation.c(177): error:  #20: identifier "decision" is undefined
+    memcpy(&data->sentry_decision_data, &decision.Judge_condition, sizeof(sentry_decision_data_t));
+..\task\navigation.c(212): warning:  #188-D: enumerated type mixed with another type
+  IOIOL = CDC_Transmit_FS(Decisin_Tx_buff, decision_tx_len);
+..\task\navigation.c: 3 warnings, 3 errors
+compiling chassis_task.c...
+"gimbal\gimbal.axf" - 3 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -57,7 +65,8 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.4.0
-Build Time Elapsed:  00:00:07
+Target not created.
+Build Time Elapsed:  00:00:03
 </pre>
 </body>
 </html>

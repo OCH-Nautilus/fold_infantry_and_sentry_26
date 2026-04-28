@@ -8,6 +8,7 @@
 #include "ins_task.h"
 #include "bsp_transmit.h"
 #include "trigger_task.h"
+
 mode_t mode;
 uint16_t chassis_last_mode=0;
 uint16_t chassis_now_mode=0;
@@ -95,7 +96,7 @@ void mode_init()
 
 void infantry_sentry_ctrl()
 {
-	if(USART_Rx_data.robot_id==0)
+	if(USART_Rx_data.flag_rx.bits.robot_id==0)
 		mode.infantry_sentry_state=INFANTRY_CTRL;
 	else
 		mode.infantry_sentry_state=SENTRY_CTRL;
@@ -150,23 +151,23 @@ void infantry_system_conctrl()
 			break;
 		}
 	}
-	else
+	else//哨兵模式
 	{
 		if(toe_offline[0].communication_state == COMMUNICATION_NONE)
-			mode.controls_state=RC_ctrl;
-		if (rc_ctrl.rc.wheel >= 600)
-			mode.controls_state=RC_ctrl;
-		else if (rc_ctrl.rc.wheel <= -600)
 			mode.controls_state=AUTO_ctrl;
+		if (rc_ctrl.rc.wheel >= 600)
+			mode.controls_state=AUTO_ctrl;
+		else if (rc_ctrl.rc.wheel <= -600)
+			mode.controls_state=RC_ctrl;
 		if(mode.gimbal_state==GIMBAL_IDLE)
 			mode.chassis_state=CHASSIS_IDLE;
 
 		switch (mode.controls_state)
 		{
-		case RC_ctrl:
+		case AUTO_ctrl:
 			if (rc_ctrl.rc.wheel <= -600)
 			{
-				mode.controls_state = AUTO_ctrl;
+				mode.controls_state = RC_ctrl;
 				mode.chassis_state = CHASSIS_IDLE;
 				mode.shoot_state = SHOOT_IDLE;
 				mode.gimbal_state = GIMBAL_IDLE;
@@ -176,10 +177,10 @@ void infantry_system_conctrl()
 				
 			}
 			break;
-		case AUTO_ctrl:
+		case RC_ctrl:
 			if (rc_ctrl.rc.wheel >= 600)
 			{
-				mode.controls_state = RC_ctrl;
+				mode.controls_state = AUTO_ctrl;
 				mode.chassis_state = CHASSIS_IDLE;
 				mode.shoot_state = SHOOT_IDLE;
 				mode.gimbal_state = GIMBAL_IDLE;
@@ -241,7 +242,7 @@ void chassis_mode_change()
  */uint8_t last_s_l=0;
 void infantry_chassis_rc_ctrl()
 {
-	if (toe_offline[0].communication_state == COMMUNICATION_NONE || rc_ctrl.rc.s[0] == 2||USART_Rx_data.chassis_if_blackout)
+	if (toe_offline[0].communication_state == COMMUNICATION_NONE || rc_ctrl.rc.s[0] == 2||USART_Rx_data.flag_rx.bits.chassis_if_blackout)
 		mode.chassis_state = CHASSIS_IDLE; // 无力
 	else if (mode.gimbal_state != GIMBAL_IDLE)
 	{
@@ -369,7 +370,7 @@ void infantry_shoot_rc_ctrl()
 
 void infantry_chassis_pc_ctrl()
 {
-	if (toe_offline[0].communication_state == COMMUNICATION_NONE||USART_Rx_data.chassis_if_blackout)
+	if (toe_offline[0].communication_state == COMMUNICATION_NONE||USART_Rx_data.flag_rx.bits.chassis_if_blackout)
 	{
 		mode.chassis_state = CHASSIS_IDLE; // 无力
 	}
@@ -745,7 +746,7 @@ void sentry_gimbal_state_ctrl()
 			case GIMBAL_IDLE:
 				if(is_stop)
 					mode.gimbal_state = GIMBAL_IDLE;
-				else if(/* 折叠条件 */)
+				else if(USART_Rx_data.flag_rx.bits.navi_need_tunnel)
 					mode.gimbal_state = GIMBAL_FOLD;
 				else if(IF_DISCERN() == 1 /* && 不折叠 */)
 					mode.gimbal_state = GIMBAL_VISION;
@@ -756,7 +757,7 @@ void sentry_gimbal_state_ctrl()
 			case GIMBAL_FOLD:
 				if(is_stop)
 					mode.gimbal_state = GIMBAL_IDLE;
-				else if(/* 继续折叠 */)
+				else if(USART_Rx_data.flag_rx.bits.navi_need_tunnel)
 					mode.gimbal_state = GIMBAL_FOLD;
 				else 
 					mode.gimbal_state = GIMBAL_CRUISE;
@@ -765,7 +766,7 @@ void sentry_gimbal_state_ctrl()
 			case GIMBAL_CRUISE:
 				if(is_stop)
 					mode.gimbal_state = GIMBAL_IDLE;
-				else if(/* 折叠条件 */)
+				else if(USART_Rx_data.flag_rx.bits.navi_need_tunnel)
 					mode.gimbal_state = GIMBAL_FOLD;
 				else if(IF_DISCERN() == 1)
 					mode.gimbal_state = GIMBAL_VISION;
@@ -776,6 +777,8 @@ void sentry_gimbal_state_ctrl()
 			case GIMBAL_VISION:
 				if(is_stop)
 					mode.gimbal_state = GIMBAL_IDLE;
+				else if(USART_Rx_data.flag_rx.bits.navi_need_tunnel)
+					mode.gimbal_state = GIMBAL_FOLD;
 				else if(IF_DISCERN() == 1)
 					mode.gimbal_state = GIMBAL_VISION;
 				else 
@@ -806,8 +809,7 @@ void sentry_chassis_state_ctrl()
     switch(mode.chassis_state)
     {
         case CHASSIS_IDLE:
-            if(toe_offline[0].communication_state == COMMUNICATION_NONE ||
-               USART_Rx_data.chassis_if_blackout)
+            if(toe_offline[0].communication_state == COMMUNICATION_NONE || USART_Rx_data.flag_rx.bits.chassis_if_blackout)
                 mode.chassis_state = CHASSIS_IDLE;
             else
                 mode.chassis_state = CHASSIS_NARIGATION;

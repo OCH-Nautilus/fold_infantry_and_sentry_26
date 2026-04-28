@@ -101,6 +101,7 @@ void gimbal_task(void const *argument)
 				sentry_auto_gimbal_mode_ctrl();
 		}
 		fold_state_judge();
+		fold_time_judge();
 		gimbal_pid_calc();
 		yaw_limit();
 		small_yaw_offline_protect();
@@ -606,24 +607,50 @@ void sentry_auto_gimbal_mode_ctrl()
 
 void sentry_gimbal_fold()
 {
-	static int16_t temp_pos=0;
-	GIMBAL.yaw_target = FOLD_SMALL_YAW_ANGLE;
-	GIMBAL.target_renew_flag = 1;
-	//过零处理
-	temp_pos=small_yaw.ecd - FOLD_SMALL_YAW_ANGLE;
-	if(temp_pos>4096)
-		temp_pos-=8192;
-	else if(temp_pos<-4096)
-		temp_pos+=8192;
-	
-	if (abs(temp_pos) < 45)
-		GIMBAL.big_pitch_target = FOLD_BIG_PITCH_ANGLE;
+    static int16_t temp_pos = 0;
+    static uint8_t retry_step = 0;   // 0=正常折叠, 1=先抬大pitch, 2=抬完重新折叠
 
-	if(GIMBAL.down_over)
-		GIMBAL.pitch_target = FOLD_SMALL_PITCH_ANGLE;
-	else
-		GIMBAL.pitch_target = 0;
+    /* 刚进入折叠模式时，清零重试状态 */
+    if (mode.gimbal_state == GIMBAL_FOLD && GIMBAL.last_mode != GIMBAL_FOLD)
+        retry_step = 0;
 
+    /* 超时触发：进入"先抬起"阶段 */
+    if (GIMBAL.fold_timeout_flag)
+    {
+        GIMBAL.fold_timeout_flag = 0;
+        retry_step = 1;
+    }
+
+    /* ── 阶段1：先把大pitch抬起来 ── */
+    if (retry_step == 1)
+    {
+        GIMBAL.big_pitch_target = NORMAL_BIG_PITCH_ANGLE;
+        GIMBAL.pitch_target = 0;
+
+        if (fabs(big_pitch._pos - NORMAL_BIG_PITCH_ANGLE) < 0.05f)
+        {
+            retry_step = 2;          // 抬到位了
+        }
+        return;   // 还没抬到位，本次不执行折叠逻辑
+    }
+
+    /* ── 正常折叠（retry_step == 0 首次 或 == 2 抬起后重新折叠） ── */
+    GIMBAL.yaw_target = FOLD_SMALL_YAW_ANGLE;
+    GIMBAL.target_renew_flag = 1;
+
+    temp_pos = small_yaw.ecd - FOLD_SMALL_YAW_ANGLE;
+    if (temp_pos > 4096)
+        temp_pos -= 8192;
+    else if (temp_pos < -4096)
+        temp_pos += 8192;
+
+    if (abs(temp_pos) < 45)
+        GIMBAL.big_pitch_target = FOLD_BIG_PITCH_ANGLE;
+
+    if (GIMBAL.down_over)
+        GIMBAL.pitch_target = FOLD_SMALL_PITCH_ANGLE;
+    else
+        GIMBAL.pitch_target = 0;
 }
 
 void sentry_gimbal_cruise()
@@ -652,7 +679,7 @@ void sentry_gimbal_vision()
 	GIMBAL.yaw_cruise_direction=1;
 	GIMBAL.pitch_cruise_direction = 1;
 }
-
+/**************************************哨兵遥控器控制*******************************************/
 /**
  * @brief sentry_rc_gimbal_mode_ctrl
  * @note
@@ -683,6 +710,7 @@ void sentry_rc_gimbal_mode_ctrl()
 	}
 }
 /*********************************其他功能*****************************************/
+
 /**
  * @brief pitch限位
  * @note
@@ -926,3 +954,30 @@ short mouse_limit(short a)
 	return a;
 }
 
+//折叠计时检测
+void fold_time_judge()
+{
+	static uint32_t fold_time_cnt=0;
+
+	if(mode.controls_state!=AUTO_ctrl)
+	{
+		fold_time_cnt=0;
+	}
+	if(mode.gimbal_state==GIMBAL_FOLD&&GIMBAL.down_over==0&&GIMBAL.rise_over==0)
+		fold_time_cnt++;
+	else
+	{
+		if(--fold_time_cnt<2)
+		fold_time_cnt=0;
+	}
+		
+	
+	if(fold_time_cnt>FOLD_TIME_MAX&&GIMBAL.down_over==0&&GIMBAL.rise_over==0)
+	{
+		GIMBAL.fold_timeout_flag=1;
+	}
+	else
+	{
+		GIMBAL.fold_timeout_flag=0;
+	}
+}

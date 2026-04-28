@@ -1,5 +1,7 @@
 #include "struct_typedef.h"
 #include "pid.h"
+
+
 typedef struct
 {
 
@@ -28,7 +30,7 @@ typedef struct
 	int16_t yaw_cruise_direction;//巡航小yaw转动方向
 	int16_t pitch_cruise_direction;//巡航小pitch转动方向
 	uint16_t target_renew_flag;
-	uint16_t big_pitch_allow_flag;
+    uint16_t fold_timeout_flag;//折叠超时标志位
 	float big_pitch_target;//大pitch目标角
 	float big_pitch_output;//大pitch目标输出电流
 	float kalman_pitch_target;
@@ -97,6 +99,7 @@ float zero_PI(float angle);
 short mouse_limit(short a);
 
 
+void fold_time_judge(void);
 extern GIMBAL_t GIMBAL;
 
 

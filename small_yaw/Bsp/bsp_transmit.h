@@ -10,7 +10,7 @@
 
 #define DATA_COUNT_RX	320
 #define DATA_COUNT_TX	82
-#define DATA_COUNT	50//接收字节数
+#define DATA_COUNT	48//接收字节数
 
 #define USART_RX_HAED   0XA5
 #define USART_RX_END    0XAA
@@ -32,8 +32,6 @@ typedef struct
 	uint8_t head;
 	
 	float chassis_diff_angle;
-	uint8_t chassis_if_blackout;
-	uint8_t trigger_weak_flag;
 	float initial_speed;
 	float ins_big_yaw;//大yaw陀螺仪值
 	float big_yaw_target;
@@ -48,8 +46,22 @@ typedef struct
 	int16_t speed_out;
 	int16_t chassis_given_current;
 	int16_t chassis_speed_rpm;
-	uint8_t vision_color;
-    uint8_t robot_id;//0步兵 1哨兵
+     union FLAG_Rx_Union 
+        {
+            uint16_t flag_rx_pack;  // 用于整体操作的8位
+            struct Flag_Rx_Bits 
+            {
+                uint8_t chassis_if_blackout :1 ;  
+                uint8_t vision_color :1; // 0蓝色 1红色
+                uint8_t robot_id :1; // 0步兵 1哨兵
+                uint8_t navi_if_conctrl :1; // 导航控制标志位
+                uint8_t navi_if_arrived :1; // 是否到达目标点 阈值 0.3m
+                uint8_t navi_close_flag :1; // //是否靠近目标点 阈值 1.0m
+                uint8_t navi_need_tunnel :1;//是否需要过洞 在靠近洞且规划路径需要过洞时为1
+                uint8_t if_lost_navi :1; // 是否丢失导航 0正常 1丢失
+                uint8_t reserved_flags_2 :7; // 位8-15，保留
+            }bits;
+         } flag_rx;
 	uint8_t tail;
 }USART_Rx_data_t;
 

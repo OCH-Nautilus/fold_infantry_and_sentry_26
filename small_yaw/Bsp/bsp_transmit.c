@@ -115,7 +115,7 @@ void USART_Data_Handle(USART_TX_data_t *data)
 		data->flag.bits.IF_DISCERN=IF_DISCERN();
 		data->flag.bits.shoot_l=shoot_l_detect();
 		data->flag.bits.shoot_r=shoot_r_detect();
-		data->flag.bits.stuck_state=stuck_state;
+		data->flag.bits.stuck_state=TRIGGER.flag_if_flug[0];
 		data->flag.bits.down_over_flag=GIMBAL.down_over;
 		data->flag.bits.rotate_direction=Rotate_direction;
 		data->flag.bits.top_mode=top_mode;
@@ -172,83 +172,162 @@ void USART_Data_Send(USART_TX_data_t *data, uint8_t *buff)
   * @param   buff: [ ‰»Î/≥ˆ] 
   * @Data    2024-01-31
 */
-int asss=0;
-void Head1_data_Handle(uint8_t *buff,USART_Rx_data_t *data)
+
+void Head1_data_Handle(uint8_t *buff, USART_Rx_data_t *data)
 {
-	
-	static uint32_t last_Communication_count=0;
-	static uint16_t err_cnt=0;
-	if(buff[0] == USART_RX_HAED && buff[DATA_COUNT-1] == USART_RX_END)
-	{asss++;
-		Algorithm_fp32_u diff_angle;
-		Algorithm_fp32_u initial_speed;
-		Algorithm_fp32_u ins_big_yaw;
-		Algorithm_fp32_u big_yaw_target;
-		Algorithm_int16_u shooter_barrel_heat_limit;
-		Algorithm_int16_u shooter_barrel_cooling_value;
-		Algorithm_int16_u shooter_17mm_1_barrel_heat;
-		Algorithm_int16_u chassis_power_limit;
-		Algorithm_fp32_u real_power;
-		Algorithm_int16_u buffer_energy;
-		Algorithm_fp32_u cap_v;
-		Algorithm_int32_u Communication_count;
-		Algorithm_int16 speed_out;
-		Algorithm_int16 chassis_given_current;
-		Algorithm_int16 chassis_speed_rpm;
+    static uint32_t last_Communication_count = 0;
+    static uint16_t err_cnt = 0;
 
-		for(int i=0;i<4;i++)
-		{
-			diff_angle.d[i]=buff[i+1];
-			initial_speed.d[i]=buff[i+7];
-			ins_big_yaw.d[i]=buff[i+11];
-			big_yaw_target.d[i]=buff[i+15];
-			real_power.d[i]=buff[i+27];			
-			cap_v.d[i]=buff[i+33];
-			Communication_count.d[i]=buff[i+37];
-		}
-		for(int i=0;i<2;i++)
-		{
-			shooter_barrel_heat_limit.d[i]=buff[i+19];
-			shooter_barrel_cooling_value.d[i]=buff[i+21];
-			shooter_17mm_1_barrel_heat.d[i]=buff[i+23];
-			chassis_power_limit.d[i]=buff[i+25];
-			buffer_energy.d[i]=buff[i+31];
-			speed_out.d[i]=buff[i+41];
-			chassis_given_current.d[i]=buff[i+43];
-			chassis_speed_rpm.d[i]=buff[i+45];
-		}
-		data->chassis_diff_angle=diff_angle.data;
-		data->chassis_if_blackout=buff[5];
-		data->trigger_weak_flag=buff[6];
-		data->initial_speed=initial_speed.data;
-		data->ins_big_yaw=ins_big_yaw.data;
-		data->big_yaw_target=big_yaw_target.data;
-		data->shooter_17mm_1_barrel_heat=shooter_17mm_1_barrel_heat.data;
-		data->shooter_barrel_heat_limit=shooter_barrel_heat_limit.data;
-		data->shooter_barrel_cooling_value=shooter_barrel_cooling_value.data;
-		data->chassis_power_limit=chassis_power_limit.data;
-		data->real_power=real_power.data;
-		data->buffer_energy=buffer_energy.data;
-		data->cap_v=cap_v.data;
-		data->Communication_count=Communication_count.data;
-		data->speed_out=speed_out.data;
-		data->chassis_given_current=chassis_given_current.data;
-		data->chassis_speed_rpm=chassis_speed_rpm.data;
-		data->vision_color=buff[47];
-		data->robot_id=buff[48];
-	}
+    if (buff[0] == USART_RX_HAED && buff[DATA_COUNT - 1] == USART_RX_END)
+    {
+        Algorithm_fp32_u diff_angle;
+        Algorithm_fp32_u initial_speed;
+        Algorithm_fp32_u ins_big_yaw;
+        Algorithm_fp32_u big_yaw_target;
+        Algorithm_int16_u shooter_barrel_heat_limit;
+        Algorithm_int16_u shooter_barrel_cooling_value;
+        Algorithm_int16_u shooter_17mm_1_barrel_heat;
+        Algorithm_int16_u chassis_power_limit;
+        Algorithm_fp32_u real_power;
+        Algorithm_int16_u buffer_energy;
+        Algorithm_fp32_u cap_v;
+        Algorithm_int32_u Communication_count;
+        Algorithm_int16 speed_out;
+        Algorithm_int16 chassis_given_current;
+        Algorithm_int16 chassis_speed_rpm;
 
-	if(last_Communication_count==data->Communication_count)
-			err_cnt++;
-	else 
-		err_cnt=0;
-	
-	if(err_cnt>=100)
-		communication_state=UART_COMMUNICATION_ERR;
-	else
-		communication_state=UART_COMMUNICATION_NORMAL;
+        for (int i = 0; i < 4; i++)
+        {
+            diff_angle.d[i]          = buff[i + 1];   // [1-4]
+            initial_speed.d[i]       = buff[i + 5];   // [5-8]
+            ins_big_yaw.d[i]         = buff[i + 9];   // [9-12]
+            big_yaw_target.d[i]      = buff[i + 13];  // [13-16]
+            real_power.d[i]          = buff[i + 25];  // [25-28]
+            cap_v.d[i]               = buff[i + 31];  // [31-34]
+            Communication_count.d[i] = buff[i + 35];  // [35-38]
+        }
 
-	last_Communication_count=data->Communication_count;
+        for (int i = 0; i < 2; i++)
+        {
+            shooter_barrel_heat_limit.d[i]   = buff[i + 17];  // [17-18]
+            shooter_barrel_cooling_value.d[i] = buff[i + 19]; // [19-20]
+            shooter_17mm_1_barrel_heat.d[i]  = buff[i + 21];  // [21-22]
+            chassis_power_limit.d[i]         = buff[i + 23];  // [23-24]
+            buffer_energy.d[i]               = buff[i + 29];  // [29-30]
+            speed_out.d[i]                   = buff[i + 39];  // [39-40]
+            chassis_given_current.d[i]       = buff[i + 41];  // [41-42]
+            chassis_speed_rpm.d[i]           = buff[i + 43];  // [43-44]
+        }
+
+        data->chassis_diff_angle          = diff_angle.data;
+        data->initial_speed               = initial_speed.data;
+        data->ins_big_yaw                 = ins_big_yaw.data;
+        data->big_yaw_target              = big_yaw_target.data;
+        data->shooter_barrel_heat_limit   = shooter_barrel_heat_limit.data;
+        data->shooter_barrel_cooling_value = shooter_barrel_cooling_value.data;
+        data->shooter_17mm_1_barrel_heat  = shooter_17mm_1_barrel_heat.data;
+        data->chassis_power_limit         = chassis_power_limit.data;
+        data->real_power                  = real_power.data;
+        data->buffer_energy               = buffer_energy.data;
+        data->cap_v                       = cap_v.data;
+        data->Communication_count         = Communication_count.data;
+        data->speed_out                   = speed_out.data;
+        data->chassis_given_current       = chassis_given_current.data;
+        data->chassis_speed_rpm           = chassis_speed_rpm.data;
+
+        data->flag_rx.flag_rx_pack = (uint16_t)buff[45] | ((uint16_t)buff[46] << 8);
+    }
+
+    if (last_Communication_count == data->Communication_count)
+        err_cnt++;
+    else
+        err_cnt = 0;
+
+    if (err_cnt >= 100)
+        communication_state = UART_COMMUNICATION_ERR;
+    else
+        communication_state = UART_COMMUNICATION_NORMAL;
+
+    last_Communication_count = data->Communication_count;
 }
+
+// int asss=0;
+// void Head1_data_Handle(uint8_t *buff,USART_Rx_data_t *data)
+// {
+	
+// 	static uint32_t last_Communication_count=0;
+// 	static uint16_t err_cnt=0;
+// 	if(buff[0] == USART_RX_HAED && buff[DATA_COUNT-1] == USART_RX_END)
+// 	{asss++;
+// 		Algorithm_fp32_u diff_angle;
+// 		Algorithm_fp32_u initial_speed;
+// 		Algorithm_fp32_u ins_big_yaw;
+// 		Algorithm_fp32_u big_yaw_target;
+// 		Algorithm_int16_u shooter_barrel_heat_limit;
+// 		Algorithm_int16_u shooter_barrel_cooling_value;
+// 		Algorithm_int16_u shooter_17mm_1_barrel_heat;
+// 		Algorithm_int16_u chassis_power_limit;
+// 		Algorithm_fp32_u real_power;
+// 		Algorithm_int16_u buffer_energy;
+// 		Algorithm_fp32_u cap_v;
+// 		Algorithm_int32_u Communication_count;
+// 		Algorithm_int16 speed_out;
+// 		Algorithm_int16 chassis_given_current;
+// 		Algorithm_int16 chassis_speed_rpm;
+
+// 		for(int i=0;i<4;i++)
+// 		{
+// 			diff_angle.d[i]=buff[i+1];
+// 			initial_speed.d[i]=buff[i+7];
+// 			ins_big_yaw.d[i]=buff[i+11];
+// 			big_yaw_target.d[i]=buff[i+15];
+// 			real_power.d[i]=buff[i+27];			
+// 			cap_v.d[i]=buff[i+33];
+// 			Communication_count.d[i]=buff[i+37];
+// 		}
+// 		for(int i=0;i<2;i++)
+// 		{
+// 			shooter_barrel_heat_limit.d[i]=buff[i+19];
+// 			shooter_barrel_cooling_value.d[i]=buff[i+21];
+// 			shooter_17mm_1_barrel_heat.d[i]=buff[i+23];
+// 			chassis_power_limit.d[i]=buff[i+25];
+// 			buffer_energy.d[i]=buff[i+31];
+// 			speed_out.d[i]=buff[i+41];
+// 			chassis_given_current.d[i]=buff[i+43];
+// 			chassis_speed_rpm.d[i]=buff[i+45];
+// 		}
+// 		data->chassis_diff_angle=diff_angle.data;
+// 		data->chassis_if_blackout=buff[5];
+// 		data->trigger_weak_flag=buff[6];
+// 		data->initial_speed=initial_speed.data;
+// 		data->ins_big_yaw=ins_big_yaw.data;
+// 		data->big_yaw_target=big_yaw_target.data;
+// 		data->shooter_17mm_1_barrel_heat=shooter_17mm_1_barrel_heat.data;
+// 		data->shooter_barrel_heat_limit=shooter_barrel_heat_limit.data;
+// 		data->shooter_barrel_cooling_value=shooter_barrel_cooling_value.data;
+// 		data->chassis_power_limit=chassis_power_limit.data;
+// 		data->real_power=real_power.data;
+// 		data->buffer_energy=buffer_energy.data;
+// 		data->cap_v=cap_v.data;
+// 		data->Communication_count=Communication_count.data;
+// 		data->speed_out=speed_out.data;
+// 		data->chassis_given_current=chassis_given_current.data;
+// 		data->chassis_speed_rpm=chassis_speed_rpm.data;
+// 		data->vision_color=buff[47];
+// 		data->robot_id=buff[48];
+// 	}
+
+// 	if(last_Communication_count==data->Communication_count)
+// 			err_cnt++;
+// 	else 
+// 		err_cnt=0;
+	
+// 	if(err_cnt>=100)
+// 		communication_state=UART_COMMUNICATION_ERR;
+// 	else
+// 		communication_state=UART_COMMUNICATION_NORMAL;
+
+// 	last_Communication_count=data->Communication_count;
+// }
 
 

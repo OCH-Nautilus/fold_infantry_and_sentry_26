@@ -77,3 +77,4 @@ gimbal\bsp_transmit.o: ../task/big_gimbal_task.h
 gimbal\bsp_transmit.o: ../Bsp/pid.h
 gimbal\bsp_transmit.o: ../SuperCAP/chassis_power.h
 gimbal\bsp_transmit.o: ..\Bsp\SMC.h
+gimbal\bsp_transmit.o: ../task/navigation.h

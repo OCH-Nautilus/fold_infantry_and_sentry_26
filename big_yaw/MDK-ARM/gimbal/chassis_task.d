@@ -69,3 +69,5 @@ gimbal\chassis_task.o: ../referee/protocol.h
 gimbal\chassis_task.o: ../referee/struct_typedef.h
 gimbal\chassis_task.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
 gimbal\chassis_task.o: ../SuperCAP/chassis_power.h
+gimbal\chassis_task.o: ..\task\navigation.h
+gimbal\chassis_task.o: ..\task\big_gimbal_task.h

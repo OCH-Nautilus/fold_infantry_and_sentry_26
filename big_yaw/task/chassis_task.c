@@ -9,6 +9,8 @@
 #include "math.h"
 #include "referee.h"
 #include "chassis_power.h"
+#include "navigation.h"
+#include "big_gimbal_task.h"
 CHASSIS_t CHASSIS;
 pid_type_def speed[4];
 pid_type_def pid_yaw_follow;
@@ -110,12 +112,30 @@ void infantry_chassis_assignment(CHASSIS_t *ch)
 	}
 }
 
+/**
+ * @brief 哨兵底盘速度赋值（AUTO模式下接收导航速度）
+ * @note  - navi_vx/navi_vy 在大yaw坐标系：正前方=Vx+，向左=Vy+
+ *        - chassis_speed_calc已通过diff_angle做全向轮分解，此处不需旋转
+ *        - 路径保护：必须有有效路径、未到达、导航未丢失才执行
+ *        - FOLD模式下需大yaw对齐后才能移动
+ */
 void sentry_chassis_assignment(CHASSIS_t *ch) 
 {
 	if(USART_Rx_data.mode.bits.controls_mode==CONTROL_AUTO_CTRL)
 	{
-		ch->Vx = 0;//导航传数据
-		ch->Vy = 0;
+		if(navigation_rx.if_control && !navigation_rx.if_arrived 
+			&& navigation_rx.if_lost_navi==0
+			&& ((USART_Rx_data.mode.bits.gimbal_mode==GIMBAL_FOLD && GIMBAL.down_over && fabs(CHASSIS.crd) < 10.0f)
+				|| (USART_Rx_data.mode.bits.gimbal_mode==GIMBAL_CRUISE || USART_Rx_data.mode.bits.gimbal_mode==GIMBAL_VISION)))
+		{
+			ch->Vx = navigation_rx.navi_vx;
+			ch->Vy = navigation_rx.navi_vy;
+		}
+		else
+		{
+			ch->Vx = 0;
+			ch->Vy = 0;
+		}
 	}
 	else
 	{
@@ -160,10 +180,19 @@ void sentry_chassis_ecdz()
 				CHASSIS.Vz = -speed_limit_top() ;
 		}
 	}
-	else if (USART_Rx_data.mode.bits.controls_mode == CONTROL_AUTO_CTRL&&)//导航数据，需要跟随时才有yaw跟随
-		CHASSIS.Vz = PID_calc(&pid_yaw_follow, CHASSIS.crd, 0);
+	else if(USART_Rx_data.mode.bits.controls_mode == CONTROL_AUTO_CTRL)
+	{
+		/* -------- 自动导航 Vz 决策 --------
+		 * need_tunnel：过洞时需底盘对准大yaw方向，用FOLLOW
+		 * 其他AUTO（巡航/视觉/到达/无路径）：小陀螺TOP全向机动
+		 */
+		if(navigation_rx.need_tunnel)
+			CHASSIS.Vz = PID_calc(&pid_yaw_follow, -CHASSIS.crd, 0);
+		else
+			CHASSIS.Vz = speed_limit_top();
+	}
 	else
-		CHASSIS.Vz = speed_limit_top();//speed_limit_top() * CHASSIS.Rotate_direction;
+		CHASSIS.Vz = speed_limit_top();
 }
 
 void infantry_chassis_ecdz()

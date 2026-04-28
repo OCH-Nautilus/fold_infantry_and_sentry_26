@@ -1,22 +1,20 @@
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'gimbal'
 compiling navigation.c...
-..\task\navigation.h(20): error:  #5: cannot open source input file "decision.h": No such file or directory
-  #include "decision.h"
-..\task\navigation.c: 0 warnings, 1 error
-compiling chassis_power.c...
-compiling send_current_task.c...
+..\task\navigation.c(65): warning:  #550-D: variable "tunnel_yaw"  was set but never used
+      Algorithm_fp32_u Vx, Vy, yaw, Sx, Sy,tunnel_yaw;
+..\task\navigation.c(134): error:  #20: identifier "receive_gimbal_data" is undefined
+    transform_angle = receive_gimbal_data.current_transform_angle * 2 * 3.14 / 360;
+..\task\navigation.c(144): error:  #20: identifier "vision_frount" is undefined
+    if( receive_gimbal_data.vision_state == vision_frount)
+..\task\navigation.c(169): warning:  #188-D: enumerated type mixed with another type
+    IOIOL = CDC_Transmit_FS(Navigate_Tx_buff, navigation_tx_len);
+..\task\navigation.c(177): error:  #20: identifier "decision" is undefined
+    memcpy(&data->sentry_decision_data, &decision.Judge_condition, sizeof(sentry_decision_data_t));
+..\task\navigation.c(212): warning:  #188-D: enumerated type mixed with another type
+  IOIOL = CDC_Transmit_FS(Decisin_Tx_buff, decision_tx_len);
+..\task\navigation.c: 3 warnings, 3 errors
 compiling chassis_task.c...
-..\task\chassis_task.c(143): error:  #29: expected an expression
-  	if ()//导航数据，需要跟随时才有yaw跟随
-..\task\chassis_task.c: 0 warnings, 1 error
-compiling bsp_transmit.c...
-compiling big_gimbal_task.c...
-..\task\big_gimbal_task.c(428): error:  #29: expected an expression
-  	GIMBAL.big_yaw_target=;//导航数据控制
-..\task\big_gimbal_task.c: 0 warnings, 1 error
-compiling vofa.c...
-compiling Steering_UI.c...
-"gimbal\gimbal.axf" - 3 Error(s), 0 Warning(s).
+"gimbal\gimbal.axf" - 3 Error(s), 3 Warning(s).
 Target not created.
-Build Time Elapsed:  00:00:08
+Build Time Elapsed:  00:00:03

@@ -17,7 +17,6 @@
 #include "bsp_transmit.h"
 #include "protocol.h"
 #include "main.h"
-#include "decision.h"
 
 typedef enum
 {
@@ -75,6 +74,8 @@ typedef struct
   float yaw_target;//导航目标方向角
 //  uint8_t seq;//包序号
 }navigation_rx_t;
+
+
 typedef struct
 {
   float yaw_diff;
@@ -221,3 +222,4 @@ void navigation_rx_handle(uint8_t *buff,uint32_t Len,navigation_rx_t *data);
 void Navigation_Tx_Send(navigation_tx_t *data);
 void Decision_Tx_Send(Decision_tx_t *data);
 #endif
+

@@ -1,5 +1,3 @@
-
-
 /*导航信息处理*/
 
 // #include "Odometer.h"
@@ -9,10 +7,8 @@
 #include "usbd_cdc_if.h"
 #include "usb_device.h"
 // #include "bsp_transmit.h"
-#include "decision.h"
 #include "bsp_transmit.h"
 #include "referee.h"
-#include "decision.h"
 #include "CAN_receive.h"
 location_t location =
     {
@@ -66,7 +62,7 @@ void navigation_rx_handle(uint8_t *buff, uint32_t Len, navigation_rx_t *data)
 
     navi_tx_count = 0;
 
-    u8_to_float Vx, Vy, yaw, Sx, Sy,tunnel_yaw;
+    Algorithm_fp32_u Vx, Vy, yaw, Sx, Sy,tunnel_yaw;
 
     for (int i = 0; i < 4; i++)
     {
@@ -95,7 +91,7 @@ void navigation_rx_handle(uint8_t *buff, uint32_t Len, navigation_rx_t *data)
 
     //      data->navi_vx=0;
     //      data->navi_vy=0;
-    data->navi_yaw_diff = yaw.data * 57.3;
+    data->navi_yaw_diff = yaw.data * 57.3f;
     data->current_x = Sx.data;
     data->current_y = Sy.data;
 
@@ -115,6 +111,8 @@ void navigation_rx_handle(uint8_t *buff, uint32_t Len, navigation_rx_t *data)
     
     navi_tx_count = 0;
     data->navigate_yaw_target = INS.YawTotalAngle + (data->navi_yaw_diff);
+  
+    data->if_control=(data->If_get_path!=0&&data->get_goal!=0);
   }
 }
 
@@ -218,3 +216,4 @@ IOIOL = CDC_Transmit_FS(Decisin_Tx_buff, decision_tx_len);
 void Serial_Data_Handle()
 {
 }
+

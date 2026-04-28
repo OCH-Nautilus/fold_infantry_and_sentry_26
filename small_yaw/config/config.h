@@ -26,6 +26,9 @@
 #define BIG_YAW_VISION_CONTROL_ANGLE 0.53f //大yaw视觉控制角度阈值
 #define PITCH_LIMIT 20.0f
 
+#define FOLD_TIME_MAX 2000//折叠计时
+
+
 #define CRUISE_YAW_SPEED 0.01f//巡航小yaw转动速度
 #define CRUISE_PITCH_SPEED 0.01f//巡航pitch转动速度
 #define CRUISE_PITCH_MAX 15.0f//巡航pitch最大角度

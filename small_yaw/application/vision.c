@@ -198,7 +198,7 @@ void tx_handle(SendRobotCmdData *data)
 	data->v_z=0;
 	data->bullet_speed=USART_Rx_data.initial_speed;
 
-	data->detect_color=USART_Rx_data.vision_color;
+	data->detect_color=USART_Rx_data.flag_rx.bits.vision_color;
 	
 
 }
