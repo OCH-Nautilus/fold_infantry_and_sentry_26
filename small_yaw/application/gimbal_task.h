@@ -98,6 +98,7 @@ void yaw_limit(void);
 float zero_PI(float angle);
 short mouse_limit(short a);
 
+float gravity_compensation(void);
 
 void fold_time_judge(void);
 extern GIMBAL_t GIMBAL;

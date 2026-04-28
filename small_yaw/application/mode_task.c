@@ -154,20 +154,20 @@ void infantry_system_conctrl()
 	else//哨兵模式
 	{
 		if(toe_offline[0].communication_state == COMMUNICATION_NONE)
-			mode.controls_state=AUTO_ctrl;
-		if (rc_ctrl.rc.wheel >= 600)
-			mode.controls_state=AUTO_ctrl;
-		else if (rc_ctrl.rc.wheel <= -600)
 			mode.controls_state=RC_ctrl;
+		if (rc_ctrl.rc.wheel >= 600)
+			mode.controls_state=RC_ctrl;
+		else if (rc_ctrl.rc.wheel <= -600)
+			mode.controls_state=AUTO_ctrl;
 		if(mode.gimbal_state==GIMBAL_IDLE)
 			mode.chassis_state=CHASSIS_IDLE;
 
 		switch (mode.controls_state)
 		{
-		case AUTO_ctrl:
+		case RC_ctrl:
 			if (rc_ctrl.rc.wheel <= -600)
 			{
-				mode.controls_state = RC_ctrl;
+				mode.controls_state = AUTO_ctrl;
 				mode.chassis_state = CHASSIS_IDLE;
 				mode.shoot_state = SHOOT_IDLE;
 				mode.gimbal_state = GIMBAL_IDLE;
@@ -177,10 +177,10 @@ void infantry_system_conctrl()
 				
 			}
 			break;
-		case RC_ctrl:
+		case AUTO_ctrl:
 			if (rc_ctrl.rc.wheel >= 600)
 			{
-				mode.controls_state = AUTO_ctrl;
+				mode.controls_state = RC_ctrl;
 				mode.chassis_state = CHASSIS_IDLE;
 				mode.shoot_state = SHOOT_IDLE;
 				mode.gimbal_state = GIMBAL_IDLE;
@@ -250,7 +250,7 @@ void infantry_chassis_rc_ctrl()
 		{
 		case 1: // 陀螺
 			if(CHASSIS_LIMIT())
-				mode.chassis_state = CHASSIS_TOP;//mode.chassis_state = CHASSIS_TOP;
+				mode.chassis_state = CHASSIS_FOLLOW;//mode.chassis_state = CHASSIS_TOP;
 			else
 				mode.chassis_state = CHASSIS_IDLE; // 无力
 			break;
@@ -731,7 +731,18 @@ void sentry_gimbal_state_ctrl()
                 else
                     mode.gimbal_state = GIMBAL_NORMAL;
             break;
-
+			case GIMBAL_VISION:
+				if(is_stop)
+                    mode.gimbal_state = GIMBAL_IDLE;
+				else if(rc_ctrl.rc.s[1] == 1) 
+					mode.gimbal_state = GIMBAL_VISION;
+				else if(rc_ctrl.rc.s[0] == 1)
+                    mode.gimbal_state = GIMBAL_FOLD;
+                else if(rc_ctrl.rc.s[0] == 3)
+                    mode.gimbal_state = GIMBAL_CRUISE;
+                else
+                    mode.gimbal_state = GIMBAL_NORMAL;
+			break;
             default:
                 mode.gimbal_state = GIMBAL_IDLE;
             break;
@@ -795,7 +806,7 @@ void sentry_gimbal_state_ctrl()
 
 /**
  * @brief 底盘
- * @note  云台
+ * @note  
  * @param
  */
 void sentry_chassis_state_ctrl()
