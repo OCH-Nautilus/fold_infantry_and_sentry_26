@@ -8,6 +8,7 @@
 #include "big_gimbal_task.h"
 #include "SuperCAP.h"
 #include "bsp_transmit.h"
+#include "trigger_task.h"
 int time = 0;
 
 void send_current_task(void const * argument)
@@ -106,6 +107,33 @@ void Error_Chassis()
 {
 	set_motor_current(&hcan1, 0x200, 0, 0, 0, 0);
 }
+
+/**
+ * @brief 摩擦轮拨弹盘正常电流发送
+ * @note
+ * @param
+ */
+void shoot_ctrl_current()
+{
+	
+		if(USART_Rx_data.flag.bits.detect_flag == DETECT_NORMAL)
+			set_motor_current(&hcan2, 0x1ff,TRIGGER.pid_trigger_out, 0, 0, 0);
+		else
+			set_motor_current(&hcan2, 0x1ff,0, 0, 0, 0);	
+		
+}
+
+/**
+ * @brief 摩擦轮拨弹盘错误电流发送
+ * @note
+ * @param
+ */
+void Error_Shoot()
+{
+	set_motor_current(&hcan2, 0x1ff, 0, 0, 0, 0);
+}
+
+
 
 void enable_disable_DM4310(void)
 {

@@ -5,6 +5,8 @@
 damiao_typedef big_yaw;
 
 SuperCAp_t SuperCAP;
+moto_measure_t small_yaw;
+uint32_t small_yaw_err_cnt=0;
 
 moto_measure_t chassis_motor[4];
 // ·¢Éäµ¯Íèµç»ú
@@ -86,7 +88,11 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 		case 0x205:
 			trigger_motor.msg_cnt++ <= 50 ? get_moto_offset(&trigger_motor, rx_data) : encoder_data_handle(&trigger_motor, rx_data);
 		break;
-	
+		case 0x204://
+			small_yaw.msg_cnt++ <= 50 ? get_moto_offset(&small_yaw, rx_data) : \
+			encoder_data_handle(&small_yaw, rx_data);
+			small_yaw_err_cnt++;
+		break;
 	
 	default:
 

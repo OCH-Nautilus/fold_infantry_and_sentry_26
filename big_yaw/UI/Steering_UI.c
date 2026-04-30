@@ -25,6 +25,7 @@ ps: RoboMaster_裁判系统串口协议附录 V1.3
 #include "bsp_dwt.h"
 #include "bsp_transmit.h"
 #include "SuperCAP.h"
+#include "trigger_task.h"
 void UI_ID_Set(void)
 {
 	Robot_ID = robot_status.robot_id;
@@ -304,7 +305,7 @@ void UI_trajectory_add(void)
 
 void UI_trajectory_update(void)
 {
-	if(USART_Rx_data.mode.bits.shoot_mode==SHOOT_IDLE&&USART_Rx_data.flag.bits.stuck_state==1)
+	if(USART_Rx_data.mode.bits.shoot_mode==SHOOT_IDLE&&TRIGGER.flag_if_flug[1] ==1)
 	{
 		Line_Draw(&trajectory_3m_1,"348",2,1,8,3,944,557,1010,557);
 		Line_Draw(&trajectory_3m_2,"349",2,1,8,3,1010,557,1010,500);
@@ -316,7 +317,7 @@ void UI_trajectory_update(void)
 		Line_Draw(&trajectory_1m_3,"354",2,1,8,3,964,480,1050,480);
 		Line_Draw(&trajectory_1m_4,"355",2,1,8,3,964,577,964,480);
 	}
-	else if(USART_Rx_data.mode.bits.shoot_mode!=SHOOT_IDLE&&USART_Rx_data.flag.bits.stuck_state==1)
+	else if(USART_Rx_data.mode.bits.shoot_mode!=SHOOT_IDLE&&TRIGGER.flag_if_flug[1]==1)
 	{
 		Line_Draw(&trajectory_3m_1,"348",2,1,3,3,944,557,1010,557);
 		Line_Draw(&trajectory_3m_2,"349",2,1,3,3,1010,557,1010,500);
@@ -526,7 +527,7 @@ void UI_shoot_update(void)
 	// 	Line_Draw( &shoot_1, "131", 2, 1, 8, 5, 1480, 462, 1578, 462 );//平头模式
 	
 	//卡弹
-	if(USART_Rx_data.flag.bits.stuck_state == STUCK_ERR)
+	if(TRIGGER.flag_if_flug[1] == 1)
 		Line_Draw( &shoot_2, "132", 2, 1, 3, 5, 1480, 392, 1578, 392 );//下
 	else
 		Line_Draw( &shoot_2, "132", 2, 1, 8, 5, 1480, 392, 1578, 392 );//下

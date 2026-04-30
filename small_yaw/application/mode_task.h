@@ -47,11 +47,11 @@ typedef enum
 typedef enum
 {
 	TRIGGER_IDLE = 0,
-	TRIGGER_SINGLE,
-	TRIGGER_LONG,
-	TRIGGER_STATIC,
-	TRIGGER_BACK,
-	TRIGGER_CAL,
+	TRIGGER_SINGLE =1,
+	TRIGGER_LONG=2,
+	TRIGGER_STATIC=3,
+	TRIGGER_BACK=4,
+	TRIGGER_CAL=5,
 }trigger_state_t;//²¦µ¯ÅÌÄ£Ê½
 
 

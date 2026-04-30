@@ -75,4 +75,3 @@ gimbal\mode_task.o: ../Components/ins_task.h
 gimbal\mode_task.o: ../Bsp/bsp_transmit.h
 gimbal\mode_task.o: ../Inc/usart.h
 gimbal\mode_task.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
-gimbal\mode_task.o: ..\application\trigger_task.h

@@ -1,6 +1,10 @@
 #include "struct_typedef.h"
 #include "stdbool.h"
-#include "mode_task.h"
+
+
+
+
+
 typedef struct
 {
 	bool vision_fire;
@@ -24,17 +28,11 @@ typedef struct
 	float pid_trigger_single_out;
 	float pid_trigger_long_out;
 	float pid_trigger_out;
-	trigger_state_t  last_trigger_mode;
 	float cal_protect_start_time;
 	float cal_protect_now_time;
 }trigger_t;
 
-typedef enum
-{
-	STUCK_ERR=0,
-	STUCK_NORMAL=1,
 
-}stuck_t;
 
 void trigger_init(void);
 void trigger_pid_calc(void);
@@ -46,9 +44,13 @@ void back_stick(void);
 void stick_judge(void);
 float floatabs(float a);
 void trigger_state_judge(void);
-extern stuck_t stuck_state;
 int32_t abs32(int32_t a);
-void trigger_mode(void);
+
+void infantry_trigger_state_ctrl(void);               
+void sentry_trigger_state_ctrl(void);
+
+
+void trigger_mode_choose(void);
 void trigger_retreat(void);
 
 void trigger_heat(void);//热量限制

@@ -26,8 +26,9 @@ pid_type_def pid_big_yaw_speed_fold;
 //掉头
 pid_type_def pid_big_yaw_angle_dt;
 pid_type_def pid_big_yaw_speed_dt;
-
-
+//巡航
+pid_type_def pid_big_yaw_angle_cruise;
+pid_type_def pid_big_yaw_speed_cruise;
 // 自瞄装甲板
 pid_type_def pid_big_yaw_vision_armor_angle;
 pid_type_def pid_big_yaw_vision_armor_speed;
@@ -122,6 +123,9 @@ void gimbal_init()
 	//折叠模式
 	PID_init(&pid_big_yaw_angle_fold,PID_BIG_YAW_FOLD_ANGLE_MODE,PID_BIG_YAW_FOLD_ANGLE_KP,PID_BIG_YAW_FOLD_ANGLE_KI,PID_BIG_YAW_FOLD_ANGLE_KD,PID_BIG_YAW_FOLD_ANGLE_IMAX_OUT,PID_BIG_YAW_FOLD_ANGLE_MAX_OUT);
 	PID_init(&pid_big_yaw_speed_fold,PID_BIG_YAW_FOLD_SPEED_MODE,PID_BIG_YAW_FOLD_SPEED_KP,PID_BIG_YAW_FOLD_SPEED_KI,PID_BIG_YAW_FOLD_SPEED_KD,PID_BIG_YAW_FOLD_SPEED_IMAX_OUT,PID_BIG_YAW_FOLD_SPEED_MAX_OUT);
+	// 巡航模式
+	PID_init(&pid_big_yaw_angle_cruise, PID_BIG_YAW_CRUISE_ANGLE_MODE, PID_BIG_YAW_CRUISE_ANGLE_KP, PID_BIG_YAW_CRUISE_ANGLE_KI, PID_BIG_YAW_CRUISE_ANGLE_KD, PID_BIG_YAW_CRUISE_ANGLE_IMAX_OUT, PID_BIG_YAW_CRUISE_ANGLE_MAX_OUT);
+	PID_init(&pid_big_yaw_speed_cruise, PID_BIG_YAW_CRUISE_SPEED_MODE, PID_BIG_YAW_CRUISE_SPEED_KP, PID_BIG_YAW_CRUISE_SPEED_KI, PID_BIG_YAW_CRUISE_SPEED_KD, PID_BIG_YAW_CRUISE_SPEED_IMAX_OUT, PID_BIG_YAW_CRUISE_SPEED_MAX_OUT);
 	// 装甲板
 	PID_init(&pid_big_yaw_vision_armor_angle, PID_BIG_YAW_VISION_ARMOR_ANGLE_MODE, PID_BIG_YAW_VISION_ARMOR_ANGLE_KP, PID_BIG_YAW_VISION_ARMOR_ANGLE_KI, PID_BIG_YAW_VISION_ARMOR_ANGLE_KD, PID_BIG_YAW_VISION_ARMOR_ANGLE_IMAX_OUT, PID_BIG_YAW_VISION_ARMOR_ANGLE_MAX_OUT);
 	PID_init(&pid_big_yaw_vision_armor_speed, PID_BIG_YAW_VISION_ARMOR_SPEED_MODE, PID_BIG_YAW_VISION_ARMOR_SPEED_KP, PID_BIG_YAW_VISION_ARMOR_SPEED_KI, PID_BIG_YAW_VISION_ARMOR_SPEED_KD, PID_BIG_YAW_VISION_ARMOR_SPEED_IMAX_OUT, PID_BIG_YAW_VISION_ARMOR_SPEED_MAX_OUT);
@@ -205,6 +209,10 @@ void gimbal_pid_calc()
                     break;
             }
             break;
+		case GIMBAL_CRUISE:
+			PID_calc(&pid_big_yaw_angle_cruise, 0, yaw_error);
+			GIMBAL.big_yaw_output = PID_calc(&pid_big_yaw_speed_cruise, INS.Gyro[2], pid_big_yaw_angle_cruise.out);
+			break;
 		case GIMBAL_IDLE:
 			GIMBAL.big_yaw_output=0;
 		break;
@@ -268,8 +276,6 @@ void infantry_gimbal_mode_rc_normal()
 	GIMBAL.ratio_yaw = (zero_180((USART_Rx_data.small_yaw_pos/4096.0f*180.0f)-(FOLD_SMALL_YAW_ANGLE/4096.0f*180.0f)))/(YAW_LIMIT_ANGLE/4096.0f*180.0f/4.0f);
 	if(big_yaw.ERR==1)
 		GIMBAL.big_yaw_target=INS.Yaw-GIMBAL.ratio_yaw*GIMBAL.ratio_yaw*GIMBAL.ratio_yaw*0.5f;
-	
-	
 	GIMBAL.big_yaw_target=zero_180(GIMBAL.big_yaw_target);
 
 //	turn_round();

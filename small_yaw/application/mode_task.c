@@ -7,7 +7,6 @@
 #include "vision.h"
 #include "ins_task.h"
 #include "bsp_transmit.h"
-#include "trigger_task.h"
 
 mode_t mode;
 uint16_t chassis_last_mode=0;
@@ -32,7 +31,7 @@ void mode_task(void const * argument)
 		if(mode.infantry_sentry_state==INFANTRY_CTRL)//步兵模式
 		{
 				infantry_system_conctrl();//键鼠切换
-				infantry_trigger_state_ctrl();//拨弹盘状态机
+				//infantry_trigger_state_ctrl();//拨弹盘状态机
 				if(mode.controls_state==RC_ctrl)
 				{
 					infantry_chassis_rc_ctrl();
@@ -66,7 +65,7 @@ void mode_task(void const * argument)
 			sentry_chassis_state_ctrl();
 			sentry_shoot_state_ctrl();
 			sentry_vision_ctrl();
-			sentry_trigger_state_ctrl();
+			//sentry_trigger_state_ctrl();
 		}
 		
 		
@@ -477,127 +476,127 @@ void infantry_vision_pc_ctrl()
 	}
 }
 
-/**
- * @brief 拨盘
- * @note 
- * @param
- */
-void infantry_trigger_state_ctrl(void)               
-{
-	TRIGGER.cal_protect_now_time = HAL_GetTick();
-	switch(mode.trigger_state)
-	{
-		case TRIGGER_IDLE:
-			   if(( rc_ctrl.rc.s[1] == 2 && mode.controls_state == RC_ctrl)  || toe_offline[DBUS_TOE].communication_state == COMMUNICATION_NONE)//|| ( mode.controls_state == KEY_ctrl)
-				 {
-					 mode.trigger_state = TRIGGER_IDLE;
-				 }
+///**
+// * @brief 拨盘
+// * @note 
+// * @param
+// */
+//void infantry_trigger_state_ctrl(void)               
+//{
+//	TRIGGER.cal_protect_now_time = HAL_GetTick();
+//	switch(mode.trigger_state)
+//	{
+//		case TRIGGER_IDLE:
+//			   if(( rc_ctrl.rc.s[1] == 2 && mode.controls_state == RC_ctrl)  || toe_offline[DBUS_TOE].communication_state == COMMUNICATION_NONE)//|| ( mode.controls_state == KEY_ctrl)
+//				 {
+//					 mode.trigger_state = TRIGGER_IDLE;
+//				 }
+////				 else
+////				 {
+////				 	 TRIGGER.cal_step[0] = 1;
+////					 TRIGGER.cal_step[1] = 0;
+////					 TRIGGER.if_cal = 1;
+////					 TRIGGER.cal_protect_start_time = HAL_GetTick();
+////					 mode.trigger_state = TRIGGER_CAL;
+////				 }
+//				 else
+//					 mode.trigger_state = TRIGGER_STATIC;
+//				 break;
+//				 
+//		case TRIGGER_STATIC:
+//			   if(( rc_ctrl.rc.s[1] == 2 && mode.controls_state == RC_ctrl)  || toe_offline[DBUS_TOE].communication_state == COMMUNICATION_NONE)//|| ( mode.controls_state == KEY_ctrl)
+//					 mode.trigger_state = TRIGGER_IDLE;
+////				 else if(if_trigger_cal())
+////				 {
+////				 	 TRIGGER.cal_step[0] = 1;
+////					 TRIGGER.cal_step[1] = 0;
+////					 TRIGGER.if_cal = 1;
+////					 TRIGGER.cal_protect_start_time = HAL_GetTick();
+////					 mode.trigger_state = TRIGGER_CAL;
+////				 }
+//				 else if(((mode.controls_state == RC_ctrl && rc_ctrl.rc.WHEEL_State == DOWN_LONG) || (mode.controls_state == KEY_ctrl && rc_ctrl.mouse.KEY_L_State == PUSH_LONG)) || (mode.gimbal_state==GIMBAL_VISION&&mode.vision_switch_state == VISION_ARMOR &&IF_FIRE())&&TRIGGER.weak_flag==0)
+//				 { 
+//				   mode.trigger_state = TRIGGER_LONG;
+//				 }
+//				 else if(((((mode.controls_state == RC_ctrl && rc_ctrl.rc.WHEEL_State == DOWN_SHORT) || (mode.controls_state == KEY_ctrl && rc_ctrl.mouse.KEY_L_State == PUSH_SHORT)) && mode.vision_switch_state !=VISION_SMALL_BUFF && mode.vision_switch_state != VISION_BIG_BUFF) ||
+//					       (((mode.controls_state == RC_ctrl && rc_ctrl.rc.WHEEL_State == DOWN_SHORT) || (mode.controls_state == KEY_ctrl && rc_ctrl.mouse.KEY_L_State == PUSH_SHORT)) && (mode.vision_switch_state ==VISION_SMALL_BUFF || mode.vision_switch_state == VISION_BIG_BUFF) && IF_FIRE()))  && TRIGGER.flag_if_single_over == 1 && TRIGGER.weak_flag==0)
+//				 {
+//				   mode.trigger_state = TRIGGER_SINGLE;
+//				   TRIGGER.flag_if_single = 1;
+//					 TRIGGER.flag_if_single_over = 0;
+//				 }
+//				 else 
+//				 {
+//					 mode.trigger_state = TRIGGER_STATIC;
+//				 }
+//				 break;           
+//		case TRIGGER_SINGLE:
+//         if(( rc_ctrl.rc.s[1] == 2 && mode.controls_state == RC_ctrl)  || toe_offline[DBUS_TOE].communication_state == COMMUNICATION_NONE)//|| ( mode.controls_state == KEY_ctrl)
+//					 mode.trigger_state = TRIGGER_IDLE;
+//			   else if(TRIGGER.flag_if_flug[0] == 1)
+//				 {
+//				   mode.trigger_state = TRIGGER_BACK;
+//					 TRIGGER.flag_if_back = 1;
+//					 TRIGGER.flag_if_back_over = 0;
+//					 TRIGGER.flag_if_single_over = 1;
+//				 	 TRIGGER.tire_retreat_current = 0;
+//				 }
+//			   else if( TRIGGER.flag_if_single_over == 0&&TRIGGER.weak_flag==0 )
+//					 mode.trigger_state = TRIGGER_SINGLE;
+//				 else
+//					 mode.trigger_state = TRIGGER_STATIC;
+//				 break;
+//				 
+//		case TRIGGER_LONG:
+//			   if(( rc_ctrl.rc.s[1] == 2 && mode.controls_state == RC_ctrl)  || toe_offline[DBUS_TOE].communication_state == COMMUNICATION_NONE)//|| ( mode.controls_state == KEY_ctrl)
+//					 mode.trigger_state = TRIGGER_IDLE;
+//			   else if(TRIGGER.flag_if_flug[0] == 1)
+//				 {
+//				   mode.trigger_state = TRIGGER_BACK;
+//					 TRIGGER.flag_if_back = 1;
+//					 TRIGGER.flag_if_back_over = 0;
+//				 }
+//				 else if((((mode.controls_state == RC_ctrl && rc_ctrl.rc.WHEEL_State == DOWN_LONG) || (mode.controls_state == KEY_ctrl && rc_ctrl.mouse.KEY_L_State == PUSH_LONG)) || (mode.vision_switch_state == VISION_ARMOR && TRIGGER.vision_fire == 1))&&TRIGGER.weak_flag==0)
+//					 mode.trigger_state = TRIGGER_LONG;
+//				 else
+//					 mode.trigger_state = TRIGGER_STATIC;
+//				 break;
+
+//		case TRIGGER_BACK:
+//				 if(( rc_ctrl.rc.s[1] == 2 && mode.controls_state == RC_ctrl)  || toe_offline[DBUS_TOE].communication_state == COMMUNICATION_NONE)//|| ( mode.controls_state == KEY_ctrl)
+//					 mode.trigger_state = TRIGGER_IDLE;
+//			   else if(TRIGGER.flag_if_back_over == 0 && TRIGGER.flag_if_flug[1] == 0)
+//				   mode.trigger_state = TRIGGER_BACK;
 //				 else
 //				 {
-//				 	 TRIGGER.cal_step[0] = 1;
-//					 TRIGGER.cal_step[1] = 0;
-//					 TRIGGER.if_cal = 1;
-//					 TRIGGER.cal_protect_start_time = HAL_GetTick();
-//					 mode.trigger_state = TRIGGER_CAL;
+//					 mode.trigger_state = TRIGGER_STATIC;
+//					 TRIGGER.flag_if_back_over = 1;
+//				 	 TRIGGER.tire_retreat_current = 0;
+//					 TRIGGER.tire_retreat_current_back = 0;
 //				 }
-				 else
-					 mode.trigger_state = TRIGGER_STATIC;
-				 break;
-				 
-		case TRIGGER_STATIC:
-			   if(( rc_ctrl.rc.s[1] == 2 && mode.controls_state == RC_ctrl)  || toe_offline[DBUS_TOE].communication_state == COMMUNICATION_NONE)//|| ( mode.controls_state == KEY_ctrl)
-					 mode.trigger_state = TRIGGER_IDLE;
-//				 else if(if_trigger_cal())
+//				 break;
+//		
+//		case TRIGGER_CAL:
+//			   if(( rc_ctrl.rc.s[1] == 2 && mode.controls_state == RC_ctrl) || ( mode.controls_state == KEY_ctrl) || toe_offline[DBUS_TOE].communication_state == COMMUNICATION_NONE)					
 //				 {
-//				 	 TRIGGER.cal_step[0] = 1;
-//					 TRIGGER.cal_step[1] = 0;
-//					 TRIGGER.if_cal = 1;
-//					 TRIGGER.cal_protect_start_time = HAL_GetTick();
-//					 mode.trigger_state = TRIGGER_CAL;
+//					 TRIGGER.cal_protect_start_time = 0;
+//					 mode.trigger_state = TRIGGER_IDLE;
 //				 }
-				 else if(((mode.controls_state == RC_ctrl && rc_ctrl.rc.WHEEL_State == DOWN_LONG) || (mode.controls_state == KEY_ctrl && rc_ctrl.mouse.KEY_L_State == PUSH_LONG)) || (mode.gimbal_state==GIMBAL_VISION&&mode.vision_switch_state == VISION_ARMOR &&IF_FIRE())&&TRIGGER.weak_flag==0)
-				 { 
-				   mode.trigger_state = TRIGGER_LONG;
-				 }
-				 else if(((((mode.controls_state == RC_ctrl && rc_ctrl.rc.WHEEL_State == DOWN_SHORT) || (mode.controls_state == KEY_ctrl && rc_ctrl.mouse.KEY_L_State == PUSH_SHORT)) && mode.vision_switch_state !=VISION_SMALL_BUFF && mode.vision_switch_state != VISION_BIG_BUFF) ||
-					       (((mode.controls_state == RC_ctrl && rc_ctrl.rc.WHEEL_State == DOWN_SHORT) || (mode.controls_state == KEY_ctrl && rc_ctrl.mouse.KEY_L_State == PUSH_SHORT)) && (mode.vision_switch_state ==VISION_SMALL_BUFF || mode.vision_switch_state == VISION_BIG_BUFF) && IF_FIRE()))  && TRIGGER.flag_if_single_over == 1 && TRIGGER.weak_flag==0)
-				 {
-				   mode.trigger_state = TRIGGER_SINGLE;
-				   TRIGGER.flag_if_single = 1;
-					 TRIGGER.flag_if_single_over = 0;
-				 }
-				 else 
-				 {
-					 mode.trigger_state = TRIGGER_STATIC;
-				 }
-				 break;           
-		case TRIGGER_SINGLE:
-         if(( rc_ctrl.rc.s[1] == 2 && mode.controls_state == RC_ctrl)  || toe_offline[DBUS_TOE].communication_state == COMMUNICATION_NONE)//|| ( mode.controls_state == KEY_ctrl)
-					 mode.trigger_state = TRIGGER_IDLE;
-			   else if(TRIGGER.flag_if_flug[0] == 1)
-				 {
-				   mode.trigger_state = TRIGGER_BACK;
-					 TRIGGER.flag_if_back = 1;
-					 TRIGGER.flag_if_back_over = 0;
-					 TRIGGER.flag_if_single_over = 1;
-				 	 TRIGGER.tire_retreat_current = 0;
-				 }
-			   else if( TRIGGER.flag_if_single_over == 0&&TRIGGER.weak_flag==0 )
-					 mode.trigger_state = TRIGGER_SINGLE;
-				 else
-					 mode.trigger_state = TRIGGER_STATIC;
-				 break;
-				 
-		case TRIGGER_LONG:
-			   if(( rc_ctrl.rc.s[1] == 2 && mode.controls_state == RC_ctrl)  || toe_offline[DBUS_TOE].communication_state == COMMUNICATION_NONE)//|| ( mode.controls_state == KEY_ctrl)
-					 mode.trigger_state = TRIGGER_IDLE;
-			   else if(TRIGGER.flag_if_flug[0] == 1)
-				 {
-				   mode.trigger_state = TRIGGER_BACK;
-					 TRIGGER.flag_if_back = 1;
-					 TRIGGER.flag_if_back_over = 0;
-				 }
-				 else if((((mode.controls_state == RC_ctrl && rc_ctrl.rc.WHEEL_State == DOWN_LONG) || (mode.controls_state == KEY_ctrl && rc_ctrl.mouse.KEY_L_State == PUSH_LONG)) || (mode.vision_switch_state == VISION_ARMOR && TRIGGER.vision_fire == 1))&&TRIGGER.weak_flag==0)
-					 mode.trigger_state = TRIGGER_LONG;
-				 else
-					 mode.trigger_state = TRIGGER_STATIC;
-				 break;
-
-		case TRIGGER_BACK:
-				 if(( rc_ctrl.rc.s[1] == 2 && mode.controls_state == RC_ctrl)  || toe_offline[DBUS_TOE].communication_state == COMMUNICATION_NONE)//|| ( mode.controls_state == KEY_ctrl)
-					 mode.trigger_state = TRIGGER_IDLE;
-			   else if(TRIGGER.flag_if_back_over == 0 && TRIGGER.flag_if_flug[1] == 0)
-				   mode.trigger_state = TRIGGER_BACK;
-				 else
-				 {
-					 mode.trigger_state = TRIGGER_STATIC;
-					 TRIGGER.flag_if_back_over = 1;
-				 	 TRIGGER.tire_retreat_current = 0;
-					 TRIGGER.tire_retreat_current_back = 0;
-				 }
-				 break;
-		
-		case TRIGGER_CAL:
-			   if(( rc_ctrl.rc.s[1] == 2 && mode.controls_state == RC_ctrl) || ( mode.controls_state == KEY_ctrl) || toe_offline[DBUS_TOE].communication_state == COMMUNICATION_NONE)					
-				 {
-					 TRIGGER.cal_protect_start_time = 0;
-					 mode.trigger_state = TRIGGER_IDLE;
-				 }
-				 else if(TRIGGER.if_cal == 1 && (TRIGGER.cal_protect_now_time - TRIGGER.cal_protect_start_time) < TRIGGER_CAL_PROTECT_TIME)
-				 {
-				   mode.trigger_state = TRIGGER_CAL;
-				 }
-				 else
-				 {
-					 TRIGGER.cal_protect_start_time = 0;
-					 mode.trigger_state = TRIGGER_STATIC;
-				 }
-			break;
-				 
-		default:
-			   break;
-	}
-}
+//				 else if(TRIGGER.if_cal == 1 && (TRIGGER.cal_protect_now_time - TRIGGER.cal_protect_start_time) < TRIGGER_CAL_PROTECT_TIME)
+//				 {
+//				   mode.trigger_state = TRIGGER_CAL;
+//				 }
+//				 else
+//				 {
+//					 TRIGGER.cal_protect_start_time = 0;
+//					 mode.trigger_state = TRIGGER_STATIC;
+//				 }
+//			break;
+//				 
+//		default:
+//			   break;
+//	}
+//}
 
 
 
@@ -878,96 +877,96 @@ void sentry_shoot_state_ctrl(void)
  * @note  哨兵模式下拨弹盘由视觉触发，视觉识别装甲板且满足开火条件时进入开火状态，否则进入静止状态；卡弹优先级最高，进入卡弹状态后退弹完成进入静止状态；无信号或遥控器切换到无力状态
  * @param
  */
-void sentry_trigger_state_ctrl(void)
-{
-    TRIGGER.cal_protect_now_time = HAL_GetTick();
+//void sentry_trigger_state_ctrl(void)
+//{
+//    TRIGGER.cal_protect_now_time = HAL_GetTick();
 
-    uint8_t is_stop =
-        ((mode.controls_state == RC_ctrl && rc_ctrl.rc.s[1] == 2) ||
-         toe_offline[DBUS_TOE].communication_state == COMMUNICATION_NONE);
+//    uint8_t is_stop =
+//        ((mode.controls_state == RC_ctrl && rc_ctrl.rc.s[1] == 2) ||
+//         toe_offline[DBUS_TOE].communication_state == COMMUNICATION_NONE);
 
-    uint8_t fire_cmd = 0;
+//    uint8_t fire_cmd = 0;
 
-    // ===== RC模式 =====
-    if(mode.controls_state == RC_ctrl)
-    {
-        if(rc_ctrl.rc.WHEEL_State == DOWN_LONG && TRIGGER.weak_flag == 0)
-            fire_cmd = 1;
-    }
+//    // ===== RC模式 =====
+//    if(mode.controls_state == RC_ctrl)
+//    {
+//        if(rc_ctrl.rc.WHEEL_State == DOWN_LONG && TRIGGER.weak_flag == 0)
+//            fire_cmd = 1;
+//    }
 
-    // ===== AUTO模式 =====
-    else if(mode.controls_state == AUTO_ctrl)
-    {
-        if(mode.gimbal_state == GIMBAL_VISION &&
-           mode.vision_switch_state == VISION_ARMOR &&
-           IF_FIRE() &&
-           TRIGGER.weak_flag == 0)
-        {
-            fire_cmd = 1;
-        }
-    }
+//    // ===== AUTO模式 =====
+//    else if(mode.controls_state == AUTO_ctrl)
+//    {
+//        if(mode.gimbal_state == GIMBAL_VISION &&
+//           mode.vision_switch_state == VISION_ARMOR &&
+//           IF_FIRE() &&
+//           TRIGGER.weak_flag == 0)
+//        {
+//            fire_cmd = 1;
+//        }
+//    }
 
-    switch(mode.trigger_state)
-    {
-        case TRIGGER_IDLE:
-            if(is_stop)
-                mode.trigger_state = TRIGGER_IDLE;
-            else
-                mode.trigger_state = TRIGGER_STATIC;
-        break;
+//    switch(mode.trigger_state)
+//    {
+//        case TRIGGER_IDLE:
+//            if(is_stop)
+//                mode.trigger_state = TRIGGER_IDLE;
+//            else
+//                mode.trigger_state = TRIGGER_STATIC;
+//        break;
 
-        case TRIGGER_STATIC:
-            if(is_stop)
-                mode.trigger_state = TRIGGER_IDLE;
-            else if(TRIGGER.flag_if_flug[0])   // 卡弹优先（不受weak_flag影响）
-            {
-                mode.trigger_state = TRIGGER_BACK;
-                TRIGGER.flag_if_back = 1;
-                TRIGGER.flag_if_back_over = 0;
-            }
-            else if(fire_cmd)
-                mode.trigger_state = TRIGGER_LONG;
-            else
-                mode.trigger_state = TRIGGER_STATIC;
-        break;
+//        case TRIGGER_STATIC:
+//            if(is_stop)
+//                mode.trigger_state = TRIGGER_IDLE;
+//            else if(TRIGGER.flag_if_flug[0])   // 卡弹优先（不受weak_flag影响）
+//            {
+//                mode.trigger_state = TRIGGER_BACK;
+//                TRIGGER.flag_if_back = 1;
+//                TRIGGER.flag_if_back_over = 0;
+//            }
+//            else if(fire_cmd)
+//                mode.trigger_state = TRIGGER_LONG;
+//            else
+//                mode.trigger_state = TRIGGER_STATIC;
+//        break;
 
-        case TRIGGER_LONG:
-            if(is_stop)
-                mode.trigger_state = TRIGGER_IDLE;
-            else if(TRIGGER.flag_if_flug[0])
-            {
-                mode.trigger_state = TRIGGER_BACK;
-                TRIGGER.flag_if_back = 1;
-                TRIGGER.flag_if_back_over = 0;
-            }
-            else if(fire_cmd)
-                mode.trigger_state = TRIGGER_LONG;
-            else
-                mode.trigger_state = TRIGGER_STATIC;
-        break;
+//        case TRIGGER_LONG:
+//            if(is_stop)
+//                mode.trigger_state = TRIGGER_IDLE;
+//            else if(TRIGGER.flag_if_flug[0])
+//            {
+//                mode.trigger_state = TRIGGER_BACK;
+//                TRIGGER.flag_if_back = 1;
+//                TRIGGER.flag_if_back_over = 0;
+//            }
+//            else if(fire_cmd)
+//                mode.trigger_state = TRIGGER_LONG;
+//            else
+//                mode.trigger_state = TRIGGER_STATIC;
+//        break;
 
-        case TRIGGER_BACK:
-            if(is_stop)
-                mode.trigger_state = TRIGGER_IDLE;
-            else if(TRIGGER.flag_if_back_over == 0 &&
-                    TRIGGER.flag_if_flug[1] == 0)
-            {
-                mode.trigger_state = TRIGGER_BACK;
-            }
-            else
-            {
-                mode.trigger_state = TRIGGER_STATIC;
-                TRIGGER.flag_if_back_over = 1;
-                TRIGGER.tire_retreat_current = 0;
-                TRIGGER.tire_retreat_current_back = 0;
-            }
-        break;
+//        case TRIGGER_BACK:
+//            if(is_stop)
+//                mode.trigger_state = TRIGGER_IDLE;
+//            else if(TRIGGER.flag_if_back_over == 0 &&
+//                    TRIGGER.flag_if_flug[1] == 0)
+//            {
+//                mode.trigger_state = TRIGGER_BACK;
+//            }
+//            else
+//            {
+//                mode.trigger_state = TRIGGER_STATIC;
+//                TRIGGER.flag_if_back_over = 1;
+//                TRIGGER.tire_retreat_current = 0;
+//                TRIGGER.tire_retreat_current_back = 0;
+//            }
+//        break;
 
-        default:
-            mode.trigger_state = TRIGGER_IDLE;
-        break;
-    }
-}
+//        default:
+//            mode.trigger_state = TRIGGER_IDLE;
+//        break;
+//    }
+//}
 
 //是否校准
 bool if_trigger_cal()

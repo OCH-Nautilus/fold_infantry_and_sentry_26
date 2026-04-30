@@ -66,3 +66,5 @@ gimbal\send_current_task.o: ../SuperCAP/SuperCAP.h
 gimbal\send_current_task.o: ../Bsp/bsp_transmit.h
 gimbal\send_current_task.o: ../Inc/usart.h
 gimbal\send_current_task.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+gimbal\send_current_task.o: ..\task\trigger_task.h
+gimbal\send_current_task.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h

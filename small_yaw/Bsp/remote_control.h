@@ -62,7 +62,7 @@ typedef enum
 	UP_LONG = 1,
 	DOWN_LONG  = 2,
 	UP_SHORT = 3,
-	DOWN_SHORT,
+	DOWN_SHORT=4,
 }Wheel_State_t;
 
 /* Êó±ê×ó¼ü×´Ì¬Ã¶¾Ù */

@@ -30,11 +30,10 @@ typedef struct
 {
 //
 	uint8_t head;
-	
 	float chassis_diff_angle;
-	float initial_speed;
 	float ins_big_yaw;//大yaw陀螺仪值
 	float big_yaw_target;
+	float initial_speed;
 	uint16_t shooter_barrel_heat_limit;
 	uint16_t shooter_barrel_cooling_value;
 	uint16_t shooter_17mm_1_barrel_heat; 
@@ -80,8 +79,8 @@ typedef struct
             uint8_t controls_mode      : 2;  // 位0-1
             uint8_t gimbal_mode        : 3;  // 位2-4
             uint8_t vision_mode        : 2;  // 位5-6
-            uint8_t shoot_mode         : 2;  // 位7-8
-            uint8_t trigger_mode       : 2;  // 位9-10
+            uint8_t shoot_mode         : 1;  // 位7-8
+            uint8_t trigger_mode       : 3;  // 位9-10
             uint8_t chassis_mode       : 2;  // 位11-12
             uint8_t chassis_speed_mode : 2;  // 位13-14
             
@@ -93,8 +92,7 @@ typedef struct
     int16_t rc_ctrl_r_y;
     int16_t rc_ctrl_l_x;
     int16_t rc_ctrl_l_y;
-    
-    int16_t small_yaw_pos;
+    float small_yaw_pos;
     float yaw;
     float mouse_vx;
     float mouse_vy;
@@ -115,11 +113,12 @@ typedef struct
     } key;
     
 		union RC_CTRL_S_Union {
-        uint8_t rc_s_pack;  // 用于整体操作的8位
+        uint16_t rc_s_pack;  // 用于整体操作的8位
         struct Rc_S_Bits {
             uint8_t s_l : 2;  // 位0-1
 						uint8_t s_r : 2;	// 位2-3
-					uint8_t reserved :4;// 位4-7，保留位
+						uint8_t WHEEL_State :3;// 位4-7，保留位
+						uint8_t KEY_L_State :2;
         }bits;
     } rc_ctrl_s;
 		
@@ -131,7 +130,6 @@ typedef struct
             {
                 uint8_t IF_DISCERN :1;
                 uint8_t IF_PT_OVER :1;
-                uint8_t stuck_state :1;// 0正常，1卡弹
                 uint8_t shoot_l :1;
                 uint8_t shoot_r :1;
                 uint8_t	down_over_flag :1;

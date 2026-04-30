@@ -9,7 +9,6 @@
 #include "gimbal_task.h"
 #include "vision.h"
 #include "shoot_task.h"
-#include "trigger_task.h"
 USART_Rx_data_t USART_Rx_data;
 USART_TX_data_t  USART_TX_data;
 
@@ -90,9 +89,6 @@ void USART_Data_Handle(USART_TX_data_t *data)
     data->rc_ctrl_l_x = rc_ctrl.rc.ch[2];
     data->rc_ctrl_l_y = rc_ctrl.rc.ch[3];
     
-    // 设置云台和传感器数据
-    data->small_yaw_pos = small_yaw.ecd;
-    data->yaw = INS.Yaw;
     
     // 设置鼠标数据
     data->mouse_vx = rc_ctrl.mouse.vx;
@@ -115,7 +111,6 @@ void USART_Data_Handle(USART_TX_data_t *data)
 		data->flag.bits.IF_DISCERN=IF_DISCERN();
 		data->flag.bits.shoot_l=shoot_l_detect();
 		data->flag.bits.shoot_r=shoot_r_detect();
-		data->flag.bits.stuck_state=TRIGGER.flag_if_flug[0];
 		data->flag.bits.down_over_flag=GIMBAL.down_over;
 		data->flag.bits.rotate_direction=Rotate_direction;
 		data->flag.bits.top_mode=top_mode;

@@ -37,14 +37,14 @@ typedef struct
     union ModeUnion {
         uint16_t mode_pack;  // 用于整体操作的16位
         struct ModeBits {
+            uint8_t infantry_sentry_mode     	 : 1;  // 位15
             uint8_t controls_mode      : 2;  // 位0-1
             uint8_t gimbal_mode        : 3;  // 位2-4
             uint8_t vision_mode        : 2;  // 位5-6
-            uint8_t shoot_mode         : 2;  // 位7-8
-            uint8_t trigger_mode       : 2;  // 位9-10
+            uint8_t shoot_mode         : 1;  // 位7-8
+            uint8_t re_flag       : 3;  // 位9-10
             uint8_t chassis_mode       : 2;  // 位11-12
             uint8_t chassis_speed_mode : 2;  // 位13-14
-			uint8_t infantry_sentry_mode     	 : 1;  // 位15
         } bits;
     } mode;
     
@@ -74,12 +74,12 @@ typedef struct
     } key;
 		
 		union RC_CTRL_S_Union {
-        uint8_t rc_s_pack;  // 用于整体操作的8位
+        uint16_t rc_s_pack;  // 用于整体操作的8位
         struct Rc_S_Bits {
-            uint8_t s_l : 2;  // 位0-1
+						uint8_t s_l : 2;  // 位0-1
 						uint8_t s_r : 2;	// 位2-3
-					
-					// 位6-7，保留位
+						uint8_t WHEEL_State :3;// 位4-7，保留位
+						uint8_t KEY_L_State :2;
         }bits;
     } rc_ctrl_s;
 		
@@ -92,7 +92,7 @@ typedef struct
             {
                 uint8_t IF_DISCERN :1;
                 uint8_t IF_PT_OVER :1;
-                uint8_t stuck_state :1;// 1正常，0卡弹
+                
                 uint8_t shoot_l :1;// 位3-7，保留位
                 uint8_t shoot_r :1;
 				uint8_t	down_over_flag :1;
@@ -100,9 +100,13 @@ typedef struct
                 uint8_t top_mode : 1; // 小陀螺变速模式
                 uint8_t detect_flag :1;
 				uint8_t DT_OVER_FLAG : 1;
+                uint8_t fire_flag :1;
 				uint8_t re_flag : 6; // 位8-15，保留位										
             }bits;
          } flag;
+    
+    float ins_yaw;
+    float ins_gyro_yaw;
     uint8_t tail;
 } USART_Rx_data_t;
 
@@ -128,7 +132,7 @@ typedef struct
 	int16_t chassis_speed_rpm;
      union FLAG_Tx_Union 
         {
-            uint16_t flag_pack;  // 用于整体操作的8位
+            uint16_t flag_pack;  // 用于整体操作的16位
             struct Flag_Tx_Bits 
             {
                 uint8_t chassis_if_blackout :1 ;  
@@ -142,6 +146,14 @@ typedef struct
                 uint8_t reserved_flags_2 :7; // 位8-15，保留
             }bits;
          } flag_tx;
+//	 		union FLAG_TRIGGER
+//			{
+//				 uint16_t flag_pack;  // 用于整体操作的16位
+//            struct Flag_Trigger_Bits 
+//            {
+//							uint8_t weak_flag : 1;
+//						}bits;
+//			}flag_trigger;			
 	uint8_t tail;
 }USART_TX_data_t;
 

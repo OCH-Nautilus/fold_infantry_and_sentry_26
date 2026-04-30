@@ -65,7 +65,6 @@ gimbal\send_current_task.o: ..\application\mode_task.h
 gimbal\send_current_task.o: ..\application\gimbal_task.h
 gimbal\send_current_task.o: ../Bsp/pid.h
 gimbal\send_current_task.o: ..\application\shoot_task.h
-gimbal\send_current_task.o: ..\application\trigger_task.h
 gimbal\send_current_task.o: ../Bsp/bsp_transmit.h
 gimbal\send_current_task.o: ../Inc/usart.h
 gimbal\send_current_task.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h

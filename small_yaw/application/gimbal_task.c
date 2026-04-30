@@ -123,7 +123,6 @@ void gimbal_init()
 	GIMBAL.PT_flag = 0;
 	GIMBAL.last_mode = GIMBAL_IDLE;
 	GIMBAL.IF_DT_OVER = 1;
-	GIMBAL.IF_FOLD_OVER = 1;
 	GIMBAL.angle_limit_flag = 0;
 	GIMBAL.yaw_cruise_direction=1;
 	first_order_filter_init(&yaw_lowpass_key, LowPass_YAW_KEY_TIME, low_pass_yaw_key_num);

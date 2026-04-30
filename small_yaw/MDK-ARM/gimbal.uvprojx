@@ -1839,11 +1839,6 @@
               <FileType>1</FileType>
               <FilePath>..\application\vofa.c</FilePath>
             </File>
-            <File>
-              <FileName>trigger_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\application\trigger_task.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>

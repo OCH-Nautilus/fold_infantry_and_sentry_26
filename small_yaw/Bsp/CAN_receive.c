@@ -7,7 +7,6 @@ damiao_typedef small_pitch;
 damiao_typedef test_4310;
 moto_measure_t frictiongear_l;
 moto_measure_t frictiongear_r;
-moto_measure_t trigger_motor;
 /**
  * @brief can1  CAN接收中断回调
  * @param
@@ -51,18 +50,18 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	switch (rx_header.StdId)
 	{
 
-		case 0x206://+
+		case 0x201://+
 			frictiongear_l.msg_cnt++ <= 50 ? get_moto_offset(&frictiongear_l, rx_data) : \
 			encoder_data_handle(&frictiongear_l, rx_data);
 		break;
-		case 0x207://-
+		case 0x202://-
 			frictiongear_r.msg_cnt++ <= 50 ? get_moto_offset(&frictiongear_r, rx_data) : \
 			encoder_data_handle(&frictiongear_r, rx_data);
 		break;
-		case 0x205:
-			trigger_motor.msg_cnt++ <= 50 ? get_moto_offset(&trigger_motor, rx_data) : encoder_data_handle(&trigger_motor, rx_data);
-		break;
-		case 0x204://
+//		case 0x205:
+//			trigger_motor.msg_cnt++ <= 50 ? get_moto_offset(&trigger_motor, rx_data) : encoder_data_handle(&trigger_motor, rx_data);
+//		break;
+		case 0x206://
 			small_yaw.msg_cnt++ <= 50 ? get_moto_offset(&small_yaw, rx_data) : \
 			encoder_data_handle(&small_yaw, rx_data);
 			small_yaw_err_cnt++;

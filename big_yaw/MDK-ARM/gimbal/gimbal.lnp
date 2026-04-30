@@ -80,6 +80,7 @@
 "gimbal\send_current_task.o"
 "gimbal\big_gimbal_task.o"
 "gimbal\navigation.o"
+"gimbal\trigger_task.o"
 "gimbal\nautilus_ui.o"
 "gimbal\steering_ui.o"
 "gimbal\usbd_core.o"

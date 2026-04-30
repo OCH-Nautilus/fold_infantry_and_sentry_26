@@ -7,7 +7,6 @@
 #include "mode_task.h"
 #include "gimbal_task.h"
 #include "shoot_task.h"
-#include "trigger_task.h"
 #include "bsp_transmit.h"
 #include "ins_task.h"
 #include "math.h"
@@ -36,18 +35,18 @@ void send_current_task(void const * argument)
 			#endif
 					vTaskDelay(1);
 					
-			#ifdef SHOOT_SEND
-					shoot_ctrl_current();
-			#else
-					Error_Shoot();
-			#endif
+//			#ifdef SHOOT_SEND
+//					shoot_ctrl_current();
+//			#else
+//					Error_Shoot();
+//			#endif
 			
 		}
 		else
 		{
 			Error_Yaw();
 			Error_Pitch();
-			Error_Shoot();
+			//Error_Shoot();
 		}
 			
 		vTaskDelay(1);
@@ -118,29 +117,29 @@ void Error_Pitch()
 	DM_position_ctrl(&hcan1,0x103,GIMBAL.big_pitch_target,0);
 }
 
-/**
- * @brief 摩擦轮拨弹盘正常电流发送
- * @note
- * @param
- */
-void shoot_ctrl_current()
-{
-	
-		if(toe_offline[0].communication_state == COMMUNICATION_NORMAL)
-			set_motor_current(&hcan2, 0x1ff,TRIGGER.pid_trigger_out, SHOOT.output[0], SHOOT.output[1], 0);
-		else
-			set_motor_current(&hcan2, 0x1ff,0, SHOOT.output[0], SHOOT.output[1], 0);	
-		
-}
-/**
- * @brief 摩擦轮拨弹盘错误电流发送
- * @note
- * @param
- */
-void Error_Shoot()
-{
-	set_motor_current(&hcan2, 0x1ff, 0, 0, 0, 0);
-}
+///**
+// * @brief 摩擦轮拨弹盘正常电流发送
+// * @note
+// * @param
+// */
+//void shoot_ctrl_current()
+//{
+//	
+//		if(toe_offline[0].communication_state == COMMUNICATION_NORMAL)
+//			set_motor_current(&hcan2, 0x1ff,TRIGGER.pid_trigger_out, SHOOT.output[0], SHOOT.output[1], 0);
+//		else
+//			set_motor_current(&hcan2, 0x1ff,0, SHOOT.output[0], SHOOT.output[1], 0);	
+//		
+//}
+///**
+// * @brief 摩擦轮拨弹盘错误电流发送
+// * @note
+// * @param
+// */
+//void Error_Shoot()
+//{
+//	set_motor_current(&hcan2, 0x1ff, 0, 0, 0, 0);
+//}
 
 
 int yuu1=0,yuu2=0,yuu3=0;

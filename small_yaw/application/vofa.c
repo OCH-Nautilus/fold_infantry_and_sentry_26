@@ -8,7 +8,6 @@
 #include "CAN_receive.h"
 #include "ins_task.h"
 #include "vision.h"
-#include "trigger_task.h"
 #include "bsp_transmit.h"
 #include "remote_control.h"
 #include "shoot_task.h"
@@ -35,7 +34,6 @@ extern float accel_kalman,angel_accle;//差分获得的角加速度
 extern pid_type_def pid_yaw_angle_Recognition, pid_yaw_speed_Recognition;
 extern pid_type_def pid_pitch_angle;
 extern pid_type_def pid_pitch_speed;
-extern stuck_t stuck_state;
 extern pid_type_def pid_trigger_speed_long;
 extern shoot_t SHOOT;
 
@@ -58,7 +56,7 @@ void StartVOFATask(void const * argument)
 		//Vofa_Send_Data8(USART_Rx_data.real_power,USART_Rx_data.chassis_given_current,USART_Rx_data.chassis_speed_rpm,USART_Rx_data.cap_v,USART_Rx_data.buffer_energy,0,0,0);
 		//Vofa_Send_Data8(USART_Rx_data.initial_speed,frictiongear_l.speed_rpm,frictiongear_r.speed_rpm,SHOOT.shoot_target_speed,0,0,0,0);
 		//Vofa_Send_Data8(pid_pitch_angle.set,pid_pitch_angle.ref,pid_pitch_angle.out,pid_pitch_speed.ref,pid_pitch_speed.out,INS.Pitch,small_pitch._torq,0);
-		Vofa_Send_Data8(USART_Rx_data.real_power,USART_Rx_data.chassis_given_current,USART_Rx_data.big_yaw_target,USART_Rx_data.ins_big_yaw,0,0,0,0);
+		//Vofa_Send_Data8(USART_Rx_data.real_power,USART_Rx_data.chassis_given_current,USART_Rx_data.big_yaw_target,USART_Rx_data.ins_big_yaw,0,0,0,0);
 		vTaskDelay(10);
   }
 }

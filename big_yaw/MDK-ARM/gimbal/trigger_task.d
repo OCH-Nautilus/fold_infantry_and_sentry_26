@@ -1,6 +1,7 @@
 gimbal\trigger_task.o: ..\task\trigger_task.c
 gimbal\trigger_task.o: ..\task\trigger_task.h
 gimbal\trigger_task.o: ../Bsp/struct_typedef.h
+gimbal\trigger_task.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
 gimbal\trigger_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
 gimbal\trigger_task.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
 gimbal\trigger_task.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
@@ -58,9 +59,11 @@ gimbal\trigger_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
 gimbal\trigger_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd.h
 gimbal\trigger_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h
 gimbal\trigger_task.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h
-gimbal\trigger_task.o: ../referee/referee.h
-gimbal\trigger_task.o: ../referee/protocol.h
-gimbal\trigger_task.o: ../referee/struct_typedef.h
 gimbal\trigger_task.o: ../Bsp/bsp_transmit.h
 gimbal\trigger_task.o: ../Inc/usart.h
 gimbal\trigger_task.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+gimbal\trigger_task.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
+gimbal\trigger_task.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+gimbal\trigger_task.o: ../referee/referee.h
+gimbal\trigger_task.o: ../referee/protocol.h
+gimbal\trigger_task.o: ../referee/struct_typedef.h

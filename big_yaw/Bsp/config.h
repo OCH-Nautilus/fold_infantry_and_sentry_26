@@ -14,9 +14,22 @@
 #define BAT 
 //#define CAP
 /*-------------------------控制模式--------------------------------*/
+/* 拨轮状态枚举 */
+#define	ZERO  0
+#define	UP_LONG  1
+#define	DOWN_LONG  2
+#define	UP_SHORT  3
+#define	DOWN_SHORT 4
+/* 鼠标左键状态枚举 */
+#define	NOP  0
+#define	PUSH_SHORT  1
+#define	PUSH_LONG   2
+
+
+//兵种控制模式
 #define INFANTRY_CTRL 0
 #define	SENTRY_CTRL 1
-
+//遥控器是否离线
 #define DETECT_NORMAL   0
 #define DETECT_NONE     1
 //操作模式
@@ -38,10 +51,12 @@
 #define SHOOT_IDLE 0
 #define SHOOT_OPEN 1
 //拨弹盘模式
-#define TRIGGER_IDLE 0
+#define TRIGGER_IDLE  0
 #define TRIGGER_SINGLE 1
 #define TRIGGER_LONG 2
-#define TRIGGER_BACK 3
+#define TRIGGER_STATIC 3
+#define TRIGGER_BACK 4
+#define TRIGGER_CAL 5
 
 #define STUCK_ERR 0//卡弹
 #define	STUCK_NORMAL 1//正常
@@ -61,7 +76,9 @@
 #define YAW_LIMIT_ANGLE 1024 //大小yaw限位45度
 #define BIG_YAW_VISION_CONTROL_ANGLE 683 //大yaw视觉控制角度阈值
 
+
 //无视觉(正常模式)
+
 
 #define PID_BIG_YAW_ANGLE_MODE 0
 #define PID_BIG_YAW_ANGLE_KP 0.7f
@@ -78,6 +95,7 @@
 #define PID_BIG_YAW_SPEED_MAX_OUT 4.0f
 
 //掉头
+
 #define PID_BIG_YAW_ANGLE_MODE_DT 0
 #define PID_BIG_YAW_ANGLE_KP_DT 1.8f
 #define PID_BIG_YAW_ANGLE_KI_DT 0
@@ -128,7 +146,6 @@
 
 //BUFF
 
-
 #define PID_BIG_YAW_VISION_BUFF_ANGLE_MODE 0
 #define PID_BIG_YAW_VISION_BUFF_ANGLE_KP 0.6
 #define PID_BIG_YAW_VISION_BUFF_ANGLE_KI 0
@@ -143,7 +160,20 @@
 #define PID_BIG_YAW_VISION_BUFF_SPEED_IMAX_OUT 0
 #define PID_BIG_YAW_VISION_BUFF_SPEED_MAX_OUT 4
 
+//巡航
+#define PID_BIG_YAW_CRUISE_ANGLE_MODE 0
+#define PID_BIG_YAW_CRUISE_ANGLE_KP 0.0f
+#define PID_BIG_YAW_CRUISE_ANGLE_KI 0
+#define PID_BIG_YAW_CRUISE_ANGLE_KD 0
+#define PID_BIG_YAW_CRUISE_ANGLE_IMAX_OUT 0
+#define PID_BIG_YAW_CRUISE_ANGLE_MAX_OUT 7
 
+#define PID_BIG_YAW_CRUISE_SPEED_MODE 0
+#define PID_BIG_YAW_CRUISE_SPEED_KP 0.0f//0.8
+#define PID_BIG_YAW_CRUISE_SPEED_KI 0
+#define PID_BIG_YAW_CRUISE_SPEED_KD 0
+#define PID_BIG_YAW_CRUISE_SPEED_IMAX_OUT 0
+#define PID_BIG_YAW_CRUISE_SPEED_MAX_OUT 5
 //低通滤波参数
 #define LowPass_YAW_KEY_TIME    0.28f
 #define LowPass_PITCH_KEY_TIME   0.28f
@@ -157,23 +187,29 @@
 #define LowPass_PITCH_VISION_NUM   1.8f
 
 
-//视觉yaw前馈（装甲板）
-#define VISION_YAW_ALPHA 7.0f
-#define VISION_YAW_BELTA 0.0f
-#define VISION_YAW_OUTMAX  0.9f    //        25.0f
-//视觉pitch前馈（装甲板）
-#define VISION_PITCH_ALPHA 2.0f
-#define VISION_PITCH_BELTA 0.0f
-#define VISION_PITCH_OUTMAX    5     //      15.0f
+// //视觉yaw前馈（装甲板）
+// #define VISION_YAW_ALPHA 7.0f
+// #define VISION_YAW_BELTA 0.0f
+// #define VISION_YAW_OUTMAX  0.9f    //        25.0f
 
+//视觉yaw前馈（装甲板）（速度）
+#define VISION_YAW_ALPHA 0.12//0.06
+#define VISION_YAW_BELTA 0.0f
+#define VISION_YAW_OUTMAX   0.5f  //   0.8f 
+//视觉yaw前馈（装甲板）（加速度）
+#define VISION_YAW_SPEED_ALPHA 0.0008f//0.0005f
+#define VISION_YAW_SPEED_BELTA 0.0f
+#define VISION_YAW_SPEED_OUTMAX   0.8f //0.6 
 //视觉yaw前馈（符）
 #define VISION_YAW_ALPHA_MECHANIASM 7.5f
 #define VISION_YAW_BELTA_MECHANIASM 0.0f
 #define VISION_YAW_OUTMAX_MECHANIASM           25.0f
-//视觉pitch前馈（符）
-#define VISION_PITCH_ALPHA_MECHANIASM 2.0f
-#define VISION_PITCH_BELTA_MECHANIASM 0.0f
-#define VISION_PITCH_OUTMAX_MECHANIASM 15.0f
+
+
+
+
+
+
 /*---------------------底盘参数--------------------------*/
 
 #define FRONT_SET_1 -173.4f//
@@ -300,6 +336,146 @@
 #define SENSITIVITY_PITCH_RC 0.00003f
 #define SENSITIVITY_PITCH_MOUSE 0.0003f
 
+/*-------------------------拨盘参数------------------------*/
+#define PID_TRIGGER_ANGLE_SINGLE_KP 0.25f
+#define PID_TRIGGER_ANGLE_SINGLE_KI 0.0f
+#define PID_TRIGGER_ANGLE_SINGLE_KD 0.0f
+#define PID_TRIGGER_ANGLE_SINGLE_IMAX 0.0f
+#define PID_TRIGGER_ANGLE_SINGLE_MAX 7000.0f
 
+#define PID_TRIGGER_SPEED_SINGLE_KP 8.0f
+#define PID_TRIGGER_SPEED_SINGLE_KI 0.0f
+#define PID_TRIGGER_SPEED_SINGLE_KD 0.0f
+#define PID_TRIGGER_SPEED_SINGLE_IMAX 0.0f
+#define PID_TRIGGER_SPEED_SINGLE_MAX 9500.0f
+
+#define PID_TRIGGER_SPEED_LONG_KP 15.0f    
+#define PID_TRIGGER_SPEED_LONG_KI 0.0f		
+#define PID_TRIGGER_SPEED_LONG_KD 0.0f
+#define PID_TRIGGER_SPEED_LONG_IMAX 0.0f
+#define PID_TRIGGER_SPEED_LONG_MAX 9500.0f
+//单发完成阈值
+#define TRIGGER_SINGLE_OVER_THRESHOLD 3000
+//回拨完成阈值 
+#define TRIGGER_BACK_OVER_THRESHOLD  4000
+
+#define TRIGGER_ECD 36864//32768*(5/2)
+//卡弹计时 
+//力矩阈值
+#define TRIGGER_FORWARD_TORQUE_THRESHOLD 6000
+#define TRIGGER_BACK_TORQUE_THRESHOLD 7000
+//计时阈值
+#define TRIGGER_FORWARD_TIME_THRESHOLD 80
+#define TRIGGER_BACK_TIME_THRESHOLD 80
+
+//拨盘校准
+//校准转速
+#define TRIGGER_CAL_SPEED 540.0f
+//校准堵转电流
+#define TRIGGER_CAL_TORQUE_THRESHOLD 5000
+//校准计时阈值
+#define TRIGGER_CAL_TIME_THRESHOLD 20
+//校准偏移量
+#define TRIGGER_CAL_OFFSET_ECD  13828.0f
+//校准超时时间
+#define TRIGGER_CAL_PROTECT_TIME 4500.0f
+
+//拨弹盘转速
+#define   V_TRIGGER_01 270.0f  //76.8
+#define   V_TRIGGER_02 270.0f*2.0f
+#define   V_TRIGGER_03 270.0f*3.0f
+#define   V_TRIGGER_04 270.0f*4.0f
+#define   V_TRIGGER_05 270.0f*5.0f
+#define   V_TRIGGER_06 270.0f*6.0f
+#define   V_TRIGGER_07 270.0f*7.0f
+#define   V_TRIGGER_08 270.0f*8.0f
+#define   V_TRIGGER_09 270.0f*9.0f
+#define   V_TRIGGER_10 270.0f*10.0f 
+#define   V_TRIGGER_11 270.0f*11.0f
+#define   V_TRIGGER_12 270.0f*12.0f
+#define   V_TRIGGER_13 270.0f*13.0f
+#define   V_TRIGGER_14 270.0f*14.0f
+#define   V_TRIGGER_15 270.0f*15.0f//正在用
+#define   V_TRIGGER_16 270.0f*16.0f
+#define   V_TRIGGER_17 270.0f*17.0f
+#define   V_TRIGGER_18 270.0f*18.0f
+#define   V_TRIGGER_19 270.0f*19.0f
+#define   V_TRIGGER_20 270.0f*20.0f
+#define   V_TRIGGER_21 270.0f*21.0f
+#define   V_TRIGGER_22 270.0f*22.0f
+#define   V_TRIGGER_23 270.0f*23.0f
+#define   V_TRIGGER_24 270.0f*24.0f
+#define   V_TRIGGER_25 270.0f*25.0f
+#define   V_TRIGGER_26 270.0f*26.0f
+#define   V_TRIGGER_27 270.0f*27.0f
+#define   V_TRIGGER_28 270.0f*28.0f
+#define   V_TRIGGER_29 270.0f*29.0f
+#define   V_TRIGGER_30 270.0f*30.0f
+
+// #define SPEED_SET 200//摩擦轮转速目标值
+// #define Judge_AngleErr 500//允许当前角度值与目标角度之间的偏差值3000
+// #define ONCE_SHOOT_ANGLE_MAILUN 36864//32768*(5/2)
+// #define SPEED_2006_CONTI 4500
+// //#define BACK_ANGLE_TARGET 30000          // 反转角度目标 
+// #define STUCK_THRESHOLD 50              // 卡弹检测阈值
+// #define STUCK_CURRENT_THRESHOLD   5000    // 卡弹电流阈值3000
+// #define STUCK_SPEED_THRESHOLD  50    // 卡弹转速阈值50    
+
+// #define PID_TIRGGER_ONCE_ANGLE_MODE 0
+// #define PID_TIRGGER_ONCE_ANGLE_KP 0.23
+// #define PID_TIRGGER_ONCE_ANGLE_KI 0
+// #define PID_TIRGGER_ONCE_ANGLE_KD 0
+// #define PID_TIRGGER_ONCE_ANGLE_MAXIOUT 0
+// #define PID_TIRGGER_ONCE_ANGLE_MAXOUT 8000 
+
+// #define PID_TIRGGER_ONCE_SPEED_MODE 0
+// #define PID_TIRGGER_ONCE_SPEED_KP 15
+// #define PID_TIRGGER_ONCE_SPEED_KI 0
+// #define PID_TIRGGER_ONCE_SPEED_KD 0
+// #define PID_TIRGGER_ONCE_SPEED_MAXIOUT 0
+// #define PID_TIRGGER_ONCE_SPEED_MAXOUT 9000 
+
+
+
+// #define PID_TIRGGER_CONTI_SPEED_MODE 0
+// #define PID_TIRGGER_CONTI_SPEED_KP 20
+// #define PID_TIRGGER_CONTI_SPEED_KI 0
+// #define PID_TIRGGER_CONTI_SPEED_KD 0
+// #define PID_TIRGGER_CONTI_SPEED_MAXIOUT 0
+// #define PID_TIRGGER_CONTI_SPEED_MAXOUT 9000 //7000
+
+
+// //拨弹盘转速
+// #define   V_TIRGGER_01 240*5/2
+// #define   V_TIRGGER_02 480*5/2
+// #define   V_TIRGGER_03 720*5/2
+// #define   V_TIRGGER_04 960*5/2
+// #define   V_TIRGGER_05 1200*5/2
+// #define   V_TIRGGER_06 1440*5/2
+// #define   V_TIRGGER_07 1680*5/2
+// #define   V_TIRGGER_08 1920*5/2
+// #define   V_TIRGGER_09 2160*5/2 //每秒发9颗弹丸
+// #define   V_TIRGGER_10 2400 *5/2
+// #define   V_TIRGGER_11 2640*5/2
+// #define   V_TIRGGER_12 2880*5/2
+// #define   V_TIRGGER_13 3120*5/2
+// #define   V_TIRGGER_14 3360*5/2
+// #define   V_TIRGGER_15 3600*5/2
+// #define   V_TIRGGER_16 3840*5/2
+// #define   V_TIRGGER_17 4080*5/2
+// #define   V_TIRGGER_18 4320*5/2
+// #define   V_TIRGGER_19 4560*5/2
+// #define   V_TIRGGER_20 4800*5/2
+// #define   V_TIRGGER_21 5040*5/2
+// #define   V_TIRGGER_22 5280*5/2
+// #define   V_TIRGGER_23 5520*5/2
+// #define   V_TIRGGER_24 5760*5/2
+// #define   V_TIRGGER_25 6000*5/2
+// #define   V_TIRGGER_26 6240*5/2
+// #define   V_TIRGGER_27 6480*5/2
+// #define   V_TIRGGER_28 6720*5/2
+// #define   V_TIRGGER_29 6960*5/2
 
 #endif
+
+

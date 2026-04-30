@@ -3,30 +3,30 @@
 
 typedef struct
 {
-
-uint16_t vision_block;
-uint16_t found_flag;//视觉发现目标
-uint16_t last_mode;//云台上一时刻模式
-uint16_t PT_flag;//平头触发标志位
-uint32_t DT_Time;//掉头时间
-uint16_t IF_DT_OVER;//掉头完成标志位
-uint16_t IF_DT;//掉头触发标志位
-uint16_t IF_FOLLOW_ALLOW;//运行底盘跟随标志位
-uint16_t IF_FOLD;//触发折叠标志位
-uint16_t IF_FOLD_OVER;//折叠完成标志位
-uint16_t u_turn_cnt[4];//掉头分步计次
-uint16_t u_turn_index;//掉头分步计次索引值
-uint16_t rise_over;//大pitch升起完成标志位
-uint16_t down_over;//大pitch折叠完成标志位
-uint16_t angle_limit_flag;//限位标志位
-uint16_t big_yaw_vision_control_flag;//视觉模式下控制大yaw允许标志位
-float big_yaw_target;//大yaw目标角
-float big_yaw_output;//大yaw目标输出电流
-float kalman_pitch_target;
-float fold_yaw_pos;//折叠目标角
-float fold_big_pitch_pos;//折叠目标角
-float big_yaw_diff_angle;//大yaw与小yaw的偏差角度
-float ratio_yaw;//大yaw转动系数
+  int16_t yaw_cruise_direction;//巡航小yaw转动方向
+  uint16_t vision_block;
+  uint16_t found_flag;//视觉发现目标
+  uint16_t last_mode;//云台上一时刻模式
+  uint16_t PT_flag;//平头触发标志位
+  uint32_t DT_Time;//掉头时间
+  uint16_t IF_DT_OVER;//掉头完成标志位
+  uint16_t IF_DT;//掉头触发标志位
+  uint16_t IF_FOLLOW_ALLOW;//运行底盘跟随标志位
+  uint16_t IF_FOLD;//触发折叠标志位
+  uint16_t IF_FOLD_OVER;//折叠完成标志位
+  uint16_t rise_over;//大pitch升起完成标志位
+  uint16_t down_over;//大pitch折叠完成标志位
+  uint16_t angle_limit_flag;//限位标志位
+  uint16_t big_yaw_vision_control_flag;//视觉模式下控制大yaw允许标志位
+  float yaw_target;//小yaw目标角
+  float big_yaw_target;//大yaw目标角
+  float big_yaw_output;//大yaw目标输出电流
+  float output_yaw;//小yaw目标输出电流
+  float kalman_pitch_target;
+  float fold_yaw_pos;//折叠目标角
+  float fold_big_pitch_pos;//折叠目标角
+  float big_yaw_diff_angle;//大yaw与小yaw的偏差角度
+  float ratio_yaw;//大yaw转动系数
 }GIMBAL_t;
 
 typedef struct
