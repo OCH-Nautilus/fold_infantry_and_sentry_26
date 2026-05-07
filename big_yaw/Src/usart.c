@@ -58,8 +58,8 @@ void MX_USART1_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART1_Init 2 */
-  SET_BIT(huart1.Instance->CR1, USART_CR1_IDLEIE);
-	HAL_UART_Receive_DMA(&huart1, (uint8_t *)USART_Rx_data_handle, DATA_COUNT_RX);
+//  SET_BIT(huart1.Instance->CR1, USART_CR1_IDLEIE);
+//	HAL_UART_Receive_DMA(&huart1, (uint8_t *)USART_Rx_data_handle, DATA_COUNT_RX);
 
   /* USER CODE END USART1_Init 2 */
 
@@ -118,7 +118,8 @@ void MX_USART6_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART6_Init 2 */
-
+	SET_BIT(huart6.Instance->CR1, USART_CR1_IDLEIE);
+	HAL_UART_Receive_DMA(&huart6, (uint8_t *)USART_Rx_data_handle, DATA_COUNT_RX);
   /* USER CODE END USART6_Init 2 */
 
 }

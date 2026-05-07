@@ -14,18 +14,26 @@ int time = 0;
 void send_current_task(void const * argument)
 {
   /* USER CODE BEGIN current_task */
+	
   vTaskDelay(30);
   /* Infinite loop */
+	
   for(;;)
   {
 		enable_disable_DM4310();
-		
+//		damiao_record(&hcan1, 0x02);
+//		vTaskDelay(200);
 		if(communication_state==COMMUNICATION_NORMAL)
 		{
 			#ifdef GIMBAL_YAW_SENT
 				yaw_ctrl_current();
 			#else
 					Error_Yaw();
+			#endif
+			#ifdef TRIGGER_SENT
+				trigger_ctrl_current();
+			#else
+					Error_trigger();
 			#endif
 		}
     else
@@ -89,14 +97,9 @@ void chassis_ctrl_current()
 	if(USART_Rx_data.mode.bits.chassis_mode==CHASSIS_IDLE)
 		set_motor_current(&hcan1,0x200,0,0,0,0); 	
 	else
-	 set_motor_current(&hcan1,0x200,CHASSIS.output[RR], CHASSIS.output[RL], CHASSIS.output[FL], CHASSIS.output[FR]);
+	 set_motor_current(&hcan1,0x200,CHASSIS.output[RL], CHASSIS.output[RR], CHASSIS.output[FR], CHASSIS.output[FL]);
 		
 }
-
-
-
-
-
 
 /**
  * @brief 底盘错误电流发送
@@ -107,6 +110,29 @@ void Error_Chassis()
 {
 	set_motor_current(&hcan1, 0x200, 0, 0, 0, 0);
 }
+/**
+ * @brief 拨弹盘电流发送
+ * @note
+ * @param
+ */
+void trigger_ctrl_current()
+{
+	if(USART_Rx_data.flag.bits.detect_flag==DETECT_NORMAL)
+		set_motor_current(&hcan2,0x200,TRIGGER.pid_trigger_out,0,0,0);
+	else 
+		set_motor_current(&hcan2,0x200,0,0,0,0);
+}
+/**
+ * @brief 拨弹盘错误电流发送
+ * @note
+ * @param
+ */
+void Error_trigger()
+{
+	set_motor_current(&hcan2,0x200,0,0,0,0);
+}
+
+
 
 /**
  * @brief 摩擦轮拨弹盘正常电流发送

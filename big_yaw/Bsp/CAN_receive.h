@@ -61,13 +61,34 @@ typedef struct
 //	float PowerData[4];
 //}SuperCAp_t;
 
+//typedef enum 
+//{
+//  normol_cap=0,//????????
+//  just_out,//?????
+//  wireless_in,//??????
+//}cap_state_t;
+
+//typedef struct
+//{
+//  uint8_t cap_percent;//电容容量
+//  uint8_t If_wireless_wrong;//无线充电是否失败 ，失败需要上位机重置失败标志位
+//  uint8_t wireless_state;//当前无线充电状况
+//  uint8_t cap_wrong_code;//电容错误码
+//  cap_state_t cap_state;//当前电容情况
+//  float real_power;//当前真实功率（反馈到裁判端的）
+//  float cap_v;//超电电压
+//    float cap_c;//电容电流
+//    float dcdc_c;
+//}SuperCAp_t;
+
 typedef enum 
 {
-  normol_cap=0,//????????
-  just_out,//?????
-  wireless_in,//??????
+  normol_cap=0,//正常超级电容模式
+  just_out=1,//只电容放电
+  wireless_in=2,//无线充电模式
 }cap_state_t;
 
+//新超电
 typedef struct
 {
   uint8_t cap_percent;//电容容量
@@ -75,7 +96,7 @@ typedef struct
   uint8_t wireless_state;//当前无线充电状况
   uint8_t cap_wrong_code;//电容错误码
   cap_state_t cap_state;//当前电容情况
-  float real_power;//当前真实功率（反馈到裁判端的）
+  float real_power;//当前真实功率
   float cap_v;//超电电压
     float cap_c;//电容电流
     float dcdc_c;

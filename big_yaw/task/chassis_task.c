@@ -18,7 +18,6 @@ pid_type_def pid_yaw_follow;
 int16_t motor_current_lost[4]={0,0,0,0};
 int32_t motor_current_time[4]={0,0,0,0};
 
-
 /**
  * @brief 底盘总任务
  * @note
@@ -44,6 +43,7 @@ void chassis_task(void const *argument)
 		chassis_current_calc(&CHASSIS);
 
 		motor_current_up(chassis_motor,motor_current_lost,motor_current_time);
+		CHASSIS.last_HP=robot_status.current_HP;
 		vTaskDelay(1);
 	}
 }
@@ -67,9 +67,9 @@ void chassis_init()
 	CHASSIS.V[RL] = 0;
 	CHASSIS.V[FL] = 0;
 	CHASSIS.last_mode = USART_Rx_data.mode.bits.chassis_mode;
+	CHASSIS.last_HP=robot_status.current_HP;
     CHASSIS.front_set[0] = FRONT_SET_1;
     CHASSIS.front_set[1] = FRONT_SET_2;
-	CHASSIS.front_set_sentry = FRONT_SET_SENTRY;
     PID_init(&speed[FL], PID_MOTOR_MODE, PID_MOTOR_KP, PID_MOTOR_KI, PID_MOTOR_KD, PID_MOTOR_IOUT_MAX, PID_MOTOR_OUT_MAX);
 	PID_init(&speed[RL], PID_MOTOR_MODE, PID_MOTOR_KP, PID_MOTOR_KI, PID_MOTOR_KD, PID_MOTOR_IOUT_MAX, PID_MOTOR_OUT_MAX);
 	PID_init(&speed[FR], PID_MOTOR_MODE, PID_MOTOR_KP, PID_MOTOR_KI, PID_MOTOR_KD, PID_MOTOR_IOUT_MAX, PID_MOTOR_OUT_MAX);
@@ -117,7 +117,7 @@ void infantry_chassis_assignment(CHASSIS_t *ch)
  * @note  - navi_vx/navi_vy 在大yaw坐标系：正前方=Vx+，向左=Vy+
  *        - chassis_speed_calc已通过diff_angle做全向轮分解，此处不需旋转
  *        - 路径保护：必须有有效路径、未到达、导航未丢失才执行
- *        - FOLD模式下需大yaw对齐后才能移动
+ *        - FOLD模式下需大yaw对齐后,且折叠完成才能移动
  */
 void sentry_chassis_assignment(CHASSIS_t *ch) 
 {
@@ -125,11 +125,11 @@ void sentry_chassis_assignment(CHASSIS_t *ch)
 	{
 		if(navigation_rx.if_control && !navigation_rx.if_arrived 
 			&& navigation_rx.if_lost_navi==0
-			&& ((USART_Rx_data.mode.bits.gimbal_mode==GIMBAL_FOLD && GIMBAL.down_over && fabs(CHASSIS.crd) < 10.0f)
+			&& ((USART_Rx_data.mode.bits.gimbal_mode==GIMBAL_FOLD && USART_Rx_data.flag.bits.down_over_flag&&USART_Rx_data.flag.bits.small_pitch_fold_over && fabs(CHASSIS.crd) < 10.0f)
 				|| (USART_Rx_data.mode.bits.gimbal_mode==GIMBAL_CRUISE || USART_Rx_data.mode.bits.gimbal_mode==GIMBAL_VISION)))
 		{
-			ch->Vx = navigation_rx.navi_vx;
-			ch->Vy = navigation_rx.navi_vy;
+			ch->Vx = navigation_rx.chassis_vx;
+			ch->Vy = navigation_rx.chassis_vy;
 		}
 		else
 		{
@@ -140,7 +140,7 @@ void sentry_chassis_assignment(CHASSIS_t *ch)
 	else
 	{
 		ch->Vx = USART_Rx_data.rc_ctrl_r_vy * SENSITIVITY_CHASSIS_RC_X;
-		ch->Vy =- USART_Rx_data.rc_ctrl_r_vx * SENSITIVITY_CHASSIS_RC_Y;
+		ch->Vy = -USART_Rx_data.rc_ctrl_r_vx * SENSITIVITY_CHASSIS_RC_Y;
 	}
 }
 
@@ -152,32 +152,55 @@ void sentry_chassis_assignment(CHASSIS_t *ch)
 float yaw_angle = 0;//此时大小yaw的叠加角度
 void sentry_chassis_ecdz()
 {
-
+	static uint32_t last_attacked_tick = 0;
 	yaw_angle = big_yaw.Angle;
 	if (yaw_angle > 180.0f)
 		yaw_angle -= 360.0f;
 	else if (yaw_angle < -180.0f)
 		yaw_angle += 360.0f;
 
-	CHASSIS.crd = yaw_angle - CHASSIS.front_set[CHASSIS.front_set_num];
+	CHASSIS.crd = yaw_angle - FRONT_SET_SENTRY;
 
 	if (CHASSIS.crd > 180.0f)
 		CHASSIS.crd -= 360.0f;
 	else if (CHASSIS.crd < -180.0f)
 		CHASSIS.crd += 360.0f;
 
-	CHASSIS.diff_angle = -CHASSIS.crd / 360 * 2 * 3.1415926f;
+	
+		CHASSIS.diff_angle = -CHASSIS.crd / 360.0f * 2 * 3.1415926f;
 
 	if(USART_Rx_data.mode.bits.controls_mode==CONTROL_RC_CTRL)
 	{
 		if (USART_Rx_data.mode.bits.chassis_mode == CHASSIS_FOLLOW)
-			CHASSIS.Vz = PID_calc(&pid_yaw_follow, -CHASSIS.crd, 0);
+			CHASSIS.Vz = PID_calc(&pid_yaw_follow, CHASSIS.crd, 0);
+		
 		else if (USART_Rx_data.mode.bits.chassis_mode == CHASSIS_TOP)
 		{
-			if(USART_Rx_data.flag.bits.rotate_direction==1)
-				CHASSIS.Vz = speed_limit_top() ;
-			else
-				CHASSIS.Vz = -speed_limit_top() ;
+				if (CHASSIS.last_HP - robot_status.current_HP >= 10)
+				{
+						last_attacked_tick = HAL_GetTick();
+				}
+				/* 判断是否处于战斗中：HP < 200 且 5 秒内受过攻击 */
+				uint8_t in_combat_low_hp = (robot_status.current_HP < 200)&& (HAL_GetTick() - last_attacked_tick < 5000); 
+				//变速
+				uint8_t in_combat_high_hp=(robot_status.current_HP > 200)&&(robot_status.current_HP < 300)&&(HAL_GetTick() - last_attacked_tick < 5000)&&SuperCAP.cap_v>18.0f;
+				float base_speed;
+				if(in_combat_high_hp)
+				{
+					base_speed=speed_limit_top() +2000*cosf(2*3.14159f*((float)HAL_GetTick()/500.0f));
+					if(base_speed<4000.0f)
+						base_speed=4000.0f;
+				}			
+				else if (robot_status.current_HP > 200 || !in_combat_low_hp)
+						base_speed = speed_limit_top();
+				else
+						base_speed = speed_limit_top() + 2000;
+				/* 方向 */
+				if (USART_Rx_data.flag.bits.rotate_direction == 1)
+						CHASSIS.Vz =  base_speed;
+				else
+						CHASSIS.Vz = -base_speed;
+								
 		}
 	}
 	else if(USART_Rx_data.mode.bits.controls_mode == CONTROL_AUTO_CTRL)
@@ -188,16 +211,41 @@ void sentry_chassis_ecdz()
 		 */
 		if(navigation_rx.need_tunnel)
 			CHASSIS.Vz = PID_calc(&pid_yaw_follow, -CHASSIS.crd, 0);
-		else
-			CHASSIS.Vz = speed_limit_top();
+		
+		if (CHASSIS.last_HP - robot_status.current_HP >= 10)
+			{
+					last_attacked_tick = HAL_GetTick();
+			}
+			/* 判断是否处于战斗中：HP < 200 且 5 秒内受过攻击 */
+			uint8_t in_combat_low_hp = (robot_status.current_HP < 200)&& (HAL_GetTick() - last_attacked_tick < 5000); 
+			//变速
+			uint8_t in_combat_high_hp=(robot_status.current_HP > 300)&&(HAL_GetTick() - last_attacked_tick < 5000)&&SuperCAP.cap_v>18.0f;
+			float base_speed;
+			if(in_combat_high_hp)
+			{
+				base_speed=speed_limit_top() +2000*cosf(2*3.14159f*((float)HAL_GetTick()/500.0f));
+				if(base_speed<4000.0f)
+					base_speed=4000.0f;
+			}			
+			else if (robot_status.current_HP > 200 || !in_combat_low_hp)
+					base_speed = speed_limit_top();
+			else
+					base_speed = speed_limit_top() + 2000;
+			/* 方向 */
+			if (USART_Rx_data.flag.bits.rotate_direction == 1)
+					CHASSIS.Vz =  base_speed;
+			else
+					CHASSIS.Vz = -base_speed;
 	}
 	else
 		CHASSIS.Vz = speed_limit_top();
+
+	CHASSIS.last_HP = robot_status.current_HP;
 }
 
 void infantry_chassis_ecdz()
 {
-	yaw_angle = USART_Rx_data.small_yaw_pos/8192*360.0f-big_yaw.Angle;
+	yaw_angle = USART_Rx_data.small_yaw_pos/8192.0f*360.0f-big_yaw.Angle;
 	if (yaw_angle > 180.0f)
 		yaw_angle -= 360.0f;
 	else if (yaw_angle < -180.0f)
@@ -210,11 +258,11 @@ void infantry_chassis_ecdz()
 	else if (CHASSIS.crd < -180.0f)
 		CHASSIS.crd += 360.0f;
 
-	CHASSIS.diff_angle = CHASSIS.crd / 360 * 2 * 3.1415926f;
+	CHASSIS.diff_angle = CHASSIS.crd / 360.0f * 2.0f * 3.1415926f;
 
-	if (USART_Rx_data.mode.bits.chassis_mode == CHASSIS_FOLLOW&&USART_Rx_data.mode.bits.gimbal_mode!=GIMBAL_FOLD)/////////////////
+	if (USART_Rx_data.mode.bits.chassis_mode == CHASSIS_FOLLOW)/////////////////&&USART_Rx_data.mode.bits.gimbal_mode!=GIMBAL_FOLD
 		CHASSIS.Vz = PID_calc(&pid_yaw_follow, -CHASSIS.crd, 0);
-	if (USART_Rx_data.mode.bits.chassis_mode == CHASSIS_TOP&&USART_Rx_data.mode.bits.gimbal_mode!=GIMBAL_FOLD)
+	if (USART_Rx_data.mode.bits.chassis_mode == CHASSIS_TOP&&USART_Rx_data.mode.bits.gimbal_mode!=GIMBAL_FOLD)//
 	{
 		switch(USART_Rx_data.flag.bits.top_mode)
 		{
@@ -237,7 +285,7 @@ void infantry_chassis_ecdz()
 //					if(CHASSIS.Vz>-4000.0f)
 //						CHASSIS.Vz=-4000.0f;
 //				}
-			CHASSIS.Vz=3000;
+			CHASSIS.Vz=4000;
 			break;
 			
 			default :
@@ -259,8 +307,7 @@ void infantry_chassis_ecdz()
 			else
 				CHASSIS.Vz = -speed_limit_top() ;
 		}
-		else if(USART_Rx_data.mode.bits.chassis_mode == CHASSIS_FOLLOW)
-			CHASSIS.Vz =0;
+		
 	}
 }
 

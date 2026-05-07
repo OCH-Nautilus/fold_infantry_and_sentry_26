@@ -31,6 +31,7 @@ typedef struct
 	int16_t pitch_cruise_direction;//巡航小pitch转动方向
 	uint16_t target_renew_flag;
     uint16_t fold_timeout_flag;//折叠超时标志位
+		uint16_t small_pitch_fold_over;
 	float big_pitch_target;//大pitch目标角
 	float big_pitch_output;//大pitch目标输出电流
 	float kalman_pitch_target;

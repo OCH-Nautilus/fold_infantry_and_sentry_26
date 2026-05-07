@@ -10,7 +10,7 @@
 
 #define DATA_COUNT_RX	160
 #define DATA_COUNT_TX	57
-#define DATA_COUNT	36//接收字节数
+#define DATA_COUNT	37//接收字节数
 
 #define USART_RX_HEAD   0XA5
 #define USART_RX_END    0XAA
@@ -18,7 +18,7 @@
 #define USART_TX_HAED   0XA5
 #define USART_TX_END    0XAA
 
-#define USART_DATA_COUNT  48//发送字节数
+#define USART_DATA_COUNT  42//发送字节数
 
 typedef enum 
 {
@@ -95,18 +95,17 @@ typedef struct
                 
                 uint8_t shoot_l :1;// 位3-7，保留位
                 uint8_t shoot_r :1;
-				uint8_t	down_over_flag :1;
-				uint8_t	rotate_direction:1;
+								uint8_t	down_over_flag :1;
+								uint8_t	rotate_direction:1;
                 uint8_t top_mode : 1; // 小陀螺变速模式
                 uint8_t detect_flag :1;
-				uint8_t DT_OVER_FLAG : 1;
+								uint8_t DT_OVER_FLAG : 1;
                 uint8_t fire_flag :1;
-				uint8_t re_flag : 6; // 位8-15，保留位										
+								uint8_t small_pitch_fold_over:1;
+								uint8_t re_flag : 5; // 位8-15，保留位										
             }bits;
          } flag;
     
-    float ins_yaw;
-    float ins_gyro_yaw;
     uint8_t tail;
 } USART_Rx_data_t;
 
@@ -119,9 +118,6 @@ typedef struct
 	float initial_speed;
 	float ins_big_yaw;//大yaw陀螺仪值
 	float big_yaw_target;
-	uint16_t shooter_barrel_heat_limit;
-	uint16_t shooter_barrel_cooling_value;
-	uint16_t shooter_17mm_1_barrel_heat; 
 	uint16_t chassis_power_limit;
 	float real_power;
 	uint16_t buffer_energy;
@@ -146,14 +142,7 @@ typedef struct
                 uint8_t reserved_flags_2 :7; // 位8-15，保留
             }bits;
          } flag_tx;
-//	 		union FLAG_TRIGGER
-//			{
-//				 uint16_t flag_pack;  // 用于整体操作的16位
-//            struct Flag_Trigger_Bits 
-//            {
-//							uint8_t weak_flag : 1;
-//						}bits;
-//			}flag_trigger;			
+			
 	uint8_t tail;
 }USART_TX_data_t;
 

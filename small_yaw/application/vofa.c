@@ -34,7 +34,7 @@ extern float accel_kalman,angel_accle;//差分获得的角加速度
 extern pid_type_def pid_yaw_angle_Recognition, pid_yaw_speed_Recognition;
 extern pid_type_def pid_pitch_angle;
 extern pid_type_def pid_pitch_speed;
-extern pid_type_def pid_trigger_speed_long;
+extern pid_type_def pid_trigger_speed_long,pid_yaw_vision_outpost_angle;
 extern shoot_t SHOOT;
 
 void StartVOFATask(void const * argument)
@@ -49,7 +49,7 @@ void StartVOFATask(void const * argument)
 		//Vofa_Send_Data8(small_yaw._torq,VisionToGimbal.yaw_acc.d,VisionToGimbal.yaw_vel.d,0,0,0,0,0);
 		//Vofa_Send_Data8(TRIGGER.if_back_flag,TRIGGER.back_over_flag,TRIGGER.err_cnt,TRIGGER.once_target_ecd,0,0,0,0);
 		//Vofa_Send_Data8(Vision_Rx.yaw,INS.Yaw,Vision_Rx.v_yaw,Vision_Rx.enable_yaw_diff,Vision_Rx.appear,IF_FIRE(),IF_DISCERN(),mode.trigger_state);
-//Vofa_Send_Data8(Vision_Rx.yaw,INS.Yaw,-Vision_Rx.pitch,INS.Pitch,Vision_Rx.enable_yaw_diff,yaw_vision_forward.output,yaw_vision_speed_forward.output,IF_FIRE());
+//Vofa_Send_Data8(Vision_Rx.yaw,INS.Yaw,-Vision_Rx.pitch,INS.Pitch,INS.Gyro[2],pid_yaw_vision_outpost_angle.out,Vision_Rx.v_yaw,IF_FIRE());
 		//Vofa_Send_Data8(mode.gimbal_state,mode.vision_switch_state,mode.trigger_state,0,0,0,0,0);
 		//Vofa_Send_Data8(USART_Rx_data.chassis_speed_rpm,USART_Rx_data.real_power,USART_Rx_data.buffer_energy,USART_Rx_data.cap_v,mode.chassis_speed_state,0,0,0);
 		//Vofa_Send_Data8(USART_Rx_data.shooter_barrel_heat_limit,USART_Rx_data.shooter_barrel_cooling_value,USART_Rx_data.shooter_17mm_1_barrel_heat,USART_Rx_data.chassis_speed_rpm,0,0,0,0);
@@ -57,6 +57,9 @@ void StartVOFATask(void const * argument)
 		//Vofa_Send_Data8(USART_Rx_data.initial_speed,frictiongear_l.speed_rpm,frictiongear_r.speed_rpm,SHOOT.shoot_target_speed,0,0,0,0);
 		//Vofa_Send_Data8(pid_pitch_angle.set,pid_pitch_angle.ref,pid_pitch_angle.out,pid_pitch_speed.ref,pid_pitch_speed.out,INS.Pitch,small_pitch._torq,0);
 		//Vofa_Send_Data8(USART_Rx_data.real_power,USART_Rx_data.chassis_given_current,USART_Rx_data.big_yaw_target,USART_Rx_data.ins_big_yaw,0,0,0,0);
+		//Vofa_Send_Data8(GIMBAL.yaw_target,INS.Yaw,GIMBAL.pitch_target,INS.Pitch,mode.controls_state,mode.gimbal_state,rc_ctrl.rc.wheel,GIMBAL.output_pitch);
+		//Vofa_Send_Data8(GIMBAL.output_yaw,GIMBAL.output_pitch,big_pitch.Angle,mode.infantry_sentry_state,USART_Rx_data.buffer_energy,0,USART_Rx_data.flag_rx.bits.vision_color,USART_Rx_data.flag_rx.bits.robot_id);
+		Vofa_Send_Data8(USART_Rx_data.chassis_given_current,USART_Rx_data.chassis_speed_rpm,USART_Rx_data.speed_out,USART_Rx_data.buffer_energy,USART_Rx_data.cap_v,0,0,0);
 		vTaskDelay(10);
   }
 }
@@ -65,7 +68,7 @@ void Vofa_Send_Data2(float data1, float data2)
 {
     Vofa_data_2.ch_data[0] = data1;
     Vofa_data_2.ch_data[1] = data2;
-    HAL_UART_Transmit_DMA(&huart6, (uint8_t *)&Vofa_data_2, sizeof(Vofa_data_2));   
+    HAL_UART_Transmit_DMA(&huart1, (uint8_t *)&Vofa_data_2, sizeof(Vofa_data_2));   
 //    CDC_Transmit_FS((uint8_t *)&Vofa_data_2,sizeof(Vofa_data_2)); 
 }
 
@@ -75,7 +78,7 @@ void Vofa_Send_Data4(float data1, float data2,float data3, float data4)
     Vofa_data_4.ch_data[1] = data2;
     Vofa_data_4.ch_data[2] = data3;
     Vofa_data_4.ch_data[3] = data4;
-    HAL_UART_Transmit_DMA(&huart6, (uint8_t *)&Vofa_data_4, sizeof(Vofa_data_4));   
+    HAL_UART_Transmit_DMA(&huart1, (uint8_t *)&Vofa_data_4, sizeof(Vofa_data_4));   
 }
 
 void Vofa_Send_Data8(float data1, float data2,float data3, float data4,float data5, float data6,float data7, float data8)
@@ -88,5 +91,5 @@ void Vofa_Send_Data8(float data1, float data2,float data3, float data4,float dat
     Vofa_data_8.ch_data[5] = data6;
     Vofa_data_8.ch_data[6] = data7;
     Vofa_data_8.ch_data[7] = data8;
-    HAL_UART_Transmit_DMA(&huart6, (uint8_t *)&Vofa_data_8, sizeof(Vofa_data_8));   
+    HAL_UART_Transmit_DMA(&huart1, (uint8_t *)&Vofa_data_8, sizeof(Vofa_data_8));   
 }

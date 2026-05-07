@@ -68,3 +68,4 @@ gimbal\navigation.o: ../Inc/usb_device.h
 gimbal\navigation.o: ../referee/referee.h
 gimbal\navigation.o: ../Bsp/CAN_receive.h
 gimbal\navigation.o: ../Inc/can.h
+gimbal\navigation.o: ../Bsp/config.h

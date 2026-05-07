@@ -76,7 +76,7 @@ typedef struct  {
 //    
 //    uint8_t manual_reset_count;
 //    uint8_t detect_color;     // 敌方颜色 0=红 1=蓝
-    uint8_t cmd_ID;
+     uint8_t cmd_ID;
     uint32_t time_stamp;
 
     float yaw;
@@ -93,6 +93,8 @@ typedef struct  {
 
     float bullet_speed;
     uint8_t detect_color; // 0 red 1 blue
+    uint8_t mode; 
+    float big_yaw_in_world;
 } __attribute__((packed)) SendRobotCmdData ;//发送给视觉的
 
 
@@ -117,11 +119,11 @@ typedef struct  {
 //		float a_yaw;   // yaw 方向角加速度（度/s^2），发给电控
 //    float a_pitch; // pitch 方向角加速度（度/s^2），发给电控
 //    uint8_t detect_color;      // 敌方颜色
-	uint8_t cmd_ID;
+	 uint8_t cmd_ID;
     uint32_t time_stamp;
 
     uint8_t appear;
-    uint8_t shoot_rate ;
+    uint8_t shoot_rate; 
 
     float pitch;
     float yaw;
@@ -138,6 +140,10 @@ typedef struct  {
     float a_pitch;
 
     uint8_t detect_color;
+    int8_t target_id;
+    uint8_t source_camera; // 0:主相机, 1:感知相机0, 2:感知相机1, 3:未识别
+    float distance;
+		//int8_t fire_advice;//前哨开火
 } __attribute__((packed)) ReceiveAimINFO;//视觉发送过来的
 
 void vision_rx(uint8_t *buff);

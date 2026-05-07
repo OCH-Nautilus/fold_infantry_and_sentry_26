@@ -228,92 +228,62 @@
         <Ww>
           <count>14</count>
           <WinNumber>1</WinNumber>
-          <ItemText>trigger_motor,0x0A</ItemText>
+          <ItemText>frictiongear_r,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>15</count>
           <WinNumber>1</WinNumber>
-          <ItemText>frictiongear_r,0x0A</ItemText>
+          <ItemText>frictiongear_l,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>16</count>
           <WinNumber>1</WinNumber>
-          <ItemText>frictiongear_l,0x0A</ItemText>
+          <ItemText>mode,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>17</count>
           <WinNumber>1</WinNumber>
-          <ItemText>mode,0x0A</ItemText>
+          <ItemText>SHOOT</ItemText>
         </Ww>
         <Ww>
           <count>18</count>
           <WinNumber>1</WinNumber>
-          <ItemText>TRIGGER,0x0A</ItemText>
+          <ItemText>Vision_Rx,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>19</count>
           <WinNumber>1</WinNumber>
-          <ItemText>small_yaw_offline_protect,0x0A</ItemText>
+          <ItemText>Vision_Tx,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>20</count>
           <WinNumber>1</WinNumber>
-          <ItemText>stuck_state,0x0A</ItemText>
+          <ItemText>rc_ctrl,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>21</count>
           <WinNumber>1</WinNumber>
-          <ItemText>TRIGGER.output,0x0A</ItemText>
+          <ItemText>communication_state,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>22</count>
           <WinNumber>1</WinNumber>
-          <ItemText>TRIGGER.output</ItemText>
+          <ItemText>a11,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>23</count>
           <WinNumber>1</WinNumber>
-          <ItemText>SHOOT</ItemText>
+          <ItemText>b11</ItemText>
         </Ww>
         <Ww>
           <count>24</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Vision_Rx,0x0A</ItemText>
+          <ItemText>uii,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>25</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Vision_Tx,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>26</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>pid_trigger_angle_signle,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>27</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>uii1,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>28</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>rc_ctrl,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>29</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>GIMBAL.output_pitch</ItemText>
-        </Ww>
-        <Ww>
-          <count>30</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>time,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>31</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>communication_state,0x0A</ItemText>
+          <ItemText>qww,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
@@ -397,7 +367,7 @@
 
   <Group>
     <GroupName>Application/User</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

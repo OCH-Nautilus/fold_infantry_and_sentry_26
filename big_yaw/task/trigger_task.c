@@ -14,12 +14,18 @@ uint8_t last_trigger_mode=0;
 pid_type_def pid_speed_trigger_single,pid_angle_trigger_single;   //µ¥·¢pid
 pid_type_def pid_speed_trigger_long;
 
-void trigger_task(void const * argument)
+void tirgger_task(void const * argument)
 {
   trigger_init();
   vTaskDelay(10);
   for(;;)
   {
+		if(USART_Rx_data.mode.bits.infantry_sentry_mode==INFANTRY_CTRL)
+			infantry_trigger_state_ctrl();
+		else
+			sentry_trigger_state_ctrl();
+			
+		
 	trigger_heat();
 		trigger_retreat();
 		trigger_mode_choose();
@@ -484,7 +490,7 @@ int heat=power_heat_data.shooter_17mm_barrel_heat;
 //		   
 //		 if(USART_Rx_data.rc_ctrl_key_f == 0&&mode.vision_switch_state == VISION_CLOSE)
 //		 {	
-	     TRIGGER.limit_v = V_TRIGGER_15;
+	     TRIGGER.limit_v = V_TRIGGER_20;
 //		 }
 //		 else if(USART_Rx_data.rc_ctrl_key_f == 1&&mode.vision_switch_state == VISION_CLOSE)
 //		 {

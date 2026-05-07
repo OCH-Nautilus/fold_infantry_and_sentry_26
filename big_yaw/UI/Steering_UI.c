@@ -273,7 +273,7 @@ void UI_state_update(void)
 	else
 		Char_Draw( &state_4, "104", 2, 1, 3, 5, 35, 1, 330, 607, K_state );
 	
-	if(USART_Rx_data.flag.bits.down_over_flag&&USART_Rx_data.mode.bits.gimbal_mode==GIMBAL_FOLD)
+	if(USART_Rx_data.flag.bits.down_over_flag&&USART_Rx_data.mode.bits.gimbal_mode==GIMBAL_FOLD&&USART_Rx_data.flag.bits.small_pitch_fold_over)
 		Char_Draw( &state_5, "105", 2, 1, 3, 5, 35, 1, 390, 607, Z_state );
 	else if(USART_Rx_data.flag.bits.down_over_flag==0&&USART_Rx_data.mode.bits.gimbal_mode==GIMBAL_FOLD)
 		Char_Draw( &state_5, "105", 2, 1, 5, 5, 35, 1, 390, 607, Z_state );

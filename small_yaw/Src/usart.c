@@ -105,7 +105,7 @@ void MX_USART6_UART_Init(void)
 
   /* USER CODE END USART6_Init 1 */
   huart6.Instance = USART6;
-  huart6.Init.BaudRate = 1000000;
+  huart6.Init.BaudRate = 115200;
   huart6.Init.WordLength = UART_WORDLENGTH_8B;
   huart6.Init.StopBits = UART_STOPBITS_1;
   huart6.Init.Parity = UART_PARITY_NONE;
@@ -117,8 +117,8 @@ void MX_USART6_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART6_Init 2 */
-// SET_BIT(huart6.Instance->CR1, USART_CR1_IDLEIE);
-//	HAL_UART_Receive_DMA(&huart6, (uint8_t *)USART_Rx_data_handle, DATA_COUNT_RX);
+ SET_BIT(huart6.Instance->CR1, USART_CR1_IDLEIE);
+	HAL_UART_Receive_DMA(&huart6, (uint8_t *)USART_Rx_data_handle, DATA_COUNT_RX);
   /* USER CODE END USART6_Init 2 */
 
 }

@@ -44,6 +44,38 @@ typedef enum
 //    uint8_t close_flag;
 //    // uint8_t arrive_flag;
 //    uint8_t m_FrameTail = 0xAA;
+//typedef struct
+//{
+
+////消息包原生协议
+//  float navi_vx;//目标x速度
+//  float navi_vy;//目标y速度
+//  float navi_yaw_diff;//正常情况下的yaw增量，加上当前yaw就是目标yaw 
+//  float current_x;//基于建图坐标系的当前x位置
+//  float current_y;//基于建图坐标系的当前y位置
+//  uint8_t If_get_path;//导航是否获取到路径
+//  uint8_t get_goal;//导航是否获取到目标
+//  uint8_t if_arrived;//是否到达目标点 阈值 0.3m
+//  uint8_t close_flag;//是否靠近目标点 阈值 1.0m
+//  //过洞相关
+//  uint8_t need_tunnel;//是否需要过洞 在靠近洞且规划路径需要过洞时为1
+//  float tunnel_yaw_error;//过洞情况下的yaw增量，加上当前yaw就是目标yaw
+//     //yaw_set = ins.yaw + tunnel_yaw_error
+//  uint8_t seq;//包序号
+//  
+//  
+////解算以及处理后的一些数据  
+//  float navigate_yaw_target;
+//	float chassis_vx;//实际给轮子电机的目标转速
+//	float chassis_vy;
+//  uint8_t if_control;
+//	
+//  uint8_t if_lost_navi;
+// 
+//  float yaw_target;//导航目标方向角
+////  uint8_t seq;//包序号
+//}navigation_rx_t;
+
 typedef struct
 {
 
@@ -60,13 +92,17 @@ typedef struct
   //过洞相关
   uint8_t need_tunnel;//是否需要过洞 在靠近洞且规划路径需要过洞时为1
   float tunnel_yaw_error;//过洞情况下的yaw增量，加上当前yaw就是目标yaw
+  uint8_t if_on_attack;//正在追击中 1 未追击0
+  uint8_t sentry_attitude_switch;//1=进攻/2=防御/3=移动
+
   
   uint8_t seq;//包序号
   
   
 //解算以及处理后的一些数据  
   float navigate_yaw_target;
- 
+ 	float chassis_vx;//实际给轮子电机的目标转速
+ 	float chassis_vy;
   uint8_t if_control;
  
   uint8_t if_lost_navi;
@@ -74,6 +110,7 @@ typedef struct
   float yaw_target;//导航目标方向角
 //  uint8_t seq;//包序号
 }navigation_rx_t;
+
 
 
 typedef struct

@@ -159,7 +159,7 @@ void MX_FREERTOS_Init(void) {
   SHOOT_TASKHandle = osThreadCreate(osThread(SHOOT_TASK), NULL);
 
   /* definition and creation of TransmitTask */
-  osThreadDef(TransmitTask, Transmit_Data_Task, osPriorityAboveNormal, 0, 1024);
+  osThreadDef(TransmitTask, Transmit_Data_Task, osPriorityHigh, 0, 1024);
   TransmitTaskHandle = osThreadCreate(osThread(TransmitTask), NULL);
 
   /* definition and creation of TRIGGERTASK */

@@ -73,7 +73,7 @@ void MX_FREERTOS_Init(void);
 /**
   * @brief  The application entry point.
   * @retval int
-  */
+  */int yuu=0;
 int main(void)
 {
 
@@ -115,7 +115,7 @@ int main(void)
 	DWT_Init(168);
     while (BMI088_init(&hspi1, 1) != BMI088_NO_ERROR)
         ;
-		
+		yuu++;
 		
   /* USER CODE END 2 */
 

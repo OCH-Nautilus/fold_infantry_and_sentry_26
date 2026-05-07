@@ -10,7 +10,7 @@
 
 #define DATA_COUNT_RX	320
 #define DATA_COUNT_TX	82
-#define DATA_COUNT	48//接收字节数
+#define DATA_COUNT	42//接收字节数
 
 #define USART_RX_HAED   0XA5
 #define USART_RX_END    0XAA
@@ -18,7 +18,7 @@
 #define USART_TX_HEAD   0XA5
 #define USART_TX_END    0XAA
 
-#define USART_DATA_COUNT  36//发送字节数
+#define USART_DATA_COUNT  37//发送字节数
 
 typedef enum {
     UART_COMMUNICATION_NORMAL = 0,
@@ -29,25 +29,23 @@ typedef enum {
 typedef struct
 {
 //
-	uint8_t head;
+uint8_t head;
+	
 	float chassis_diff_angle;
+	float initial_speed;
 	float ins_big_yaw;//大yaw陀螺仪值
 	float big_yaw_target;
-	float initial_speed;
-	uint16_t shooter_barrel_heat_limit;
-	uint16_t shooter_barrel_cooling_value;
-	uint16_t shooter_17mm_1_barrel_heat; 
-	uint16_t chassis_power_limit;
-	float real_power;
-	uint16_t buffer_energy;
-	float cap_v;
+	uint16_t chassis_power_limit;//
+	float real_power;//
+	uint16_t buffer_energy;//
+	float cap_v;//
 	uint32_t Communication_count;
-	int16_t speed_out;
-	int16_t chassis_given_current;
-	int16_t chassis_speed_rpm;
+	int16_t speed_out;//
+	int16_t chassis_given_current;//
+	int16_t chassis_speed_rpm;//
      union FLAG_Rx_Union 
         {
-            uint16_t flag_rx_pack;  // 用于整体操作的8位
+            uint16_t flag_pack;  // 用于整体操作的16位
             struct Flag_Rx_Bits 
             {
                 uint8_t chassis_if_blackout :1 ;  
@@ -61,6 +59,7 @@ typedef struct
                 uint8_t reserved_flags_2 :7; // 位8-15，保留
             }bits;
          } flag_rx;
+			
 	uint8_t tail;
 }USART_Rx_data_t;
 
@@ -69,7 +68,7 @@ typedef struct
 #pragma pack(push, 1)
 typedef struct
 {
-    uint8_t head;  // 帧头
+    uint8_t head;
     
     // 模式位域 - 总共2个字节
     union ModeUnion {
@@ -80,18 +79,16 @@ typedef struct
             uint8_t gimbal_mode        : 3;  // 位2-4
             uint8_t vision_mode        : 2;  // 位5-6
             uint8_t shoot_mode         : 1;  // 位7-8
-            uint8_t trigger_mode       : 3;  // 位9-10
+            uint8_t re_flag       : 3;  // 位9-10
             uint8_t chassis_mode       : 2;  // 位11-12
             uint8_t chassis_speed_mode : 2;  // 位13-14
-            
-			
         } bits;
     } mode;
     
-    int16_t rc_ctrl_r_x;
-    int16_t rc_ctrl_r_y;
-    int16_t rc_ctrl_l_x;
-    int16_t rc_ctrl_l_y;
+    int16_t rc_ctrl_r_vx;
+    int16_t rc_ctrl_r_vy;
+    int16_t rc_ctrl_l_vx;
+    int16_t rc_ctrl_l_vy;
     float small_yaw_pos;
     float yaw;
     float mouse_vx;
@@ -105,17 +102,17 @@ typedef struct
             uint8_t Key_S : 1;  // 位1
             uint8_t Key_A : 1;  // 位2
             uint8_t Key_D : 1;  // 位3
-			uint8_t Key_Shift : 1;  //位4
-			uint8_t Key_Flag_E : 1;//位5
-			uint8_t Key_E : 1;//位6
-            uint8_t Key_G : 1;//位7
-        } bits;
+						uint8_t Key_Shift : 1;  //位4
+						uint8_t Key_Flag_E : 1;//位5
+						uint8_t Key_E : 1;//位6
+						uint8_t Key_G : 1;//位7
+        }bits;
     } key;
-    
+		
 		union RC_CTRL_S_Union {
         uint16_t rc_s_pack;  // 用于整体操作的8位
         struct Rc_S_Bits {
-            uint8_t s_l : 2;  // 位0-1
+						uint8_t s_l : 2;  // 位0-1
 						uint8_t s_r : 2;	// 位2-3
 						uint8_t WHEEL_State :3;// 位4-7，保留位
 						uint8_t KEY_L_State :2;
@@ -123,6 +120,7 @@ typedef struct
     } rc_ctrl_s;
 		
 		uint32_t Communication_count;
+
         union FLAG_Union 
         {
             uint16_t flag_pack;  // 用于整体操作的8位
@@ -130,17 +128,22 @@ typedef struct
             {
                 uint8_t IF_DISCERN :1;
                 uint8_t IF_PT_OVER :1;
-                uint8_t shoot_l :1;
+                
+                uint8_t shoot_l :1;// 位3-7，保留位
                 uint8_t shoot_r :1;
-                uint8_t	down_over_flag :1;
+								uint8_t	down_over_flag :1;
 								uint8_t	rotate_direction:1;
                 uint8_t top_mode : 1; // 小陀螺变速模式
-								uint8_t detect_flag :1;
-                uint8_t DT_OVER_FLAG : 1;  // 位15                
-                uint8_t reserved_flags_2 : 6; // 位8-15，保留位		
+                uint8_t detect_flag :1;
+								uint8_t DT_OVER_FLAG : 1;
+                uint8_t fire_flag :1;
+								uint8_t small_pitch_fold_over:1;
+								uint8_t re_flag : 5; // 位8-15，保留位										
             }bits;
          } flag;
-    uint8_t tail;  // 帧尾
+    
+    
+    uint8_t tail;
 } USART_TX_data_t;
 #pragma pack(pop)
 

@@ -51,29 +51,64 @@ uint16_t Power_Buffer,Power_Buffer_100 ;
 //	HAL_CAN_AddTxMessage(hcan, &tx_header, sendbuf,&pTxMailbox);
 //}
 
-void Send_SupPower(CAN_HandleTypeDef *hcan)  
+//void Send_SupPower(CAN_HandleTypeDef *hcan)  
+//{
+//   CAN_TxHeaderTypeDef tx_header;
+//   uint8_t sendbuf[8];
+//     uint32_t	pTxMailbox;
+//    tx_header.StdId = 0x210;
+//    tx_header.IDE   = CAN_ID_STD;
+//    tx_header.RTR   = CAN_RTR_DATA;
+//    tx_header.DLC   = 8;
+//    
+//      limit = (powerlimit.referee_max_power - 5);    //裁判系统功率上限
+//    Power_Buffer = limit - PID_cap_calc(&pid_buff,power_heat_data.buffer_energy,30);//计算发给电容的功率
+
+//    limit_100 = limit * 100; 
+//    Power_Buffer_100 = Power_Buffer * 100; 
+//    
+//    
+//    sendbuf[0] = 0;
+//      sendbuf[1] = 0;
+//      sendbuf[2] = Power_Buffer_100>>8;
+//      sendbuf[3] = Power_Buffer_100;
+//        
+
+//    HAL_CAN_AddTxMessage(hcan, &tx_header, sendbuf,&pTxMailbox);
+//}
+void Send_SupPower(CAN_HandleTypeDef *hcan)     
 {
-   CAN_TxHeaderTypeDef tx_header;
-   uint8_t sendbuf[8];
-     uint32_t	pTxMailbox;
-    tx_header.StdId = 0x210;
+    CAN_TxHeaderTypeDef tx_header;
+    uint8_t sendbuf[8];
+    
+    uint32_t    pTxMailbox;
+   limit = 100-5;
+
+    
+      Power_Buffer = robot_status.chassis_power_limit *100;    //缓冲能量
+      
+//    pid_init(&pid_buff,0,0,0,0,0);
+    Power_Buffer = 100;
+
+    limit_100 = limit * 100; 
+    Power_Buffer_100 = Power_Buffer * 100; 
+//    sendbuf[0] = limit_100 >> 8 ;//工作模式
+//        sendbuf[1] = limit_100 ;
+//    sendbuf[2] = Power_Buffer_100 >> 8 ;//裁判系统限制功率
+//        sendbuf[3] = Power_Buffer_100 ;
+//    sendbuf[4] = Power_Buffer >> 8 ;//裁判系统反馈的当前功缓冲能量
+//      sendbuf[5] = Power_Buffer ;
+
+    sendbuf[0] = 0 ;//工作模式
+        sendbuf[1] = 0 ;
+    sendbuf[2] = Power_Buffer_100 >> 8 ;//裁判系统限制功率
+        sendbuf[3] = Power_Buffer_100 ;
+    
+      tx_header.StdId = 0x210;
     tx_header.IDE   = CAN_ID_STD;
     tx_header.RTR   = CAN_RTR_DATA;
     tx_header.DLC   = 8;
     
-      limit = (powerlimit.referee_max_power - 5);    //裁判系统功率上限
-    Power_Buffer = limit - PID_cap_calc(&pid_buff,power_heat_data.buffer_energy,30);//计算发给电容的功率
-
-    limit_100 = limit * 100; 
-    Power_Buffer_100 = Power_Buffer * 100; 
-    
-    
-    sendbuf[0] = 0;
-      sendbuf[1] = 0;
-      sendbuf[2] = Power_Buffer_100>>8;
-      sendbuf[3] = Power_Buffer_100;
-        
-
     HAL_CAN_AddTxMessage(hcan, &tx_header, sendbuf,&pTxMailbox);
 }
 /*******************************************************************

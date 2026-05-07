@@ -30,6 +30,9 @@ pid_type_def pid_yaw_angle_Recognition;
 pid_type_def pid_yaw_speed_Recognition;
 pid_type_def pid_pitch_angle_Recognition;
 pid_type_def pid_pitch_speed_Recognition;
+//前哨站前馈
+feedforward_control_t yaw_vision_outpost_forward;
+feedforward_control_t yaw_vision_speed_outpost_forward;
 
 // 无视觉
 pid_type_def pid_yaw_angle;
@@ -51,7 +54,11 @@ pid_type_def pid_yaw_vision_armor_angle;
 pid_type_def pid_yaw_vision_armor_speed;
 pid_type_def pid_pitch_vision_armor_angle;
 pid_type_def pid_pitch_vision_armor_speed;
-
+// 自瞄前哨站
+pid_type_def pid_yaw_vision_outpost_angle;
+pid_type_def pid_yaw_vision_outpost_speed;
+pid_type_def pid_pitch_vision_outpost_angle;
+pid_type_def pid_pitch_vision_outpost_speed;
 // 打符
 pid_type_def pid_yaw_vision_buff_angle;
 pid_type_def pid_yaw_vision_buff_speed;
@@ -125,6 +132,7 @@ void gimbal_init()
 	GIMBAL.IF_DT_OVER = 1;
 	GIMBAL.angle_limit_flag = 0;
 	GIMBAL.yaw_cruise_direction=1;
+	 GIMBAL.pitch_cruise_direction=1;
 	first_order_filter_init(&yaw_lowpass_key, LowPass_YAW_KEY_TIME, low_pass_yaw_key_num);
 	first_order_filter_init(&pitch_lowpass_key, LowPass_PITCH_KEY_TIME, low_pass_pitch_key_num);
 
@@ -135,6 +143,8 @@ void gimbal_init()
 	feedforward_control_init(&yaw_vision_speed_forward, VISION_YAW_SPEED_ALPHA, VISION_YAW_SPEED_BELTA, VISION_YAW_SPEED_OUTMAX);
 	feedforward_control_init(&pitch_vision_angle_forward, VISION_PITCH_ALPHA, VISION_PITCH_BELTA, VISION_PITCH_OUTMAX);
 	feedforward_control_init(&pitch_vision_speed_forward, VISION_PITCH_SPEED_ALPHA, VISION_PITCH_SPEED_BELTA, VISION_PITCH_SPEED_OUTMAX);
+	feedforward_control_init(&yaw_vision_outpost_forward, VISION_YAW_ALPHA_OUTPOST, VISION_YAW_BELTA_OUTPOST, VISION_YAW_OUTMAX_OUTPOST);
+	feedforward_control_init(&yaw_vision_speed_outpost_forward, VISION_YAW_SPEED_ALPHA_OUTPOST, VISION_YAW_SPEED_BELTA_OUTPOST, VISION_YAW_SPEED_OUTMAX_OUTPOST);
 
 	// 系统辨识
 	PID_init(&pid_yaw_angle_Recognition, PID_YAW_ANGLE_RECO_MODE, PID_YAW_ANGLE_RECO_KP, PID_YAW_ANGLE_RECO_KI, PID_YAW_ANGLE_RECO_KD, PID_YAW_ANGLE_RECO_IMAX_OUT, PID_YAW_ANGLE_RECO_MAX_OUT);
@@ -163,6 +173,12 @@ void gimbal_init()
 	PID_init(&pid_yaw_vision_armor_speed, PID_YAW_VISION_ARMOR_SPEED_MODE, PID_YAW_VISION_ARMOR_SPEED_KP, PID_YAW_VISION_ARMOR_SPEED_KI, PID_YAW_VISION_ARMOR_SPEED_KD, PID_YAW_VISION_ARMOR_SPEED_IMAX_OUT, PID_YAW_VISION_ARMOR_SPEED_MAX_OUT);
 	PID_init(&pid_pitch_vision_armor_angle, PID_PITCH_VISION_ARMOR_ANGLE_MODE, PID_PITCH_VISION_ARMOR_ANGLE_KP, PID_PITCH_VISION_ARMOR_ANGLE_KI, PID_PITCH_VISION_ARMOR_ANGLE_KD, PID_PITCH_VISION_ARMOR_ANGLE_IMAX_OUT, PID_PITCH_VISION_ARMOR_ANGLE_MAX_OUT);
 	PID_init(&pid_pitch_vision_armor_speed, PID_PITCH_VISION_ARMOR_SPEED_MODE, PID_PITCH_VISION_ARMOR_SPEED_KP, PID_PITCH_VISION_ARMOR_SPEED_KI, PID_PITCH_VISION_ARMOR_SPEED_KD, PID_PITCH_VISION_ARMOR_SPEED_IMAX_OUT, PID_PITCH_VISION_ARMOR_SPEED_MAX_OUT);
+		// 前哨站
+	PID_init(&pid_yaw_vision_outpost_angle, PID_YAW_VISION_OUTPOST_ANGLE_MODE, PID_YAW_VISION_OUTPOST_ANGLE_KP, PID_YAW_VISION_OUTPOST_ANGLE_KI, PID_YAW_VISION_OUTPOST_ANGLE_KD, PID_YAW_VISION_OUTPOST_ANGLE_IMAX_OUT, PID_YAW_VISION_OUTPOST_ANGLE_MAX_OUT);
+	PID_init(&pid_yaw_vision_outpost_speed, PID_YAW_VISION_OUTPOST_SPEED_MODE, PID_YAW_VISION_OUTPOST_SPEED_KP, PID_YAW_VISION_OUTPOST_SPEED_KI, PID_YAW_VISION_OUTPOST_SPEED_KD, PID_YAW_VISION_OUTPOST_SPEED_IMAX_OUT, PID_YAW_VISION_OUTPOST_SPEED_MAX_OUT);
+	PID_init(&pid_pitch_vision_outpost_angle, PID_PITCH_VISION_OUTPOST_ANGLE_MODE, PID_PITCH_VISION_OUTPOST_ANGLE_KP, PID_PITCH_VISION_OUTPOST_ANGLE_KI, PID_PITCH_VISION_OUTPOST_ANGLE_KD, PID_PITCH_VISION_OUTPOST_ANGLE_IMAX_OUT, PID_PITCH_VISION_OUTPOST_ANGLE_MAX_OUT);
+	PID_init(&pid_pitch_vision_outpost_speed, PID_PITCH_VISION_OUTPOST_SPEED_MODE, PID_PITCH_VISION_OUTPOST_SPEED_KP, PID_PITCH_VISION_OUTPOST_SPEED_KI, PID_PITCH_VISION_OUTPOST_SPEED_KD, PID_PITCH_VISION_OUTPOST_SPEED_IMAX_OUT, PID_PITCH_VISION_OUTPOST_SPEED_MAX_OUT);
+
 	// buff
 	PID_init(&pid_yaw_vision_buff_angle, PID_YAW_VISION_BUFF_ANGLE_MODE, PID_YAW_VISION_BUFF_ANGLE_KP, PID_YAW_VISION_BUFF_ANGLE_KI, PID_YAW_VISION_BUFF_ANGLE_KD, PID_YAW_VISION_BUFF_ANGLE_IMAX_OUT, PID_YAW_VISION_BUFF_ANGLE_MAX_OUT);
 	PID_init(&pid_yaw_vision_buff_speed, PID_YAW_VISION_BUFF_SPEED_MODE, PID_YAW_VISION_BUFF_SPEED_KP, PID_YAW_VISION_BUFF_SPEED_KI, PID_YAW_VISION_BUFF_SPEED_KD, PID_YAW_VISION_BUFF_SPEED_IMAX_OUT, PID_YAW_VISION_BUFF_SPEED_MAX_OUT);
@@ -201,13 +217,13 @@ void gimbal_pid_calc()
 			{
 				yaw_error = shortestAngleDiff(INS.Yaw, GIMBAL.yaw_target);
 				PID_calc(&pid_yaw_angle, 0, yaw_error);
-				GIMBAL.output_yaw = PID_calc(&pid_yaw_speed, INS.Gyro[2], pid_yaw_angle.out);
+				GIMBAL.output_yaw = PID_calc(&pid_yaw_speed, INS.Gyro[2]*10, pid_yaw_angle.out);
 			}
 			else
 			{
 				yaw_error = shortestAngleDiff(INS.Yaw, GIMBAL.yaw_target);
 				PID_calc(&pid_yaw_angle_dt, 0, yaw_error);
-				GIMBAL.output_yaw = PID_calc(&pid_yaw_speed_dt, INS.Gyro[2], pid_yaw_angle_dt.out);
+				GIMBAL.output_yaw = PID_calc(&pid_yaw_speed_dt, INS.Gyro[2]*10, pid_yaw_angle_dt.out);
 			}
 		}
 		else // KEY_ctrl
@@ -217,51 +233,69 @@ void gimbal_pid_calc()
 
 			if (GIMBAL.IF_DT_OVER == 1)
 			{
-				yaw_error = shortestAngleDiff(INS.Yaw, GIMBAL.lowpass_yaw_target);
+				yaw_error = shortestAngleDiff(INS.Yaw, GIMBAL.yaw_target);
 				PID_calc(&pid_yaw_angle, 0, yaw_error);
-				GIMBAL.output_yaw = PID_calc(&pid_yaw_speed, INS.Gyro[2], pid_yaw_angle.out);
+				GIMBAL.output_yaw = PID_calc(&pid_yaw_speed, INS.Gyro[2]*10, pid_yaw_angle.out);
 			}
 			else
 			{
-				yaw_error = shortestAngleDiff(INS.Yaw, GIMBAL.lowpass_yaw_target);
+				yaw_error = shortestAngleDiff(INS.Yaw, GIMBAL.yaw_target);
 				PID_calc(&pid_yaw_angle_dt, 0, yaw_error);
-				GIMBAL.output_yaw = PID_calc(&pid_yaw_speed_dt, INS.Gyro[2], pid_yaw_angle_dt.out);
+				GIMBAL.output_yaw = PID_calc(&pid_yaw_speed_dt, INS.Gyro[2]*10, pid_yaw_angle_dt.out);
 			}
 		}
 		break;
 
 	case GIMBAL_FOLD:
-		//					if(fabs(big_pitch._pos-FOLD_BIG_PITCH_ANGLE)<0.03f)
-		//					{
-		//						PID_calc(&pid_pitch_angle_fold, small_pitch.Angle, GIMBAL.pitch_target);
-		//            GIMBAL.output_pitch = PID_calc(&pid_pitch_speed_fold, INS.Gyro[1], pid_pitch_angle_fold.out);
-		//					}
-		//          else
-		//					{
-		//						 PID_calc(&pid_pitch_angle, INS.Pitch, GIMBAL.pitch_target);
-		//             GIMBAL.output_pitch = PID_calc(&pid_pitch_speed, INS.Gyro[1], pid_pitch_angle.out);
-		//					}
-		PID_calc(&pid_pitch_angle, INS.Pitch, GIMBAL.lowpass_pitch_target);
-		GIMBAL.output_pitch = PID_calc(&pid_pitch_speed, INS.Gyro[1], pid_pitch_angle.out);
-		PID_calc(&pid_yaw_angle_pos, small_yaw.ecd, GIMBAL.yaw_target);
-		GIMBAL.output_yaw = PID_calc(&pid_yaw_speed, INS.Gyro[2], pid_yaw_angle_pos.out);
+					if(GIMBAL.down_over)
+					{
+						PID_calc(&pid_pitch_angle_fold, small_pitch.Angle, GIMBAL.pitch_target);
+            GIMBAL.output_pitch = PID_calc(&pid_pitch_speed_fold, INS.Gyro[1], pid_pitch_angle_fold.out);
+					}
+          else
+					{
+						 PID_calc(&pid_pitch_angle, INS.Pitch, GIMBAL.pitch_target);
+             GIMBAL.output_pitch = PID_calc(&pid_pitch_speed, INS.Gyro[1], pid_pitch_angle.out);
+					}
+	
+//		PID_calc(&pid_pitch_angle, INS.Pitch, GIMBAL.lowpass_pitch_target);
+//		GIMBAL.output_pitch = PID_calc(&pid_pitch_speed, INS.Gyro[1], pid_pitch_angle.out);
+		yaw_error =  GIMBAL.yaw_target-small_yaw.ecd;
+	if(yaw_error>4096)
+		yaw_error-=8192;
+	else if(yaw_error<-4096)
+		yaw_error+=8192;
+		PID_calc(&pid_yaw_angle_pos, 0, yaw_error);
+		GIMBAL.output_yaw = PID_calc(&pid_yaw_speed, INS.Gyro[2]*10, pid_yaw_angle_pos.out);
 		break;
 	case GIMBAL_CRUISE:
-		PID_calc(&pid_pitch_angle_cruise, INS.Pitch, GIMBAL.lowpass_pitch_target);
+		PID_calc(&pid_pitch_angle_cruise, INS.Pitch, GIMBAL.pitch_target);
 		GIMBAL.output_pitch = PID_calc(&pid_pitch_speed_cruise, INS.Gyro[1], pid_pitch_angle_cruise.out);
-		PID_calc(&pid_yaw_angle_cruise, small_yaw.ecd, GIMBAL.yaw_target);
-		GIMBAL.output_yaw = PID_calc(&pid_yaw_speed_cruise, INS.Gyro[2], pid_yaw_angle_cruise.out);
+		yaw_error = shortestAngleDiff(INS.Yaw, GIMBAL.yaw_target);
+		PID_calc(&pid_yaw_angle_cruise, 0, yaw_error);
+		GIMBAL.output_yaw = PID_calc(&pid_yaw_speed_cruise, INS.Gyro[2]*10, pid_yaw_angle_cruise.out);
 	break;
 	case GIMBAL_VISION:
 		switch (mode.vision_switch_state)
 		{
 		case VISION_ARMOR:
-			PID_calc(&pid_pitch_vision_armor_angle, INS.Pitch, GIMBAL.pitch_target);																					// KalmanFilter(&kalman_pitch_armor,GIMBAL.pitch_target)
-			GIMBAL.output_pitch = PID_calc(&pid_pitch_vision_armor_speed, INS.Gyro[1], pid_pitch_vision_armor_angle.out) +gravity_compensation(); //
 
 			yaw_error = shortestAngleDiff(INS.Yaw, GIMBAL.yaw_target);
+		if(Vision_Rx.target_id!=6)
+		{		
+			PID_calc(&pid_pitch_vision_armor_angle, INS.Pitch, GIMBAL.pitch_target);																					// KalmanFilter(&kalman_pitch_armor,GIMBAL.pitch_target)
+			GIMBAL.output_pitch = PID_calc(&pid_pitch_vision_armor_speed, INS.Gyro[1], pid_pitch_vision_armor_angle.out) +gravity_compensation(); //
 			PID_calc(&pid_yaw_vision_armor_angle, 0, yaw_error);
-			GIMBAL.output_yaw = PID_calc(&pid_yaw_vision_armor_speed, INS.Gyro[2], pid_yaw_vision_armor_angle.out+ feedforward_control_calc(&yaw_vision_forward, Vision_Rx.v_yaw) )+ feedforward_control_calc(&yaw_vision_speed_forward, Vision_Rx.a_yaw);
+			GIMBAL.output_yaw = PID_calc(&pid_yaw_vision_armor_speed, INS.Gyro[2]*10, pid_yaw_vision_armor_angle.out+ feedforward_control_calc(&yaw_vision_forward, Vision_Rx.v_yaw) )+ feedforward_control_calc(&yaw_vision_speed_forward, Vision_Rx.a_yaw);
+		}
+		else
+		{
+			PID_calc(&pid_pitch_vision_outpost_angle, INS.Pitch, GIMBAL.pitch_target);																					// KalmanFilter(&kalman_pitch_armor,GIMBAL.pitch_target)
+			GIMBAL.output_pitch = PID_calc(&pid_pitch_vision_outpost_speed, INS.Gyro[1], pid_pitch_vision_outpost_angle.out) +gravity_compensation(); //			
+			PID_calc(&pid_yaw_vision_outpost_angle, 0, yaw_error);
+			GIMBAL.output_yaw = PID_calc(&pid_yaw_vision_outpost_speed, INS.Gyro[2]*10, pid_yaw_vision_outpost_angle.out);
+
+		}
 		//+ feedforward_control_calc(&yaw_vision_forward, Vision_Rx.v_yaw)
 		//+ feedforward_control_calc(&yaw_vision_speed_forward, Vision_Rx.a_yaw)
 																																																															//							Modeling_Parameters_yaw.target_vel=	PID_calc(&pid_yaw_angle_Recognition, 0, yaw_error);
@@ -351,16 +385,20 @@ void gimbal_mode_idle()
 
 void infantry_gimbal_mode_rc_normal()
 {
-	if (GIMBAL.target_renew_flag == 1) // 刚切换到正常模式
+	
+	
+	if (GIMBAL.target_renew_flag) // 刚切换到正常模式
 	{
 		GIMBAL.yaw_target = INS.Yaw;
 		GIMBAL.pitch_target = 0;
-		GIMBAL.target_renew_flag = 0;
+		GIMBAL.target_renew_flag=0;
 	}
 
 	if (GIMBAL.angle_limit_flag == 0)
 		GIMBAL.yaw_target -= rc_ctrl.rc.ch[2] * SENSITIVITY_YAW_RC;
-
+	else
+		GIMBAL.yaw_target -= rc_ctrl.rc.ch[2] * SENSITIVITY_YAW_RC/3.0f;
+	
 	GIMBAL.big_pitch_target = NORMAL_BIG_PITCH_ANGLE; // 固定角度
 
 	//	if (GIMBAL.PT_flag == 0)
@@ -389,15 +427,15 @@ void infantry_gimbal_mode_rc_normal()
 	GIMBAL.pitch_target = pitch_protect(GIMBAL.pitch_target);
 	//	turn_round();
 }
-
+int uii=0;
 void infantry_gimbal_mode_rc_vision()
 {
-	if (GIMBAL.target_renew_flag == 1) // 刚从折叠模式切换
+	if (GIMBAL.last_mode!=GIMBAL_VISION) 
 	{
 		GIMBAL.yaw_target = INS.Yaw;
-		GIMBAL.target_renew_flag = 0;
 	}
 
+	uii=IF_DISCERN();
 	if (IF_DISCERN())
 	{
 		if (mode.vision_switch_state == VISION_ARMOR)
@@ -425,20 +463,61 @@ void infantry_gimbal_mode_rc_vision()
 
 void infantry_gimbal_mode_rc_fold()
 {
-	static int16_t temp_pos=0;
-	GIMBAL.yaw_target = FOLD_SMALL_YAW_ANGLE;
-	GIMBAL.target_renew_flag = 1;
-	//过零处理
-	temp_pos=small_yaw.ecd-FOLD_SMALL_YAW_ANGLE;
-	if(temp_pos>4096)
-		temp_pos-=8192;
-	else if(temp_pos<-4096)
-		temp_pos+=8192;
-	
-	if (abs(temp_pos) < 45)
-		GIMBAL.big_pitch_target = FOLD_BIG_PITCH_ANGLE;
+	//原逻辑
+//	static int16_t temp_pos=0;
+//	GIMBAL.yaw_target = FOLD_SMALL_YAW_ANGLE;
+//	GIMBAL.target_renew_flag = 1;
+//	//过零处理
+//	temp_pos=small_yaw.ecd-FOLD_SMALL_YAW_ANGLE;
+//	if(temp_pos>4096)
+//		temp_pos-=8192;
+//	else if(temp_pos<-4096)
+//		temp_pos+=8192;
+//	
+//	if (abs(temp_pos) < 45)
+//		GIMBAL.big_pitch_target = FOLD_BIG_PITCH_ANGLE;
 
-	GIMBAL.pitch_target = 0;
+//	if(GIMBAL.down_over)
+//		GIMBAL.pitch_target = FOLD_SMALL_PITCH_ANGLE;
+//	else
+//		GIMBAL.pitch_target = 0;
+	
+	//现逻辑
+	static int16_t temp_pos = 0;
+		static uint16_t fold_cnt=0;
+	    GIMBAL.yaw_target = FOLD_SMALL_YAW_ANGLE;
+    GIMBAL.target_renew_flag = 1;
+
+    temp_pos = small_yaw.ecd - FOLD_SMALL_YAW_ANGLE;
+    if (temp_pos > 4096)
+        temp_pos -= 8192;
+    else if (temp_pos < -4096)
+        temp_pos += 8192;
+
+		if(GIMBAL.last_mode!=GIMBAL_FOLD)
+			fold_cnt=0;
+		
+    if (abs(temp_pos) < 45)
+		{
+			if(++fold_cnt>400)
+				fold_cnt=400;
+		}
+    else 
+		{
+				if(--fold_cnt<10)
+				fold_cnt=10;
+		}			
+		if(fold_cnt>=390)
+			GIMBAL.big_pitch_target = FOLD_BIG_PITCH_ANGLE;
+		else if(fold_cnt<=20)
+			GIMBAL.big_pitch_target = NORMAL_BIG_PITCH_ANGLE;
+		
+		
+		
+    if (GIMBAL.down_over)
+        GIMBAL.pitch_target = FOLD_SMALL_PITCH_ANGLE;
+    else
+        GIMBAL.pitch_target = 0;
 }
 
 /**********************************步兵键鼠控制云台***********************************/
@@ -473,11 +552,11 @@ void infantry_gimbal_mode_key_ctrl()
 
 void infantry_gimbal_mode_key_normal()
 {
-	if (GIMBAL.target_renew_flag == 1) // 刚切换到正常模式
+	if (GIMBAL.target_renew_flag) // 刚切换到正常模式
 	{
 		GIMBAL.yaw_target = INS.Yaw;
 		GIMBAL.pitch_target = 0;
-		GIMBAL.target_renew_flag = 0;
+		GIMBAL.target_renew_flag=0;
 	}
 
 	turn_round();
@@ -521,10 +600,9 @@ void infantry_gimbal_mode_key_normal()
 
 void infantry_gimbal_mode_key_vision()
 {
-	if (GIMBAL.target_renew_flag == 1) // 刚从折叠模式切换
+	if (GIMBAL.last_mode !=GIMBAL_VISION) // 刚切换到正常模式
 	{
 		GIMBAL.yaw_target = INS.Yaw;
-		GIMBAL.target_renew_flag = 0;
 	}
 
 	if (IF_DISCERN())
@@ -558,20 +636,62 @@ void infantry_gimbal_mode_key_vision()
 
 void infantry_gimbal_mode_key_fold()
 {
-	static int16_t temp_pos=0;
-	GIMBAL.yaw_target = FOLD_SMALL_YAW_ANGLE;
-	GIMBAL.target_renew_flag = 1;
-	//过零处理
-	temp_pos=small_yaw.ecd - FOLD_SMALL_YAW_ANGLE;
-	if(temp_pos>4096)
-		temp_pos-=8192;
-	else if(temp_pos<-4096)
-		temp_pos+=8192;
-	
-	if (abs(temp_pos) < 45)
-		GIMBAL.big_pitch_target = FOLD_BIG_PITCH_ANGLE;
+	//原逻辑
+//	static int16_t temp_pos=0;
+//	GIMBAL.yaw_target = FOLD_SMALL_YAW_ANGLE;
+//	GIMBAL.target_renew_flag = 1;
+//	//过零处理
+//	temp_pos=small_yaw.ecd - FOLD_SMALL_YAW_ANGLE;
+//	if(temp_pos>4096)
+//		temp_pos-=8192;
+//	else if(temp_pos<-4096)
+//		temp_pos+=8192;
+//	
+//	if (abs(temp_pos) < 45)
+//		GIMBAL.big_pitch_target = FOLD_BIG_PITCH_ANGLE;
 
-	GIMBAL.pitch_target = 0;
+//	if(GIMBAL.down_over)
+//		GIMBAL.pitch_target = FOLD_SMALL_PITCH_ANGLE;
+//	else
+//		GIMBAL.pitch_target = 0;
+	
+//现逻辑
+	    static int16_t temp_pos = 0;
+		static uint16_t fold_cnt=0;
+	    GIMBAL.yaw_target = FOLD_SMALL_YAW_ANGLE;
+    GIMBAL.target_renew_flag = 1;
+
+    temp_pos = small_yaw.ecd - FOLD_SMALL_YAW_ANGLE;
+    if (temp_pos > 4096)
+        temp_pos -= 8192;
+    else if (temp_pos < -4096)
+        temp_pos += 8192;
+
+		if(GIMBAL.last_mode!=GIMBAL_FOLD)
+			fold_cnt=0;
+		
+    if (abs(temp_pos) < 45)
+		{
+			if(++fold_cnt>400)
+				fold_cnt=400;
+		}
+    else 
+		{
+			if(--fold_cnt<10)
+				fold_cnt=10;
+		}			
+		if(fold_cnt>=390)
+			GIMBAL.big_pitch_target = FOLD_BIG_PITCH_ANGLE;
+		else if(fold_cnt<=20)
+			GIMBAL.big_pitch_target = NORMAL_BIG_PITCH_ANGLE;
+		
+		
+		
+    if (GIMBAL.down_over)
+        GIMBAL.pitch_target = FOLD_SMALL_PITCH_ANGLE;
+    else
+        GIMBAL.pitch_target = 0;
+
 	turn_round();
 }
 /********************************哨兵自动控制层*************************************/
@@ -603,35 +723,35 @@ void sentry_auto_gimbal_mode_ctrl()
 	}
 
 }
-
+int qww=0;
 void sentry_gimbal_fold()
 {
     static int16_t temp_pos = 0;
-    static uint8_t retry_step = 0;   // 0=正常折叠, 1=先抬大pitch, 2=抬完重新折叠
-
+//    static uint8_t retry_step = 0;   // 0=正常折叠, 1=先抬大pitch, 2=抬完重新折叠
+		static uint16_t fold_cnt=0;
     /* 刚进入折叠模式时，清零重试状态 */
-    if (mode.gimbal_state == GIMBAL_FOLD && GIMBAL.last_mode != GIMBAL_FOLD)
-        retry_step = 0;
+//    if (mode.gimbal_state == GIMBAL_FOLD && GIMBAL.last_mode != GIMBAL_FOLD)
+//        retry_step = 0;
 
-    /* 超时触发：进入"先抬起"阶段 */
-    if (GIMBAL.fold_timeout_flag)
-    {
-        GIMBAL.fold_timeout_flag = 0;
-        retry_step = 1;
-    }
+//    /* 超时触发：进入"先抬起"阶段 */
+//    if (GIMBAL.fold_timeout_flag)
+//    {
+//        GIMBAL.fold_timeout_flag = 0;
+//        retry_step = 1;
+//    }
 
-    /* ── 阶段1：先把大pitch抬起来 ── */
-    if (retry_step == 1)
-    {
-        GIMBAL.big_pitch_target = NORMAL_BIG_PITCH_ANGLE;
-        GIMBAL.pitch_target = 0;
+//    /* ── 阶段1：先把大pitch抬起来 ── */
+//    if (retry_step == 1)
+//    {
+//        GIMBAL.big_pitch_target = NORMAL_BIG_PITCH_ANGLE;
+//        GIMBAL.pitch_target = 0;
 
-        if (fabs(big_pitch._pos - NORMAL_BIG_PITCH_ANGLE) < 0.05f)
-        {
-            retry_step = 2;          // 抬到位了
-        }
-        return;   // 还没抬到位，本次不执行折叠逻辑
-    }
+//        if (fabs(big_pitch._pos - NORMAL_BIG_PITCH_ANGLE) < 0.05f)
+//        {
+//            retry_step = 2;          // 抬到位了
+//        }
+//        return;   // 还没抬到位，本次不执行折叠逻辑
+//    }
 
     /* ── 正常折叠（retry_step == 0 首次 或 == 2 抬起后重新折叠） ── */
     GIMBAL.yaw_target = FOLD_SMALL_YAW_ANGLE;
@@ -643,9 +763,27 @@ void sentry_gimbal_fold()
     else if (temp_pos < -4096)
         temp_pos += 8192;
 
+		if(GIMBAL.last_mode!=GIMBAL_FOLD)
+			fold_cnt=0;
+		
     if (abs(temp_pos) < 45)
-        GIMBAL.big_pitch_target = FOLD_BIG_PITCH_ANGLE;
-
+		{
+			if(++fold_cnt>400)
+				fold_cnt=400;
+		}
+    else 
+		{
+				if(--fold_cnt<10)
+					fold_cnt=10;
+		}			
+		qww=fold_cnt;
+		if(fold_cnt>=390)
+			GIMBAL.big_pitch_target = FOLD_BIG_PITCH_ANGLE;
+		else if(fold_cnt<=20)
+			GIMBAL.big_pitch_target = NORMAL_BIG_PITCH_ANGLE;
+		
+		
+		
     if (GIMBAL.down_over)
         GIMBAL.pitch_target = FOLD_SMALL_PITCH_ANGLE;
     else
@@ -654,11 +792,38 @@ void sentry_gimbal_fold()
 
 void sentry_gimbal_cruise()
 {
-	GIMBAL.yaw_target += GIMBAL.yaw_cruise_direction*CRUISE_YAW_SPEED;
-	GIMBAL.pitch_target += GIMBAL.pitch_cruise_direction*CRUISE_PITCH_SPEED;
+	if(GIMBAL.target_renew_flag)
+	{
+		GIMBAL.yaw_target=INS.Yaw;
+		GIMBAL.pitch_target=0;
+		GIMBAL.target_renew_flag=0;
+	}
+	GIMBAL.big_pitch_target = NORMAL_BIG_PITCH_ANGLE; // 固定角度
+	if(GIMBAL.rise_over)
+	{
+		GIMBAL.yaw_target += GIMBAL.yaw_cruise_direction*CRUISE_YAW_SPEED;
+		GIMBAL.pitch_target += GIMBAL.pitch_cruise_direction*CRUISE_PITCH_SPEED;
 
-	GIMBAL.yaw_target = zero_180(GIMBAL.yaw_target);
-	GIMBAL.pitch_target = pitch_protect(GIMBAL.pitch_target);
+		GIMBAL.yaw_target = zero_180(GIMBAL.yaw_target);
+		
+		if(GIMBAL.pitch_target>CRUISE_PITCH_MAX&&GIMBAL.pitch_cruise_direction ==1)
+		{
+		//	GIMBAL.pitch_target=INS.Pitch;
+			GIMBAL.pitch_cruise_direction = -1;
+		}
+		else if(GIMBAL.pitch_target<CRUISE_PITCH_MIN&&GIMBAL.pitch_cruise_direction ==-1)
+		{
+		//	GIMBAL.pitch_target=INS.Pitch;
+			GIMBAL.pitch_cruise_direction = 1;
+		}
+	}
+	else 
+	{
+		GIMBAL.yaw_target=INS.Yaw;
+		GIMBAL.pitch_target=0;
+	}
+	
+	//GIMBAL.pitch_target = pitch_protect(GIMBAL.pitch_target);
 }
 
 void sentry_gimbal_vision()
@@ -666,6 +831,7 @@ void sentry_gimbal_vision()
 	if (GIMBAL.target_renew_flag == 1) // 刚从折叠模式切换
 	{
 		GIMBAL.yaw_target = INS.Yaw;
+		GIMBAL.pitch_target=0;
 		GIMBAL.target_renew_flag = 0;
 	}
 
@@ -698,7 +864,7 @@ void sentry_rc_gimbal_mode_ctrl()
 		infantry_gimbal_mode_rc_vision();
 		break;
 	case GIMBAL_FOLD:
-		infantry_gimbal_mode_rc_fold();
+		sentry_gimbal_fold();
 		break;
 	case GIMBAL_CRUISE:
 		sentry_gimbal_cruise();
@@ -720,15 +886,13 @@ float pitch_protect(float data)
 	// pitch
 	if (data > 19.0f)
 		data = 19.0f;
-	else if (fabs(small_yaw.ecd-FOLD_SMALL_YAW_ANGLE)<521&&data < -37.0f)
-		data = -37.0f;
-	else if (fabs(small_yaw.ecd-FOLD_SMALL_YAW_ANGLE)>=521&&data < -19.0f)
+	else if (abs(small_yaw.ecd-FOLD_SMALL_YAW_ANGLE)<521&&data < -30.0f)
+		data = -30.0f;
+	else if (abs(small_yaw.ecd-FOLD_SMALL_YAW_ANGLE)>=521&&data < -19.0f)
 		data = -19.0f;
 	
-	if(GIMBAL.pitch_target>CRUISE_PITCH_MAX)
-		GIMBAL.pitch_cruise_direction = -1;
-	else if(GIMBAL.pitch_target<CRUISE_PITCH_MIN)
-		GIMBAL.pitch_cruise_direction = 1;
+	
+		
 	
 	return data;
 }
@@ -869,22 +1033,44 @@ float record_big_pitch_pos()
  */
 void fold_state_judge()
 {
-	if (fabs(big_pitch._pos - FOLD_BIG_PITCH_ANGLE) < 0.05f)
+	static float big_pitch_angle_err=0;
+	static float small_pitch_angle_err=0;
+	
+	big_pitch_angle_err=big_pitch._pos - FOLD_BIG_PITCH_ANGLE;
+	small_pitch_angle_err=small_pitch.Angle-FOLD_SMALL_PITCH_ANGLE;
+	
+	if(big_pitch_angle_err>3.14f)
+		big_pitch_angle_err-=6.28f;
+	else if(big_pitch_angle_err<-3.14f)
+		big_pitch_angle_err+=6.28f;
+	
+	if(small_pitch_angle_err>180.0f)
+		small_pitch_angle_err-=360.0f;
+	else if(small_pitch_angle_err<-180.0f)
+		small_pitch_angle_err+=360.0f;
+	
+	
+	if (fabs(big_pitch_angle_err) < 0.05f)
 		GIMBAL.down_over = 1;
 	else
 		GIMBAL.down_over = 0;
 
-	if (fabs(big_pitch._pos - NORMAL_BIG_PITCH_ANGLE < 0.05f))
+	if (fabs(big_pitch_angle_err < 0.05f))
 		GIMBAL.rise_over = 1;
 	else
 		GIMBAL.rise_over = 0;
+	
+	if(fabs(small_pitch_angle_err)<0.5f)
+		GIMBAL.small_pitch_fold_over=1;
+	else
+		GIMBAL.small_pitch_fold_over=0;
 }
 
 /**
  * @brief 大小yaw差角限位
  * @note  大pitch
  * @param
- */
+ */float a11=0,b11=0;
 void yaw_limit()
 {
 	static float temp_now_limit_pos=0;
@@ -905,21 +1091,35 @@ void yaw_limit()
 		temp_now_limit_angle+=360.0f;
 	
 		
-	if (fabs(temp_now_limit_pos) > YAW_LIMIT_ANGLE||fabs(temp_now_limit_angle)>40.0f)//
+	a11=temp_now_limit_pos;
+	b11=temp_now_limit_angle;
+	
+	if (fabs(temp_now_limit_pos) > YAW_LIMIT_ANGLE||fabs(temp_now_limit_angle)>25.0f)//
 		GIMBAL.angle_limit_flag = 1;
 	else
 		GIMBAL.angle_limit_flag = 0;
-
-	if(GIMBAL.yaw_cruise_direction==1)
+	
+	if(mode.gimbal_state==GIMBAL_CRUISE)
 	{
-		if(temp_now_limit_pos > 40||temp_now_limit_angle>40.0f)
-			GIMBAL.yaw_cruise_direction=-1;
+		if(GIMBAL.yaw_cruise_direction==1)
+		{
+			if(temp_now_limit_pos > YAW_LIMIT_ANGLE)
+			{
+				//GIMBAL.yaw_target=INS.Yaw;
+				GIMBAL.yaw_cruise_direction=-1;
+			}
+				
+		}
+		else if(GIMBAL.yaw_cruise_direction==-1)
+		{
+			if(temp_now_limit_pos <- YAW_LIMIT_ANGLE*1.2f)
+			{
+				//GIMBAL.yaw_target=INS.Yaw;
+				GIMBAL.yaw_cruise_direction=1;
+			}
+		}
 	}
-	else if(GIMBAL.yaw_cruise_direction==-1)
-	{
-		if(temp_now_limit_pos <- 40||temp_now_limit_angle<-40.0f)
-			GIMBAL.yaw_cruise_direction=1;
-	}
+	
 
 }
 
@@ -958,25 +1158,25 @@ void fold_time_judge()
 {
 	static uint32_t fold_time_cnt=0;
 
-	if(mode.controls_state!=AUTO_ctrl)
-	{
-		fold_time_cnt=0;
-	}
-	if(mode.gimbal_state==GIMBAL_FOLD&&GIMBAL.down_over==0&&GIMBAL.rise_over==0)
+//	if(mode.controls_state!=AUTO_ctrl)
+//	{
+//		fold_time_cnt=0;
+//	}
+	if(mode.gimbal_state==GIMBAL_FOLD&&GIMBAL.down_over==0)
 		fold_time_cnt++;
 	else
 	{
-		if(--fold_time_cnt<2)
 		fold_time_cnt=0;
 	}
 		
 	
-	if(fold_time_cnt>FOLD_TIME_MAX&&GIMBAL.down_over==0&&GIMBAL.rise_over==0)
+	if(fold_time_cnt>FOLD_TIME_MAX&&GIMBAL.down_over==0)
 	{
 		GIMBAL.fold_timeout_flag=1;
 	}
-	else
+	if(GIMBAL.down_over)
 	{
+		fold_time_cnt=0;
 		GIMBAL.fold_timeout_flag=0;
 	}
 }
@@ -989,7 +1189,7 @@ void fold_time_judge()
  */
 float gravity_compensation()
 {
-    return -1.9f * arm_cos_f32(INS.Pitch / 180 * PI);
+    return -1.4f * arm_cos_f32(INS.Pitch / 180.0f * PI);
 }
 
 

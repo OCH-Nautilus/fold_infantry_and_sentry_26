@@ -28,20 +28,20 @@ wwwqq++;
 	switch (rx_header.StdId)
 	{
 
-	case 0x201://右后1
-		chassis_motor[RR].msg_cnt++ <= 50 ? get_moto_offset(&chassis_motor[RR], rx_data) : encoder_data_handle(&chassis_motor[RR], rx_data);
+	case 0x201://左后1
+		chassis_motor[RL].msg_cnt++ <= 50 ? get_moto_offset(&chassis_motor[RL], rx_data) : encoder_data_handle(&chassis_motor[RL], rx_data);
 	AA11++;
 		break;
-	case 0x202://左后0
-		chassis_motor[RL].msg_cnt++ <= 50 ? get_moto_offset(&chassis_motor[RL], rx_data) : encoder_data_handle(&chassis_motor[RL], rx_data);
+	case 0x202://右后0
+		chassis_motor[RR].msg_cnt++ <= 50 ? get_moto_offset(&chassis_motor[RR], rx_data) : encoder_data_handle(&chassis_motor[RR], rx_data);
 	BB++;
 		break;
-	case 0x203://左前3
-		chassis_motor[FL].msg_cnt++ <= 50 ? get_moto_offset(&chassis_motor[FL], rx_data) : encoder_data_handle(&chassis_motor[FL], rx_data);
+	case 0x203://右前3
+		chassis_motor[FR].msg_cnt++ <= 50 ? get_moto_offset(&chassis_motor[FR], rx_data) : encoder_data_handle(&chassis_motor[FR], rx_data);
 	CC++;
 		break;
-	case 0x204://右前2
-		chassis_motor[FR].msg_cnt++ <= 50 ? get_moto_offset(&chassis_motor[FR], rx_data) : encoder_data_handle(&chassis_motor[FR], rx_data);
+	case 0x204://左前2
+		chassis_motor[FL].msg_cnt++ <= 50 ? get_moto_offset(&chassis_motor[FL], rx_data) : encoder_data_handle(&chassis_motor[FL], rx_data);
 	DD++;
 		break;
 	case 0x212:
@@ -54,17 +54,32 @@ wwwqq++;
 	case 0x01:
 		damiao_4310_data_handle(&big_yaw, rx_data);
 		break;
-	case 0x211:    // ????
-					{
-							SuperCAP.cap_v = (float)(rx_data[0]<<8|rx_data[1])/10.0f;
-							SuperCAP.If_wireless_wrong = rx_data[2];
-							SuperCAP.wireless_state = rx_data[3];
-							SuperCAP.cap_wrong_code = rx_data[4];
-  						SuperCAP.cap_state = rx_data[5];
-							SuperCAP.real_power = (float)((int16_t)(rx_data[6]<<8|rx_data[7]))/10.0f;
-							if(SuperCAP.cap_wrong_code!=0)
-													break;
-					}
+//	case 0x211:    // ????
+//					{
+//							SuperCAP.cap_v = (float)(rx_data[0]<<8|rx_data[1])/10.0f;
+//							SuperCAP.If_wireless_wrong = rx_data[2];
+//							SuperCAP.wireless_state = rx_data[3];
+//							SuperCAP.cap_wrong_code = rx_data[4];
+//  						SuperCAP.cap_state = rx_data[5];
+//							SuperCAP.real_power = (float)((int16_t)(rx_data[6]<<8|rx_data[7]))/10.0f;
+//							if(SuperCAP.cap_wrong_code!=0)
+//													break;
+//					}
+
+    case 0x211:    // 新超级电容
+                    {
+                        SuperCAP.cap_v = (float)(rx_data[0]<<8|rx_data[1])/10.0f;
+                        SuperCAP.If_wireless_wrong = rx_data[2];
+                        SuperCAP.wireless_state = rx_data[3];
+//                        SuperCAP.cap_c = (float)((int16_t)(rx_data[2]<<8|rx_data[3]))/100.0f;
+                        SuperCAP.cap_wrong_code = rx_data[4];
+                        SuperCAP.cap_state = (cap_state_t)rx_data[5];
+//                        SuperCAP.dcdc_c = (float)((int16_t)(rx_data[4]<<8|rx_data[5]))/100.0f;
+                        SuperCAP.real_power = (float)((int16_t)(rx_data[6]<<8|rx_data[7]))/10.0f;
+                        if(SuperCAP.cap_wrong_code!=0)
+                            
+                        break;
+                    } 
 	default:
 
 		break;
@@ -85,14 +100,10 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &rx_header, rx_data); // receive can data
 	switch (rx_header.StdId)
 	{
-		case 0x205:
+		case 0x201:
 			trigger_motor.msg_cnt++ <= 50 ? get_moto_offset(&trigger_motor, rx_data) : encoder_data_handle(&trigger_motor, rx_data);
 		break;
-		case 0x204://
-			small_yaw.msg_cnt++ <= 50 ? get_moto_offset(&small_yaw, rx_data) : \
-			encoder_data_handle(&small_yaw, rx_data);
-			small_yaw_err_cnt++;
-		break;
+		
 	
 	default:
 

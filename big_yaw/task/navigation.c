@@ -10,6 +10,7 @@
 #include "bsp_transmit.h"
 #include "referee.h"
 #include "CAN_receive.h"
+#include "config.h"
 location_t location =
     {
         .Sx = 0,
@@ -35,19 +36,94 @@ navigation_rx_t navigation_rx;
 navigation_tx_t navigation_tx;
 Decision_tx_t Decision_tx;
 
-//uint8_t Navigate_Tx_buff[navigation_tx_len];
-//uint8_t Decisin_Tx_buff[decision_tx_len];
-//int navi_tx_count;
-//int navigation_seq=0;
-//uint8_t last_point_get;
-//uint16_t opopok;
-//uint8_t navi_state_get;
-//// uint8_t buff_const;
-//// uint8_t buff_head;
-//uint8_t buff_count[100];
-//int i_count = 0;
-//int olklk;
-//// uint8_t rx_data_navi[24]={0};
+uint8_t Navigate_Tx_buff[navigation_tx_len];
+uint8_t Decisin_Tx_buff[decision_tx_len];
+int navi_tx_count;
+int navigation_seq=0;
+uint8_t last_point_get;
+uint16_t opopok;
+uint8_t navi_state_get;
+// uint8_t buff_const;
+// uint8_t buff_head;
+uint8_t buff_count[100];
+int i_count = 0;
+int olklk;
+ uint8_t rx_data_navi[24]={0};
+void navigation_rx_handle(uint8_t *buff, uint32_t Len, navigation_rx_t *data)
+{
+
+  navigation_seq++;
+
+  if (buff == NULL)
+  {
+    return;
+  }
+  if (buff[0] == CONST_HEAD0 && buff[Len - 1] == CONST_END0)
+  {
+
+    navi_tx_count = 0;
+
+    Algorithm_fp32_u Vx, Vy, yaw, Sx, Sy,tunnel_yaw;
+
+    for (int i = 0; i < 4; i++)
+    {
+
+      Vx.d[i] = buff[i + 1];
+      Vy.d[i] = buff[i + 5];
+      yaw.d[i] = buff[i + 9];
+      Sx.d[i] = buff[i + 13];
+      Sy.d[i] = buff[i + 17];
+      tunnel_yaw.d[i] = buff[i+26];
+      
+    }
+    data->If_get_path = buff[21];
+    data->get_goal = buff[22];
+    data->if_arrived=buff[23];
+    data->close_flag=buff[24];
+    data->close_flag=buff[25];
+    
+    data->need_tunnel = buff[30];
+    data->sentry_attitude_switch=buff[31];
+		data->seq = buff[32];
+
+    
+
+    data->navi_vx = Vx.data;
+    data->navi_vy = Vy.data;
+
+		data->chassis_vx=data->navi_vx*706.0f;
+		data->chassis_vy=data->navi_vy*706.0f;
+    //      data->navi_vx=0;
+    //      data->navi_vy=0;
+    data->navi_yaw_diff = yaw.data * 57.3f;
+    data->current_x = Sx.data;
+    data->current_y = Sy.data;
+
+    if (data->navi_yaw_diff > 180.0f)
+    {
+      data->navi_yaw_diff -= 360.0f;
+    }
+    else if (data->navi_yaw_diff < -180.0f)
+    {
+      data->navi_yaw_diff += 360.0f;
+    }
+
+    if (fabs(data->navi_yaw_diff) < 30)
+    {
+      data->navi_yaw_diff = 0;
+    }
+    
+    navi_tx_count = 0;
+    data->navigate_yaw_target = INS.Yaw + (data->navi_yaw_diff);
+		if(data->navigate_yaw_target>180.0f)
+			data->navigate_yaw_target-=360.0f;
+		else if(data->navigate_yaw_target<-180.0f)
+			data->navigate_yaw_target+=360.0f;
+  
+    data->if_control=(data->If_get_path!=0&&data->get_goal!=0);
+  }
+}
+
 //void navigation_rx_handle(uint8_t *buff, uint32_t Len, navigation_rx_t *data)
 //{
 
@@ -72,47 +148,47 @@ Decision_tx_t Decision_tx;
 //      yaw.d[i] = buff[i + 9];
 //      Sx.d[i] = buff[i + 13];
 //      Sy.d[i] = buff[i + 17];
-//      tunnel_yaw.d[i] = buff[i+26];
+//      tunnel_yaw.d[i] = buff[i+27];
 //      
 //    }
 //    data->If_get_path = buff[21];
 //    data->get_goal = buff[22];
 //    data->if_arrived=buff[23];
 //    data->close_flag=buff[24];
-//    data->close_flag=buff[25];
-//    
-//    data->need_tunnel = buff[30];
-//    
-
-//    
+//    data->need_tunnel=buff[25];
+//    data->if_on_attack = buff[26];
+//    data->sentry_attitude_switch=buff[31];
+//    data->seq = buff[32];
 
 //    data->navi_vx = Vx.data;
 //    data->navi_vy = Vy.data;
 
 //    //      data->navi_vx=0;
 //    //      data->navi_vy=0;
-//    data->navi_yaw_diff = yaw.data * 57.3f;
+//    if(data->need_tunnel==0)
+//    {
+//       data->navi_yaw_diff=0;
+//    }
+//    else 
+//    {
+//      data->navi_yaw_diff = tunnel_yaw.data * 57.3F;
+//    }
+//    
+//    
 //    data->current_x = Sx.data;
 //    data->current_y = Sy.data;
 
 //    if (data->navi_yaw_diff > 180.0f)
 //    {
-//      data->navi_yaw_diff -= 360;
+//      data->navi_yaw_diff -= 360.0F;
 //    }
 //    else if (data->navi_yaw_diff < -180.0f)
 //    {
-//      data->navi_yaw_diff += 360;
+//      data->navi_yaw_diff += 360.0F;
 //    }
-
-//    if (fabs(data->navi_yaw_diff) < 30)
-//    {
-//      data->navi_yaw_diff = 0;
-//    }
-//    
-//    navi_tx_count = 0;
-//    data->navigate_yaw_target = INS.YawTotalAngle + (data->navi_yaw_diff);
-//  
-//    data->if_control=(data->If_get_path!=0&&data->get_goal!=0);
+//    data->navigate_yaw_target = INS.Yaw + (data->navi_yaw_diff);
+//		if(data->navigate_yaw_target>180.0f)
+//			
 //  }
 //}
 
@@ -131,19 +207,33 @@ Decision_tx_t Decision_tx;
 //float transform_y=0.0f;
 //void Navigation_Tx_Send(navigation_tx_t *data)
 //{
-//  transform_angle = receive_gimbal_data.current_transform_angle * 2 * 3.14f / 360.0f;
-//  dist_x = -receive_gimbal_data.armor_dist * cos(transform_angle);
-//  dist_y = -receive_gimbal_data.armor_dist * sin(transform_angle);
+//  transform_angle = (USART_Rx_data.small_yaw_pos-FOLD_SMALL_YAW_ANGLE)/8192.0f*2.0f*3.14159f;//小yaw转大yaw
+//  dist_x =  * cos(transform_angle);//视觉传的距离*角度
+//  dist_y =  * sin(transform_angle);
 //  
 //  data->nav_cmd_id = navigation_nav_id;
-//  data->navi_set_x_pos=0;
-//  data->navi_set_y_pos=0;
+//	if(game_state.game_progress==0)
+//	{
+//		map_command.target_position_x=0;
+//		map_command.target_position_y;
+//	}
+//	//red
+//if(robot_status.robot_id==7)
+//{
+// 	 data->navi_set_x_pos=map_command.target_position_x;
+// 	 data->navi_set_y_pos=map_command.target_position_y;
+//}
+//else if(robot_status.robot_id==107)//blue
+//{
+//	data->navi_set_x_pos=28-map_command.target_position_x;
+//  data->navi_set_y_pos=15-map_command.target_position_y;
+//}
 //  data->current_yaw = INS.Yaw;
-//  data->current_pitch = INS.Roll;
+//  data->current_pitch = INS.Pitch;
 //  
-//  if( receive_gimbal_data.vision_state == vision_frount)
+//  if(USART_Rx_data.flag.bits.IF_DISCERN)//视觉发现敌人
 //  {
-//    data->enemy_pose.if_on_vision=0;  
+//    data->enemy_pose.if_on_vision=1;  
 //  }
 //  else 
 //  {

@@ -57,6 +57,7 @@ void infantry_gimbal_mode_key_normal(void);
 void infantry_gimbal_mode_key_fold(void);
 void infantry_gimbal_mode_key_vision(void);
 
+void sentry_gimbal_mode_rc_ctrl(void);
 void sentry_gimbal_mode_cruise(void);
 void sentry_gimbal_mode_fold(void); 
 void sentry_gimbal_mode_vision(void);
@@ -78,6 +79,7 @@ void turn_round(void);
 float zero_PI(float angle);
 float shortestAngleDiff(float current, float target) ;
 float zero_180(float angle);
+ void big_yaw_vision_control_judge(void);
 
 
 extern GIMBAL_t GIMBAL;

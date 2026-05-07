@@ -27,10 +27,10 @@ void mode_task(void const * argument)
   for(;;)
   {
 		infantry_sentry_ctrl();//²½ÉÚÄ£Ê½ÇÐ»»		
-		
+		system_conctrl();//¼üÊóÇÐ»»
 		if(mode.infantry_sentry_state==INFANTRY_CTRL)//²½±øÄ£Ê½
 		{
-				infantry_system_conctrl();//¼üÊóÇÐ»»
+				
 				//infantry_trigger_state_ctrl();//²¦µ¯ÅÌ×´Ì¬»ú
 				if(mode.controls_state==RC_ctrl)
 				{
@@ -106,7 +106,7 @@ void infantry_sentry_ctrl()
  * @note
  * @param
  */
-void infantry_system_conctrl()
+void system_conctrl()
 {
 	if(mode.infantry_sentry_state==INFANTRY_CTRL)
 	{
@@ -255,7 +255,7 @@ void infantry_chassis_rc_ctrl()
 			break;
 		case 3: // ¸úËæ
 			if(CHASSIS_LIMIT())
-				mode.chassis_state = CHASSIS_FOLLOW;
+				mode.chassis_state = CHASSIS_TOP;
 			else
 				mode.chassis_state = CHASSIS_IDLE; // ÎÞÁ¦
 			break;
@@ -300,7 +300,7 @@ void infantry_gimbal_rc_ctrl()
 			if(rc_ctrl.rc.s[0]!=1)
 				mode.gimbal_state = GIMBAL_NORMAL;
 			else 
-				mode.gimbal_state = GIMBAL_NORMAL;//GIMBAL_FOLD
+				mode.gimbal_state = GIMBAL_FOLD;//GIMBAL_FOLD
 		}
 		else
 			mode.gimbal_state = GIMBAL_VISION;
@@ -352,7 +352,14 @@ void infantry_vision_rc_ctrl()
  */
 void infantry_shoot_rc_ctrl()
 {
-	if (rc_ctrl.rc.s[1] == 2 || toe_offline[0].communication_state == COMMUNICATION_NONE||mode.gimbal_state==GIMBAL_FOLD)
+	if(toe_offline[0].communication_state == COMMUNICATION_NONE)
+	{
+			mode.shoot_state = SHOOT_IDLE;
+			return;
+	}
+	
+	
+	if (rc_ctrl.rc.s[1] == 2 ||mode.gimbal_state==GIMBAL_FOLD)
 		mode.shoot_state=SHOOT_IDLE;
 	else
 		mode.shoot_state=SHOOT_OPEN;
@@ -426,7 +433,7 @@ void infantry_gimbal_pc_ctrl()
 			else
 				mode.gimbal_state = GIMBAL_FOLD;
 		}
-		else if (GIMBAL.IF_DT_OVER == 1&&mode.gimbal_state != GIMBAL_FOLD&&GIMBAL.rise_over==1)
+		else if (GIMBAL.IF_DT_OVER == 1&&mode.gimbal_state != GIMBAL_FOLD)//&&GIMBAL.rise_over==1
 			mode.gimbal_state = GIMBAL_VISION;
 	}
 
@@ -712,6 +719,8 @@ void sentry_gimbal_state_ctrl()
             case GIMBAL_CRUISE:
                 if(is_stop)
                     mode.gimbal_state = GIMBAL_IDLE;
+								else if(rc_ctrl.rc.s[1]==1)
+									mode.gimbal_state = GIMBAL_VISION;
                 else if(rc_ctrl.rc.s[0] == 1)
                     mode.gimbal_state = GIMBAL_FOLD;
                 else if(rc_ctrl.rc.s[0] == 3)
@@ -723,6 +732,8 @@ void sentry_gimbal_state_ctrl()
             case GIMBAL_NORMAL:
                 if(is_stop)
                     mode.gimbal_state = GIMBAL_IDLE;
+								else if(rc_ctrl.rc.s[1]==1)
+									mode.gimbal_state = GIMBAL_VISION;
                 else if(rc_ctrl.rc.s[0] == 1)
                     mode.gimbal_state = GIMBAL_FOLD;
                 else if(rc_ctrl.rc.s[0] == 3)
@@ -864,7 +875,7 @@ void sentry_shoot_state_ctrl(void)
 
     if(mode.controls_state == RC_ctrl)
     {
-        mode.shoot_state = (rc_ctrl.rc.s[1] == 2) ? SHOOT_IDLE : SHOOT_OPEN;
+        mode.shoot_state = (rc_ctrl.rc.s[1] == 2||mode.gimbal_state == GIMBAL_FOLD) ? SHOOT_IDLE : SHOOT_OPEN;
     }
     else if(mode.controls_state == AUTO_ctrl)
     {

@@ -153,11 +153,11 @@ void MX_FREERTOS_Init(void) {
   VOFATaskHandle = osThreadCreate(osThread(VOFATask), NULL);
 
   /* definition and creation of myTask09 */
-  osThreadDef(myTask09, Transmit_Data_Task, osPriorityAboveNormal, 0, 512);
+  osThreadDef(myTask09, Transmit_Data_Task, osPriorityHigh, 0, 512);
   myTask09Handle = osThreadCreate(osThread(myTask09), NULL);
 
   /* definition and creation of UI_TASK */
-  osThreadDef(UI_TASK, UI_Task, osPriorityNormal, 0, 1024);
+  osThreadDef(UI_TASK, UI_Task, osPriorityAboveNormal, 0, 1024);
   UI_TASKHandle = osThreadCreate(osThread(UI_TASK), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */

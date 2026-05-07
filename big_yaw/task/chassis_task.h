@@ -21,7 +21,8 @@ typedef struct
 	int16_t output[4];
 	uint8_t front_set_num;// 底盘当前正方向设定索引
 	float front_set[2];//底盘当前正方向设定
-	float front_set_sentry;//底盘当前正方向设定
+	uint16_t last_HP;
+
 }CHASSIS_t;
 
 float speed_limit_top(void);

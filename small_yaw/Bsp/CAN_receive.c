@@ -11,6 +11,8 @@ moto_measure_t frictiongear_r;
  * @brief can1  CAN接收中断回调
  * @param
  */
+ uint32_t small_yaw_err_cnt=0;
+
 int wwwqq = 0,
 	qqxx = 0;
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
@@ -22,9 +24,13 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	switch (rx_header.StdId)
 	{
 		
-		case 0x02://can id 0x03
-			damiao_4310_data_handle(&big_pitch,rx_data);
-		break;
+		
+	
+		case 0x206://
+			small_yaw.msg_cnt++ <= 50 ? get_moto_offset(&small_yaw, rx_data) : \
+			encoder_data_handle(&small_yaw, rx_data);
+			small_yaw_err_cnt++;
+		break;	
 		case 0x03://can id 0x04
 			damiao_4310_data_handle(&small_pitch,rx_data);
 		break;
@@ -39,7 +45,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
  */
 int dx = 0;
 int de = 0;
-uint32_t small_yaw_err_cnt=0;
 uint8_t rx_buff[8];
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
@@ -49,7 +54,10 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &rx_header, rx_data); // receive can data
 	switch (rx_header.StdId)
 	{
-
+		case 0x04://can id 0x05
+			damiao_4310_data_handle(&big_pitch,rx_data);
+		break;
+		
 		case 0x201://+
 			frictiongear_l.msg_cnt++ <= 50 ? get_moto_offset(&frictiongear_l, rx_data) : \
 			encoder_data_handle(&frictiongear_l, rx_data);
@@ -61,11 +69,7 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)
 //		case 0x205:
 //			trigger_motor.msg_cnt++ <= 50 ? get_moto_offset(&trigger_motor, rx_data) : encoder_data_handle(&trigger_motor, rx_data);
 //		break;
-		case 0x206://
-			small_yaw.msg_cnt++ <= 50 ? get_moto_offset(&small_yaw, rx_data) : \
-			encoder_data_handle(&small_yaw, rx_data);
-			small_yaw_err_cnt++;
-		break;
+		
 	default:
 
 		break;

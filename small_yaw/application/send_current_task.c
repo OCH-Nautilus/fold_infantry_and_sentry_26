@@ -12,10 +12,12 @@
 #include "math.h"
 #include "detect.h"
 int time=0;
+static uint8_t system_ready = 0;
 void send_current_task(void const * argument)
 {
   /* USER CODE BEGIN current_task */
   vTaskDelay(30);
+	system_ready=1;
   /* Infinite loop */
   for(;;)
   {
@@ -35,18 +37,18 @@ void send_current_task(void const * argument)
 			#endif
 					vTaskDelay(1);
 					
-//			#ifdef SHOOT_SEND
-//					shoot_ctrl_current();
-//			#else
-//					Error_Shoot();
-//			#endif
+			#ifdef SHOOT_SEND
+					shoot_ctrl_current();
+			#else
+					Error_Shoot();
+			#endif
 			
 		}
 		else
 		{
 			Error_Yaw();
 			Error_Pitch();
-			//Error_Shoot();
+			Error_Shoot();
 		}
 			
 		vTaskDelay(1);
@@ -63,9 +65,9 @@ void send_current_task(void const * argument)
 void yaw_ctrl_current()
 {
 	if (mode.gimbal_state != GIMBAL_IDLE) 
-		set_motor_current(&hcan2,0x1ff,0,0,0,GIMBAL.output_yaw); 	
+		set_motor_current(&hcan1,0x1fe,0,GIMBAL.output_yaw,0,0); 	
 	else
-		set_motor_current(&hcan2,0x1ff,0,0,0,0); 	
+		set_motor_current(&hcan1,0x1fe,0,0,0,0); 	
 }
 
 
@@ -78,7 +80,7 @@ void yaw_ctrl_current()
  */int uooo=0;
 void Error_Yaw()
 {
-	set_motor_current(&hcan2,0x1ff,0,0,0,0); 
+	set_motor_current(&hcan1,0x1ff,0,0,0,0); 
 	
 }
 
@@ -90,19 +92,23 @@ void Error_Yaw()
 void pitch_ctrl_current()
 {
 
-	if (mode.gimbal_state != GIMBAL_IDLE)
+	if (toe_offline[0].communication_state == COMMUNICATION_NORMAL)
 	{
 		ctrl_motor(&hcan1, 0x04, 0, 0, 0, 0, GIMBAL.output_pitch );//
-			DM_position_ctrl(&hcan1,0x103,GIMBAL.big_pitch_target,10);
+			DM_position_ctrl(&hcan2,0x105,GIMBAL.big_pitch_target,20);
 	}		
 	else
 	{
 		ctrl_motor(&hcan1, 0x04, 0, 0, 0, 0, 0);
-		DM_position_ctrl(&hcan1,0x103,GIMBAL.big_pitch_target,0);
+		DM_position_ctrl(&hcan2,0x105,GIMBAL.big_pitch_target,0);
 	}	
 	
 	if(rc_ctrl.keyboard.key_Q==1)
-		damiao_clear(&hcan1,0x103);
+	{
+		damiao_clear(&hcan2,0x105);
+		vTaskDelay(1);
+	}
+		
 
 }
 
@@ -114,32 +120,32 @@ void pitch_ctrl_current()
 void Error_Pitch()
 {
 	ctrl_motor(&hcan1, 0x04, 0, 0, 0, 0, 0);
-	DM_position_ctrl(&hcan1,0x103,GIMBAL.big_pitch_target,0);
+	DM_position_ctrl(&hcan2,0x105,GIMBAL.big_pitch_target,0);
 }
 
-///**
-// * @brief Ä¦²ÁÂÖ²¦µ¯ÅÌÕý³£µçÁ÷·¢ËÍ
-// * @note
-// * @param
-// */
-//void shoot_ctrl_current()
-//{
-//	
-//		if(toe_offline[0].communication_state == COMMUNICATION_NORMAL)
-//			set_motor_current(&hcan2, 0x1ff,TRIGGER.pid_trigger_out, SHOOT.output[0], SHOOT.output[1], 0);
-//		else
-//			set_motor_current(&hcan2, 0x1ff,0, SHOOT.output[0], SHOOT.output[1], 0);	
-//		
-//}
-///**
-// * @brief Ä¦²ÁÂÖ²¦µ¯ÅÌ´íÎóµçÁ÷·¢ËÍ
-// * @note
-// * @param
-// */
-//void Error_Shoot()
-//{
-//	set_motor_current(&hcan2, 0x1ff, 0, 0, 0, 0);
-//}
+/**
+ * @brief Ä¦²ÁÂÖ²¦µ¯ÅÌÕý³£µçÁ÷·¢ËÍ
+ * @note
+ * @param
+ */
+void shoot_ctrl_current()
+{
+	
+		if(toe_offline[0].communication_state == COMMUNICATION_NORMAL)
+			set_motor_current(&hcan2, 0x200, SHOOT.output[0], SHOOT.output[1], 0,0);
+		else
+			set_motor_current(&hcan2, 0x200, 0, 0,0, 0);	
+		
+}
+/**
+ * @brief Ä¦²ÁÂÖ²¦µ¯ÅÌ´íÎóµçÁ÷·¢ËÍ
+ * @note
+ * @param
+ */
+void Error_Shoot()
+{
+	set_motor_current(&hcan2, 0x1ff, 0, 0, 0, 0);
+}
 
 
 int yuu1=0,yuu2=0,yuu3=0;
@@ -147,26 +153,36 @@ int yuu1=0,yuu2=0,yuu3=0;
 
 void enable_disable_DM4310(void)
 {
-
+	
+	if(!system_ready)
+		return ;
+	
 	if (mode.controls_state==RC_ctrl&&mode.gimbal_state != GIMBAL_IDLE&&(small_pitch.ERR==0||big_pitch.ERR==0))
 	{			
 			
 
-					damiao_init(&hcan1, 0x03);
+					damiao_init(&hcan2, 0x105);
 					vTaskDelay(1);
 					damiao_init(&hcan1, 0x04);
 					vTaskDelay(1);						
 	}
-	if(mode.controls_state==KEY_ctrl&&toe_offline[0].communication_state == COMMUNICATION_NORMAL&&(small_pitch.ERR==0||big_pitch.ERR==0))
+	else if(mode.controls_state==KEY_ctrl&&toe_offline[0].communication_state == COMMUNICATION_NORMAL&&(small_pitch.ERR==0||big_pitch.ERR==0))
 	{
-					damiao_init(&hcan1, 0x03);
+					damiao_init(&hcan2, 0x105);
+					vTaskDelay(1);
+					damiao_init(&hcan1, 0x04);
+					vTaskDelay(1);						
+	}
+	else if(mode.controls_state==AUTO_ctrl&&toe_offline[0].communication_state == COMMUNICATION_NORMAL&&(small_pitch.ERR==0||big_pitch.ERR==0))
+	{
+					damiao_init(&hcan2, 0x105);
 					vTaskDelay(1);
 					damiao_init(&hcan1, 0x04);
 					vTaskDelay(1);						
 	}
 	if(mode.gimbal_state == GIMBAL_IDLE||toe_offline[0].communication_state == COMMUNICATION_NONE)
 	{
-			damiao_exit(&hcan1, 0x03);
+			damiao_exit(&hcan2, 0x105);
 			vTaskDelay(1);
 			damiao_exit(&hcan1, 0x04);
 			vTaskDelay(1);

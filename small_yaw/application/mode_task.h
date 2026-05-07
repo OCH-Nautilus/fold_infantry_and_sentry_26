@@ -88,7 +88,7 @@ void mode_init(void);
 void chassis_mode_change(void);
 void infantry_chassis_rc_ctrl(void);
 void infantry_shoot_rc_ctrl(void);
-void infantry_system_conctrl(void);
+void system_conctrl(void);
 void infantry_chassis_pc_ctrl(void);
 void infantry_gimbal_rc_ctrl(void);
 void infantry_gimbal_pc_ctrl(void);

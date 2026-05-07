@@ -11,8 +11,9 @@
 
 #define GIMBAL_YAW_SENT
 #define CHASSIS_SENT
-#define BAT 
-//#define CAP
+#define TRIGGER_SENT
+//#define BAT 
+#define CAP
 /*-------------------------控制模式--------------------------------*/
 /* 拨轮状态枚举 */
 #define	ZERO  0
@@ -72,23 +73,24 @@
 /*--------------------------云台参数----------------------------*/
 
 
-#define FOLD_SMALL_YAW_ANGLE 1000//折叠模式下小yaw的目标角度ecd
-#define YAW_LIMIT_ANGLE 1024 //大小yaw限位45度
-#define BIG_YAW_VISION_CONTROL_ANGLE 683 //大yaw视觉控制角度阈值
+#define FOLD_SMALL_YAW_ANGLE 2600//折叠模式下小yaw的目标角度ecd
+#define YAW_LIMIT_ANGLE 570 //大小yaw限位25度
+#define BIG_YAW_VISION_CONTROL_ANGLE 570 //大yaw视觉控制角度阈值
 
+#define CRUISE_BIG_YAW_SPEED 0.05f//巡航大yaw转动速度
 
 //无视觉(正常模式)
 
 
 #define PID_BIG_YAW_ANGLE_MODE 0
-#define PID_BIG_YAW_ANGLE_KP 0.7f
+#define PID_BIG_YAW_ANGLE_KP 1.0f
 #define PID_BIG_YAW_ANGLE_KI 0
 #define PID_BIG_YAW_ANGLE_KD 0
 #define PID_BIG_YAW_ANGLE_IMAX_OUT 0
 #define PID_BIG_YAW_ANGLE_MAX_OUT 7.0f
 
 #define PID_BIG_YAW_SPEED_MODE 0
-#define PID_BIG_YAW_SPEED_KP 0.8f
+#define PID_BIG_YAW_SPEED_KP 1.7f
 #define PID_BIG_YAW_SPEED_KI 0
 #define PID_BIG_YAW_SPEED_KD 0
 #define PID_BIG_YAW_SPEED_IMAX_OUT 0
@@ -162,18 +164,18 @@
 
 //巡航
 #define PID_BIG_YAW_CRUISE_ANGLE_MODE 0
-#define PID_BIG_YAW_CRUISE_ANGLE_KP 0.0f
+#define PID_BIG_YAW_CRUISE_ANGLE_KP 0.6f
 #define PID_BIG_YAW_CRUISE_ANGLE_KI 0
 #define PID_BIG_YAW_CRUISE_ANGLE_KD 0
 #define PID_BIG_YAW_CRUISE_ANGLE_IMAX_OUT 0
 #define PID_BIG_YAW_CRUISE_ANGLE_MAX_OUT 7
 
 #define PID_BIG_YAW_CRUISE_SPEED_MODE 0
-#define PID_BIG_YAW_CRUISE_SPEED_KP 0.0f//0.8
+#define PID_BIG_YAW_CRUISE_SPEED_KP 1.1f//0.8
 #define PID_BIG_YAW_CRUISE_SPEED_KI 0
 #define PID_BIG_YAW_CRUISE_SPEED_KD 0
 #define PID_BIG_YAW_CRUISE_SPEED_IMAX_OUT 0
-#define PID_BIG_YAW_CRUISE_SPEED_MAX_OUT 5
+#define PID_BIG_YAW_CRUISE_SPEED_MAX_OUT 3.0f
 //低通滤波参数
 #define LowPass_YAW_KEY_TIME    0.28f
 #define LowPass_PITCH_KEY_TIME   0.28f
@@ -212,9 +214,10 @@
 
 /*---------------------底盘参数--------------------------*/
 
-#define FRONT_SET_1 -173.4f//
-#define FRONT_SET_2  6.6f//
-#define FRONT_SET_SENTRY 0.0f//
+
+#define FRONT_SET_2  -160.0f//
+#define FRONT_SET_1 20.0f//
+#define FRONT_SET_SENTRY 95.0f//8.6f
 
 #define CHASSIS_MAX_CURRENT 16300
 #define FOLLOW_MAX_CURRENT 4000
