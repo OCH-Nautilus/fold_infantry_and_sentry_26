@@ -10,8 +10,8 @@
 #define CONST_HEAD2             0XB1    // 帧头
 #define CONST_END2              0XBB    // 帧尾
 
-#define navigation_tx_len   24
-#define decision_tx_len     20
+#define navigation_tx_len   25
+#define decision_tx_len     28
 #include "stdbool.h"
 #include "struct_typedef.h"
 #include "bsp_transmit.h"
@@ -89,12 +89,15 @@ typedef struct
   uint8_t get_goal;//导航是否获取到目标
   uint8_t if_arrived;//是否到达目标点 阈值 0.3m
   uint8_t close_flag;//是否靠近目标点 阈值 1.0m
+	
+	
   //过洞相关
   uint8_t need_tunnel;//是否需要过洞 在靠近洞且规划路径需要过洞时为1
   float tunnel_yaw_error;//过洞情况下的yaw增量，加上当前yaw就是目标yaw
-  uint8_t if_on_attack;//正在追击中 1 未追击0
+	uint8_t if_on_attack;//是否追击
+//  uint8_t if_on_attack;//正在追击中 1 未追击0
   uint8_t sentry_attitude_switch;//1=进攻/2=防御/3=移动
-
+	float current_navi_yaw;//当前导航坐标系下的yaw角度
   
   uint8_t seq;//包序号
   
@@ -182,7 +185,7 @@ typedef struct
   uint8_t if_on_vision;
   int16_t enemy_pos_x;
   int16_t enemy_pos_y;
-  
+  uint8_t enemy_id;
 }enemy_pose_t;
 
 
@@ -216,11 +219,17 @@ typedef struct
   sentry_decision_data_t sentry_decision_data;//哨兵决策打包数据，当前全部用1bit表示，打包成4个uint8_t
   uint16_t game_remain_time;//比赛剩余时间 单位s
   uint8_t game_state;//比赛状态 直接用裁判系统的，0x04比赛开始
-  int16_t projectile_allowance_17mm;//剩余发弹两
+  int16_t projectile_allowance_17mm;//剩余发弹量
   uint16_t current_hp;//机器人当前血量
   uint16_t my_base_hp;//我方基地当前血量
+  uint16_t we_outpost_hp;//我方前哨站血量
+  uint16_t enemy_outpost_hp;//敌方前哨站血量
   int16_t enemy_hero_x;//敌方英雄相对坐标x，单位待商榷
   int16_t enemy_hero_y;//敌方英雄相对坐标y，单位待商榷
+  uint8_t real_sentry_attitude_switch;//裁判系统反馈的真实姿态
+  uint8_t remaining_energy_flags;//剩余能量信息
+  uint8_t if_get_manual_msg;//是否获取到云台手消息
+  uint8_t if_get_radar_msg;//是否获得雷达站数据
   uint8_t m_FrameTail;//帧尾
   
 }Decision_tx_t;

@@ -47,3 +47,7 @@ gimbal\nautilus_ui.o: ../referee/referee.h
 gimbal\nautilus_ui.o: ../referee/protocol.h
 gimbal\nautilus_ui.o: ../referee/struct_typedef.h
 gimbal\nautilus_ui.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+gimbal\nautilus_ui.o: ../Bsp/bsp_transmit.h
+gimbal\nautilus_ui.o: ../Bsp/struct_typedef.h
+gimbal\nautilus_ui.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+gimbal\nautilus_ui.o: ../task/navigation.h

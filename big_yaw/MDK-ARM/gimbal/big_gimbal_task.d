@@ -75,3 +75,6 @@ gimbal\big_gimbal_task.o: ../Inc/usart.h
 gimbal\big_gimbal_task.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 gimbal\big_gimbal_task.o: ../Bsp/SMC.h
 gimbal\big_gimbal_task.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+gimbal\big_gimbal_task.o: ..\task\navigation.h
+gimbal\big_gimbal_task.o: ../referee/protocol.h
+gimbal\big_gimbal_task.o: ../referee/struct_typedef.h

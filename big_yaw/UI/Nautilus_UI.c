@@ -14,7 +14,8 @@ ps: RoboMaster_裁判系统串口协议附录 V1.3
 	频率最大为10Hz
 *******************************************************************/
 #include "Nautilus_UI.h"
-
+#include "bsp_transmit.h"
+#include "navigation.h"
 unsigned char UI_Seq;                      //包序号
 
 uint16_t Robot_ID    = UI_Data_RobotID_RStandard1;   // 机器人ID  见头文件
@@ -687,10 +688,32 @@ int wew;
 HAL_StatusTypeDef HAL_StatusType_t;
   uint8_t data_sentry_pack[UI_Sentry_byte] = {0};
 	 Sentry_cmd_t Sentry_cmd_send;
+	
+void Sentry_tx_handle(Sentry_cmd_t *cmd)
+{
+	if(robot_status.current_HP==0)
+		cmd->if_revive=1;
+	else
+		cmd->if_revive=0;
+	
+	cmd->if_immediately_revive=0;
+	cmd->exchange_projectile_num=0;
+	cmd->remote_exchange_projectile_count=0;
+	cmd->remote_exchange_HP_count=0;
+//	if(USART_Rx_data.rc_ctrl_s.bits.s_l!=0)
+//		cmd->attitude_mode=USART_Rx_data.rc_ctrl_s.bits.s_l;
+//	else
+//		cmd->attitude_mode=2;
+	cmd->attitude_mode=navigation_rx.sentry_attitude_switch;
+	cmd->sentry_judge_big_buff=0;
+}
+	
+	
 void UI_SendSentry(Sentry_cmd_t *cmd)
 {
  wew++;
-
+	Sentry_tx_handle(&Sentry_cmd_send);
+	
    UI_Datahead_t UI_Datahead;
    
    uint16_t CMD_ID;

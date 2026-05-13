@@ -71,7 +71,11 @@ typedef enum
 	SPEED_FLY =2,
 }chassis_speed_state_t;//底盘加速度限制
 
-
+typedef enum
+{
+	NORMAL_CAP=0,
+	WIRELESS_CHARGING=1,
+}super_cap_state_t;
 typedef struct 
 {
 	infantry_sentry_t        infantry_sentry_state;
@@ -82,6 +86,7 @@ typedef struct
 	trigger_state_t          trigger_state;
 	chassis_state_t          chassis_state;
 	chassis_speed_state_t    chassis_speed_state;
+	super_cap_state_t        super_cap_state;
 }mode_t;//模式总控
 
 void mode_init(void);
@@ -109,6 +114,7 @@ void sentry_shoot_state_ctrl(void);
 void infantry_trigger_state_ctrl(void);      
 void sentry_trigger_state_ctrl(void);
 void sentry_vision_ctrl(void);
+void super_cap_mode(void);
 
 extern mode_t mode;
 

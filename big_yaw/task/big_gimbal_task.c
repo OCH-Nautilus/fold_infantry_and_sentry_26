@@ -8,6 +8,7 @@
 #include "bsp_transmit.h"
 #include "CAN_receive.h"
 #include "SMC.h"
+#include "navigation.h"
 GIMBAL_t GIMBAL;
 Modeling_Parameters_t Modeling_Parameters_yaw;
 
@@ -434,6 +435,9 @@ void sentry_gimbal_mode_rc_ctrl()
  */
 void sentry_gimbal_mode_cruise()
 {
+	if(GIMBAL.last_mode !=GIMBAL_CRUISE )
+		GIMBAL.big_yaw_target=INS.Yaw;
+	
 	GIMBAL.big_yaw_target+=CRUISE_BIG_YAW_SPEED;
 	GIMBAL.big_yaw_target=zero_180(GIMBAL.big_yaw_target);
 
@@ -446,14 +450,17 @@ void sentry_gimbal_mode_cruise()
  */
 void sentry_gimbal_mode_fold()
 {
-//	if(USART_Rx_data.flag.bits.down_over_flag)
-//	GIMBAL.big_yaw_target=;//导航数据控制
-//	else 
-//		{
-//			GIMBAL.ratio_yaw = (zero_180((USART_Rx_data.small_yaw_pos/4096.0f*180.0f)-(FOLD_SMALL_YAW_ANGLE/4096.0f*180.0f)))/(YAW_LIMIT_ANGLE/4096.0f*180.0f/4.0f);
-//			GIMBAL.big_yaw_target=INS.Yaw-GIMBAL.ratio_yaw*GIMBAL.ratio_yaw*GIMBAL.ratio_yaw*0.5f;	
-//}
-//	GIMBAL.big_yaw_target=zero_180(GIMBAL.big_yaw_target);
+//	if(GIMBAL.last_mode !=GIMBAL_FOLD )
+//		GIMBAL.big_yaw_target=INS.Yaw;
+	
+	if(USART_Rx_data.flag.bits.down_over_flag)
+		GIMBAL.big_yaw_target=navigation_rx.navigate_yaw_target;//导航数据控制
+	else if(GIMBAL.last_mode !=GIMBAL_FOLD )
+		{
+			GIMBAL.ratio_yaw = (zero_180((USART_Rx_data.small_yaw_pos/4096.0f*180.0f)-(FOLD_SMALL_YAW_ANGLE/4096.0f*180.0f)))/(YAW_LIMIT_ANGLE/4096.0f*180.0f/4.0f);
+			GIMBAL.big_yaw_target=INS.Yaw-GIMBAL.ratio_yaw*GIMBAL.ratio_yaw*GIMBAL.ratio_yaw*0.5f;	
+		}
+	GIMBAL.big_yaw_target=zero_180(GIMBAL.big_yaw_target);
 
 }
 

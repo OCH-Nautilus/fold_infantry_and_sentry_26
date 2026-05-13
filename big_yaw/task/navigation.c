@@ -11,6 +11,13 @@
 #include "referee.h"
 #include "CAN_receive.h"
 #include "config.h"
+#include "cmsis_os.h"
+Decision_tx_t Decision_tx;
+static int16_t Decision_Tx_Send_cnt=0;
+
+
+
+
 location_t location =
     {
         .Sx = 0,
@@ -34,12 +41,13 @@ location_t location =
 
 navigation_rx_t navigation_rx;
 navigation_tx_t navigation_tx;
-Decision_tx_t Decision_tx;
+
 
 uint8_t Navigate_Tx_buff[navigation_tx_len];
 uint8_t Decisin_Tx_buff[decision_tx_len];
 int navi_tx_count;
 int navigation_seq=0;
+int last_navigation_seq=0;
 uint8_t last_point_get;
 uint16_t opopok;
 uint8_t navi_state_get;
@@ -48,7 +56,43 @@ uint8_t navi_state_get;
 uint8_t buff_count[100];
 int i_count = 0;
 int olklk;
- uint8_t rx_data_navi[24]={0};
+int16_t navi_err_cnt=0;
+uint8_t rx_data_navi[24]={0};
+
+ 
+void navigation_task(void const * argument)
+{
+  /* USER CODE BEGIN navigation_task */
+	
+  /* Infinite loop */
+  for(;;)
+  {
+		Navigation_Tx_Send(&navigation_tx);
+		vTaskDelay(1);
+		if(++Decision_Tx_Send_cnt>=20)
+		{
+			Decision_Tx_Send(&Decision_tx);
+			Decision_Tx_Send_cnt=0;
+			vTaskDelay(1);
+		}
+		
+	if(last_navigation_seq==navigation_seq)
+		navi_err_cnt++;
+	else
+		navi_err_cnt=0;
+	
+	if(navi_err_cnt>2000)
+		navigation_rx.if_lost_navi=1;
+	else
+		navigation_rx.if_lost_navi=0;
+	
+		last_navigation_seq=navigation_seq;
+    vTaskDelay(1);
+  }
+  /* USER CODE END navigation_task */
+}
+ 
+ float yaw_nv=0,yaw_tu=0;
 void navigation_rx_handle(uint8_t *buff, uint32_t Len, navigation_rx_t *data)
 {
 
@@ -63,7 +107,7 @@ void navigation_rx_handle(uint8_t *buff, uint32_t Len, navigation_rx_t *data)
 
     navi_tx_count = 0;
 
-    Algorithm_fp32_u Vx, Vy, yaw, Sx, Sy,tunnel_yaw;
+    Algorithm_fp32_u Vx, Vy, yaw, Sx, Sy,tunnel_yaw,navi_yaw;
 
     for (int i = 0; i < 4; i++)
     {
@@ -74,28 +118,32 @@ void navigation_rx_handle(uint8_t *buff, uint32_t Len, navigation_rx_t *data)
       Sx.d[i] = buff[i + 13];
       Sy.d[i] = buff[i + 17];
       tunnel_yaw.d[i] = buff[i+26];
+			navi_yaw.d[i]=buff[i+32];
       
     }
+		yaw_nv=navi_yaw.data;
+		yaw_tu=tunnel_yaw.data;
     data->If_get_path = buff[21];
     data->get_goal = buff[22];
     data->if_arrived=buff[23];
     data->close_flag=buff[24];
-    data->close_flag=buff[25];
     
-    data->need_tunnel = buff[30];
+    
+    data->need_tunnel = buff[25];
+		data->if_on_attack=buff[30];
     data->sentry_attitude_switch=buff[31];
-		data->seq = buff[32];
+		data->seq = buff[36];
 
     
 
     data->navi_vx = Vx.data;
     data->navi_vy = Vy.data;
 
-		data->chassis_vx=data->navi_vx*706.0f;
-		data->chassis_vy=data->navi_vy*706.0f;
+		data->chassis_vx=data->navi_vx*4500.0f;
+		data->chassis_vy=data->navi_vy*4500.0f;
     //      data->navi_vx=0;
     //      data->navi_vy=0;
-    data->navi_yaw_diff = yaw.data * 57.3f;
+    data->navi_yaw_diff = tunnel_yaw.data * 57.3f;
     data->current_x = Sx.data;
     data->current_y = Sy.data;
 
@@ -122,6 +170,9 @@ void navigation_rx_handle(uint8_t *buff, uint32_t Len, navigation_rx_t *data)
   
     data->if_control=(data->If_get_path!=0&&data->get_goal!=0);
   }
+	
+	
+	
 }
 
 //void navigation_rx_handle(uint8_t *buff, uint32_t Len, navigation_rx_t *data)
@@ -192,118 +243,153 @@ void navigation_rx_handle(uint8_t *buff, uint32_t Len, navigation_rx_t *data)
 //  }
 //}
 
-//uint8_t last_point;
-//uint8_t clear_count;
-//USBD_StatusTypeDef IOIOL;
-//uint8_t data_test[4];
+uint8_t last_point;
+uint8_t clear_count;
+USBD_StatusTypeDef IOIOL;
+uint8_t data_test[4];
 
 
-//float transform_angle=0.0f;
-//float dist_x=0.0f;
-//float dist_y=0.0f;
-//float diff_yaw=0.0f;
+float transform_angle=0.0f;
+float dist_x=0.0f;
+float dist_y=0.0f;
+float diff_yaw=0.0f;
 
-//float transform_x=0.0f;
-//float transform_y=0.0f;
-//void Navigation_Tx_Send(navigation_tx_t *data)
-//{
-//  transform_angle = (USART_Rx_data.small_yaw_pos-FOLD_SMALL_YAW_ANGLE)/8192.0f*2.0f*3.14159f;//小yaw转大yaw
-//  dist_x =  * cos(transform_angle);//视觉传的距离*角度
-//  dist_y =  * sin(transform_angle);
-//  
-//  data->nav_cmd_id = navigation_nav_id;
-//	if(game_state.game_progress==0)
-//	{
-//		map_command.target_position_x=0;
-//		map_command.target_position_y;
-//	}
-//	//red
-//if(robot_status.robot_id==7)
-//{
-// 	 data->navi_set_x_pos=map_command.target_position_x;
-// 	 data->navi_set_y_pos=map_command.target_position_y;
-//}
-//else if(robot_status.robot_id==107)//blue
-//{
-//	data->navi_set_x_pos=28-map_command.target_position_x;
-//  data->navi_set_y_pos=15-map_command.target_position_y;
-//}
-//  data->current_yaw = INS.Yaw;
-//  data->current_pitch = INS.Pitch;
-//  
-//  if(USART_Rx_data.flag.bits.IF_DISCERN)//视觉发现敌人
-//  {
-//    data->enemy_pose.if_on_vision=1;  
-//  }
-//  else 
-//  {
-//    data->enemy_pose.if_on_vision=0;  
-//  }
-//  data->enemy_pose.enemy_pos_x = dist_x;
-//  data->enemy_pose.enemy_pos_y = dist_y;
+float transform_x=0.0f;
+float transform_y=0.0f;
+void Navigation_Tx_Send(navigation_tx_t *data)
+{
+  transform_angle = (USART_Rx_data.small_yaw_pos-FOLD_SMALL_YAW_ANGLE)/8192.0f*2.0f*3.14159f;//小yaw转大yaw
+  dist_x = 0;// * cos(transform_angle);//视觉传的距离*角度
+  dist_y = 0;// * sin(transform_angle);
+  
+  data->nav_cmd_id = navigation_nav_id;
+	if(game_state.game_progress!=0x04)
+	{
+		map_command.target_position_x=0;
+		map_command.target_position_y=0;
+		map_command.cmd_keyboard='A';
+	}
+	//red
+if(robot_status.robot_id==7)
+{
+ 	 data->navi_set_x_pos=map_command.target_position_x;
+ 	 data->navi_set_y_pos=map_command.target_position_y;
+}
+else if(robot_status.robot_id==107)//blue
+{
+	data->navi_set_x_pos=28-map_command.target_position_x;
+  data->navi_set_y_pos=15-map_command.target_position_y;
+}
+  data->current_yaw = INS.Yaw;
+  data->current_pitch = INS.Pitch;
+  
+  if(USART_Rx_data.flag.bits.IF_DISCERN)//视觉发现敌人
+  {
+    data->enemy_pose.if_on_vision=1;  
+  }
+  else 
+  {
+    data->enemy_pose.if_on_vision=0;  
+  }
+  data->enemy_pose.enemy_pos_x = dist_x;
+  data->enemy_pose.enemy_pos_y = dist_y;
 
-//  
-//  Navigate_Tx_buff[0] = CONST_HEAD0;
-//  Navigate_Tx_buff[1] = 0x01;
-////  memcmp(Navigate_Tx_buff + 1, &data->nav_cmd_id,1);
-//  memcpy(Navigate_Tx_buff + 2, &data->navi_set_x_pos, 4);
-//  memcpy(Navigate_Tx_buff + 6, &data->navi_set_y_pos, 4);
-//  memcpy(Navigate_Tx_buff + 10, &data->current_yaw, 4);
-//  memcpy(Navigate_Tx_buff + 14, &data->current_pitch, 4);
-//  memcpy(Navigate_Tx_buff + 18, &data->enemy_pose.if_on_vision, 1);
-//  memcpy(Navigate_Tx_buff + 19, &data->enemy_pose.enemy_pos_x, 2);
-//  memcpy(Navigate_Tx_buff + 21, &data->enemy_pose.enemy_pos_y, 2);
-//  Navigate_Tx_buff[navigation_tx_len - 1] = CONST_END0;
-//  
+  
+  Navigate_Tx_buff[0] = CONST_HEAD0;
+  Navigate_Tx_buff[1] = 0x01;
+  memcpy(Navigate_Tx_buff + 2, &data->navi_set_x_pos, 4);
+  memcpy(Navigate_Tx_buff + 6, &data->navi_set_y_pos, 4);
+  memcpy(Navigate_Tx_buff + 10, &data->current_yaw, 4);
+  memcpy(Navigate_Tx_buff + 14, &data->current_pitch, 4);
+  memcpy(Navigate_Tx_buff + 18, &data->enemy_pose.if_on_vision, 1);
+	memcpy(Navigate_Tx_buff + 19, &data->enemy_pose.enemy_id, 1);
+  memcpy(Navigate_Tx_buff + 20, &data->enemy_pose.enemy_pos_x, 2);
+  memcpy(Navigate_Tx_buff + 22, &data->enemy_pose.enemy_pos_y, 2);
+  Navigate_Tx_buff[navigation_tx_len - 1] = CONST_END0;
+  
 
-//  IOIOL = CDC_Transmit_FS(Navigate_Tx_buff, navigation_tx_len);
-//}
+  IOIOL = CDC_Transmit_FS(Navigate_Tx_buff, navigation_tx_len);
+}
 
-//int ppppppp;
-//void Decision_Tx_Send(Decision_tx_t *data)
-//{
-//  
-//  data->decision_cmd_id = navigation_decision_id;
-//  memcpy(&data->sentry_decision_data, &decision.Judge_condition, sizeof(sentry_decision_data_t));
-//  data->game_remain_time=game_state.stage_remain_time;
-//  data->game_state = game_state.game_progress;
-//  
-//  data->projectile_allowance_17mm=0;
-//  data->current_hp = robot_status.current_HP;
-//  data->my_base_hp = game_robot_HP.we_base_HP;
-//  data->enemy_hero_x=0;
-//  data->enemy_hero_y=0;
-//  
-//  
-//  ppppppp++;
-//  
-//  Decisin_Tx_buff[0] = CONST_HEAD0;
-//  Decisin_Tx_buff[1] = 0x02;
-////  memcmp(Decisin_Tx_buff + 1, &data->decision_cmd_id,1);
-//  memcmp(Decisin_Tx_buff + 2, &data->sentry_decision_data.sentry_decision_data_1,1);
-//  memcmp(Decisin_Tx_buff + 3, &data->sentry_decision_data.sentry_decision_data_2,1);
-//  memcmp(Decisin_Tx_buff + 4, &data->sentry_decision_data.sentry_decision_data_3,1);
-//  memcmp(Decisin_Tx_buff + 5, &data->sentry_decision_data.sentry_decision_data_4,1);
-//  memcmp(Decisin_Tx_buff + 6, &data->game_remain_time,2);
-//  memcmp(Decisin_Tx_buff + 8, &data->game_state,1);
-//  memcmp(Decisin_Tx_buff + 9, &data->projectile_allowance_17mm,2);
-//  memcmp(Decisin_Tx_buff + 11, &data->current_hp,2);
-//  memcmp(Decisin_Tx_buff + 13, &data->my_base_hp,2);
-//  memcmp(Decisin_Tx_buff + 15, &data->enemy_hero_x,2);
-//  memcmp(Decisin_Tx_buff + 17, &data->enemy_hero_y,2);
+void Decision_Tx_Send(Decision_tx_t *data)
+{
+  
+  data->decision_cmd_id = navigation_decision_id;
+ // memcpy(&data->sentry_decision_data, &decision.Judge_condition, sizeof(sentry_decision_data_t));
+	memset(&data->sentry_decision_data,0,sizeof(sentry_decision_data_t));
+	
+//	data->sentry_decision_data.sentry_decision_data_1 =0;
+//	data->sentry_decision_data.sentry_decision_data_2=0;
+//	data->sentry_decision_data.sentry_decision_data_3=0;
+//	data->sentry_decision_data.sentry_decision_data_4=0;
+  data->game_remain_time=game_state.stage_remain_time;
+  data->game_state = game_state.game_progress;
+  
+  data->projectile_allowance_17mm=projectile_allowance.projectile_allowance_17mm;
+  data->current_hp = robot_status.current_HP;
+  data->my_base_hp = game_robot_HP.we_base_HP;
+	if(game_state.game_progress!=0x04)
+		data->if_get_manual_msg=0;
+	else
+		data->if_get_manual_msg=Decision_tx.if_get_manual_msg;//decision.if_get_map_msg;
+	
+  data->if_get_radar_msg = 0;//decision.if_get_radar_msg;
+  data->remaining_energy_flags = buff.energy_info.remaining_energy;
 
-//  Decisin_Tx_buff[decision_tx_len - 1] = CONST_END0;
-////  memcpy(TX_Buff + 17, &data->sentry_decision_data.sentry_decision_data_1, 1);
-////  memcpy(TX_Buff + 18, &data->sentry_decision_data.sentry_decision_data_2, 1);
-////  memcpy(TX_Buff + 19, &data->sentry_decision_data.sentry_decision_data_3, 1);
-////  memcpy(TX_Buff + 20, &data->sentry_decision_data.sentry_decision_data_4, 1);
-////  memcpy(TX_Buff + 21, &data->game_remain_time, 2);
-////  memcpy(TX_Buff + 23, &data->game_state, 1);
-//IOIOL = CDC_Transmit_FS(Decisin_Tx_buff, decision_tx_len);
-////  
-//}
 
-//void Serial_Data_Handle()
-//{
-//}
+  //是否获取到云台手消息
 
+  data->enemy_hero_y=0;
+  data->enemy_hero_x=0;
+  data->real_sentry_attitude_switch = sentry_info.state_info.state_bits.sentry_posture;
+  
+    
+  Decisin_Tx_buff[0] = CONST_HEAD0;
+  Decisin_Tx_buff[1] = 0x02;
+//  memcmp(Decisin_Tx_buff + 1, &data->decision_cmd_id,1);
+  memcpy(Decisin_Tx_buff + 2, &data->sentry_decision_data.sentry_decision_data_1,1);
+  memcpy(Decisin_Tx_buff + 3, &data->sentry_decision_data.sentry_decision_data_2,1);
+  memcpy(Decisin_Tx_buff + 4, &data->sentry_decision_data.sentry_decision_data_3,1);
+  memcpy(Decisin_Tx_buff + 5, &data->sentry_decision_data.sentry_decision_data_4,1);
+  memcpy(Decisin_Tx_buff + 6, &data->game_remain_time,2);
+  memcpy(Decisin_Tx_buff + 8, &data->game_state,1);
+  memcpy(Decisin_Tx_buff + 9, &data->projectile_allowance_17mm,2);
+  memcpy(Decisin_Tx_buff + 11, &data->current_hp,2);
+  memcpy(Decisin_Tx_buff + 13, &data->my_base_hp,2);
+  memcpy(Decisin_Tx_buff + 15, &data->we_outpost_hp,2);
+  memcpy(Decisin_Tx_buff + 17, &data->enemy_outpost_hp,2);
+  memcpy(Decisin_Tx_buff + 19, &data->enemy_hero_x,2);
+  memcpy(Decisin_Tx_buff + 21, &data->enemy_hero_y,2);
+  memcpy(Decisin_Tx_buff + 23, &data->real_sentry_attitude_switch,1);
+  memcpy(Decisin_Tx_buff + 24, &data->remaining_energy_flags,1);
+
+  memcpy(Decisin_Tx_buff + 25,&data->if_get_manual_msg,1);
+  memcpy(Decisin_Tx_buff + 26,&data->if_get_radar_msg,1);
+
+  Decisin_Tx_buff[decision_tx_len - 1] = CONST_END0;
+
+  //   uint8_t m_FrameHead;//帧头
+  // uint8_t decision_cmd_id;//命令字 0x02
+  // sentry_decision_data_t sentry_decision_data;//哨兵决策打包数据，当前全部用1bit表示，打包成4个uint8_t
+  // uint16_t game_remain_time;//比赛剩余时间 单位s
+  // uint8_t game_state;//比赛状态 直接用裁判系统的，0x04比赛开始
+  // int16_t projectile_allowance_17mm;//剩余发弹量
+  // uint16_t current_hp;//机器人当前血量
+  // uint16_t my_base_hp;//我方基地当前血量
+  // uint16_t we_outpost_hp;//我方前哨站血量
+  // uint16_t enemy_outpost_hp;//敌方前哨站血量
+  // int16_t enemy_hero_x;//敌方英雄相对坐标x，单位待商榷
+  // int16_t enemy_hero_y;//敌方英雄相对坐标y，单位待商榷
+  // uint8_t if_get_manual_msg;//是否获取到云台手消息
+  // uint8_t if_get_radar_msg;//是否获得雷达站数据
+  // uint8_t m_FrameTail;//帧尾
+
+//  memcpy(TX_Buff + 17, &data->sentry_decision_data.sentry_decision_data_1, 1);
+//  memcpy(TX_Buff + 18, &data->sentry_decision_data.sentry_decision_data_2, 1);
+//  memcpy(TX_Buff + 19, &data->sentry_decision_data.sentry_decision_data_3, 1);
+//  memcpy(TX_Buff + 20, &data->sentry_decision_data.sentry_decision_data_4, 1);
+//  memcpy(TX_Buff + 21, &data->game_remain_time, 2);
+//  memcpy(TX_Buff + 23, &data->game_state, 1);
+IOIOL = CDC_Transmit_FS(Decisin_Tx_buff, decision_tx_len);
+//  
+}

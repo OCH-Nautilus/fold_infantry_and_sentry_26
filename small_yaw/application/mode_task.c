@@ -48,6 +48,7 @@ void mode_task(void const * argument)
 					infantry_vision_pc_ctrl();
 					infantry_shoot_pc_ctrl();
 					chassis_speed();
+					super_cap_mode();
 				}
 				else
 				{
@@ -688,7 +689,7 @@ bool_t CHASSIS_LIMIT()
  */
 void sentry_gimbal_state_ctrl()
 {
-    uint8_t is_stop = (toe_offline[0].communication_state == COMMUNICATION_NONE || small_yaw_offline_protect());
+    uint8_t is_stop = (toe_offline[0].communication_state == COMMUNICATION_NONE || small_yaw_offline_protect()||USART_Rx_data.key_cmd=='D');
 
     if(mode.controls_state == RC_ctrl)
     {
@@ -787,7 +788,7 @@ void sentry_gimbal_state_ctrl()
 			case GIMBAL_CRUISE:
 				if(is_stop)
 					mode.gimbal_state = GIMBAL_IDLE;
-				else if(USART_Rx_data.flag_rx.bits.navi_need_tunnel)
+				else if(USART_Rx_data.flag_rx.bits.navi_need_tunnel&&USART_Rx_data.flag_rx.bits.if_lost_navi==0)
 					mode.gimbal_state = GIMBAL_FOLD;
 				else if(IF_DISCERN() == 1)
 					mode.gimbal_state = GIMBAL_VISION;
@@ -798,7 +799,7 @@ void sentry_gimbal_state_ctrl()
 			case GIMBAL_VISION:
 				if(is_stop)
 					mode.gimbal_state = GIMBAL_IDLE;
-				else if(USART_Rx_data.flag_rx.bits.navi_need_tunnel)
+				else if(USART_Rx_data.flag_rx.bits.navi_need_tunnel&&USART_Rx_data.flag_rx.bits.if_lost_navi==0)
 					mode.gimbal_state = GIMBAL_FOLD;
 				else if(IF_DISCERN() == 1)
 					mode.gimbal_state = GIMBAL_VISION;
@@ -830,14 +831,14 @@ void sentry_chassis_state_ctrl()
     switch(mode.chassis_state)
     {
         case CHASSIS_IDLE:
-            if(toe_offline[0].communication_state == COMMUNICATION_NONE || USART_Rx_data.flag_rx.bits.chassis_if_blackout)
+            if(toe_offline[0].communication_state == COMMUNICATION_NONE || USART_Rx_data.flag_rx.bits.chassis_if_blackout||USART_Rx_data.key_cmd=='D')
                 mode.chassis_state = CHASSIS_IDLE;
             else
                 mode.chassis_state = CHASSIS_NARIGATION;
         break;
 
         case CHASSIS_NARIGATION:
-            if(toe_offline[0].communication_state == COMMUNICATION_NONE)
+            if(toe_offline[0].communication_state == COMMUNICATION_NONE|| USART_Rx_data.flag_rx.bits.chassis_if_blackout||USART_Rx_data.key_cmd=='D')
                 mode.chassis_state = CHASSIS_IDLE;
             else 
                 mode.chassis_state = CHASSIS_NARIGATION;
@@ -851,7 +852,7 @@ void sentry_chassis_state_ctrl()
 
 void sentry_vision_ctrl()
 {
-	if (toe_offline[0].communication_state == COMMUNICATION_NONE)
+	if (toe_offline[0].communication_state == COMMUNICATION_NONE||USART_Rx_data.key_cmd=='D')
 		mode.vision_switch_state = VISION_CLOSE;
 	else
 		mode.vision_switch_state = VISION_ARMOR;
@@ -875,11 +876,11 @@ void sentry_shoot_state_ctrl(void)
 
     if(mode.controls_state == RC_ctrl)
     {
-        mode.shoot_state = (rc_ctrl.rc.s[1] == 2||mode.gimbal_state == GIMBAL_FOLD) ? SHOOT_IDLE : SHOOT_OPEN;
+        mode.shoot_state = (rc_ctrl.rc.s[1] == 2||mode.gimbal_state == GIMBAL_FOLD||USART_Rx_data.key_cmd=='D') ? SHOOT_IDLE : SHOOT_OPEN;
     }
     else if(mode.controls_state == AUTO_ctrl)
     {
-        mode.shoot_state = (mode.gimbal_state == GIMBAL_FOLD) ? SHOOT_IDLE : SHOOT_OPEN;
+        mode.shoot_state = (mode.gimbal_state == GIMBAL_FOLD||USART_Rx_data.key_cmd=='D') ? SHOOT_IDLE : SHOOT_OPEN;
     }
 }
 
@@ -998,3 +999,15 @@ bool if_trigger_cal()
 	return flag_cal;
 }
 
+/**
+ * @brief 超电模式切换
+ * @note B切换超电模式，Z发送清除超电错误码指令
+ * @param
+ */
+void super_cap_mode()
+{
+	if(rc_ctrl.keyboard.flag_B)
+		mode.super_cap_state=WIRELESS_CHARGING;
+	else
+		mode.super_cap_state=NORMAL_CAP;
+}

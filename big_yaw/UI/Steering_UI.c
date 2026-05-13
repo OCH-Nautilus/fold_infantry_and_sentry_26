@@ -26,6 +26,10 @@ ps: RoboMaster_裁判系统串口协议附录 V1.3
 #include "bsp_transmit.h"
 #include "SuperCAP.h"
 #include "trigger_task.h"
+#include "chassis_power.h"
+
+
+
 void UI_ID_Set(void)
 {
 	Robot_ID = robot_status.robot_id;
@@ -61,7 +65,9 @@ extern int32_t motor_current_time[4];
 
 uint32_t UI_time = 0;
 float UI_delta = 0;
+extern PowerState_control_t PowerState_control;
 
+extern 	 Sentry_cmd_t Sentry_cmd_send;
 
 
 int qwert=0;
@@ -112,7 +118,7 @@ void UI_Task(void)
 	osDelay (40);	
 	UI_SendGraph(5,trajectory_3m_1,trajectory_3m_2,trajectory_3m_3,trajectory_3m_4,trajectory_1m_1);
 	osDelay (40);	
-	UI_SendGraph(1,chassis_crash_left);
+	UI_SendGraph(5,chassis_crash_left,supercap_1,supercap_2,supercap_3,supercap_4);
 	osDelay (40);	
 	UI_SendGraph(1,chassis_crash_right);
 	osDelay (40);	
@@ -133,7 +139,7 @@ void UI_Task(void)
 			UI_chassis_update();
 			UI_vision_update();
 			UI_shoot_update();
-//			UI_supercap_update();
+			UI_supercap_update();
 //			UI_bullet_update();
 ////		  UI_Distance_update();
 			UI_Pitch_update();
@@ -163,7 +169,8 @@ void UI_Task(void)
 	osDelay (40);		
 	UI_SendGraph(5,SC_Vol_Arc,trajectory_1m_1,trajectory_1m_2,trajectory_1m_3,trajectory_1m_4);
 	osDelay (40);	
-
+	UI_SendGraph(5,chassis_crash_left,supercap_1,supercap_2,supercap_3,supercap_4);
+	osDelay (40);	
 //	UI_SendGraph( 7,shoot_1,shoot_2,shoot_3,shoot_4,shoot_5,direction_3,SC_Vol_Arc);
 //	osDelay (40);		
 //				
@@ -173,8 +180,8 @@ void UI_Task(void)
 ////	UI_SendGraph( 7,supercap_1,supercap_2,supercap_3,supercap_4,supercap_4,Distance,target_4);
 //	UI_SendGraph( 7,supercap_1,supercap_2,supercap_3,supercap_4,supercap_4,supercap_4,target_4);
 //	osDelay (40);
-//  UI_SendSentry(&Sentry_cmd);
-//	osDelay (40);
+  UI_SendSentry(&Sentry_cmd_send);
+	osDelay (40);
 		}
 	  	UI_delta = DWT_GetDeltaT(&UI_time);
 	}
@@ -571,6 +578,29 @@ void UI_supercap_add(void)
 
 void UI_supercap_update(void)
 {
+	if(USART_Rx_data.flag.bits.super_cap_mode==0)
+		Line_Draw( &supercap_4, "144", 2, 2, 8, 5, 1684, 380, 1609, 486 );//划线
+	else
+		Line_Draw( &supercap_4, "144", 2, 2, 2, 5, 1684, 380, 1609, 486 );//划线
+
+	if(SuperCAP.If_wireless_wrong==1)
+	{
+		Line_Draw( &supercap_1, "141", 2, 1, 4, 5, 1618, 437, 1652, 486 );
+		Line_Draw( &supercap_2, "142", 2, 1, 4, 5, 1641, 378, 1680, 438 );
+		Line_Draw( &supercap_3, "143", 2, 1, 4, 5, 1619, 436, 1679, 436 );
+	}	
+	else if(SuperCAP.If_wireless_wrong==0&&PowerState_control==FullCAP)
+	{
+		Line_Draw( &supercap_1, "141", 2, 1, 3, 5, 1618, 437, 1652, 486 );
+		Line_Draw( &supercap_2, "142", 2, 1, 3, 5, 1641, 378, 1680, 438 );
+		Line_Draw( &supercap_3, "143", 2, 1, 3, 5, 1619, 436, 1679, 436 );
+	}
+	else
+	{
+		Line_Draw( &supercap_1, "141", 2, 1, 8, 5, 1618, 437, 1652, 486 );
+		Line_Draw( &supercap_2, "142", 2, 1, 8, 5, 1641, 378, 1680, 438 );
+		Line_Draw( &supercap_3, "143", 2, 1, 8, 5, 1619, 436, 1679, 436 );
+	}
 //	if(rc_ctrl.keyboard.key_Shift==0&&rc_ctrl.keyboard.key_F==0)
 //	{
 //		Line_Draw( &supercap_1, "141", 2, 1, 8, 5, 1618, 437, 1652, 486 );

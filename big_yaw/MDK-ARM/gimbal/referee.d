@@ -45,3 +45,7 @@ gimbal\referee.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
 gimbal\referee.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 gimbal\referee.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 gimbal\referee.o: ..\referee\CRC8_CRC16.h
+gimbal\referee.o: ../task/navigation.h
+gimbal\referee.o: ../Bsp/struct_typedef.h
+gimbal\referee.o: ../Bsp/bsp_transmit.h
+gimbal\referee.o: ../Inc/usart.h

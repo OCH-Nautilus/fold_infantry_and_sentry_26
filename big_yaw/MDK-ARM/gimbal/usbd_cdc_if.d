@@ -49,3 +49,10 @@ gimbal\usbd_cdc_if.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h
 gimbal\usbd_cdc_if.o: ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h
 gimbal\usbd_cdc_if.o: ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h
 gimbal\usbd_cdc_if.o: ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h
+gimbal\usbd_cdc_if.o: ../task/navigation.h
+gimbal\usbd_cdc_if.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+gimbal\usbd_cdc_if.o: ../Bsp/struct_typedef.h
+gimbal\usbd_cdc_if.o: ../Bsp/bsp_transmit.h
+gimbal\usbd_cdc_if.o: ../Inc/usart.h
+gimbal\usbd_cdc_if.o: ../referee/protocol.h
+gimbal\usbd_cdc_if.o: ../referee/struct_typedef.h

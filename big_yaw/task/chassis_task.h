@@ -22,6 +22,7 @@ typedef struct
 	uint8_t front_set_num;// 底盘当前正方向设定索引
 	float front_set[2];//底盘当前正方向设定
 	uint16_t last_HP;
+	float cap_front_set;
 
 }CHASSIS_t;
 

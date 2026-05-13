@@ -75,11 +75,11 @@ void infantry_trigger_state_ctrl(void)
 //					 TRIGGER.cal_protect_start_time = HAL_GetTick();
 //					 mode.trigger_state = TRIGGER_CAL;
 //				 }
-				 else if((((USART_Rx_data.mode.bits.controls_mode == CONTROL_RC_CTRL && USART_Rx_data.rc_ctrl_s.bits.WHEEL_State == DOWN_LONG) || (USART_Rx_data.mode.bits.controls_mode == CONTROL_KEYBOARD_CTRL && USART_Rx_data.rc_ctrl_s.bits.KEY_L_State == PUSH_LONG)) || (USART_Rx_data.mode.bits.gimbal_mode==GIMBAL_VISION&&USART_Rx_data.mode.bits.vision_mode == VISION_ARMOR &&USART_Rx_data.flag.bits.fire_flag))&&TRIGGER.weak_flag==0)
+				 else if(USART_Rx_data.mode.bits.shoot_mode==SHOOT_OPEN&&(((USART_Rx_data.mode.bits.controls_mode == CONTROL_RC_CTRL && USART_Rx_data.rc_ctrl_s.bits.WHEEL_State == DOWN_LONG) || (USART_Rx_data.mode.bits.controls_mode == CONTROL_KEYBOARD_CTRL && USART_Rx_data.rc_ctrl_s.bits.KEY_L_State == PUSH_LONG)) || (USART_Rx_data.mode.bits.gimbal_mode==GIMBAL_VISION&&USART_Rx_data.mode.bits.vision_mode == VISION_ARMOR &&USART_Rx_data.flag.bits.fire_flag))&&TRIGGER.weak_flag==0)
 				 { 
 				   trigger_mode = TRIGGER_LONG;
 				 }
-				 else if(((((USART_Rx_data.mode.bits.controls_mode == CONTROL_RC_CTRL && USART_Rx_data.rc_ctrl_s.bits.WHEEL_State == DOWN_SHORT) || (USART_Rx_data.mode.bits.controls_mode == CONTROL_KEYBOARD_CTRL && USART_Rx_data.rc_ctrl_s.bits.KEY_L_State == PUSH_SHORT)) && USART_Rx_data.mode.bits.vision_mode !=VISION_SMALL_BUFF && USART_Rx_data.mode.bits.vision_mode != VISION_BIG_BUFF) ||
+				 else if(USART_Rx_data.mode.bits.shoot_mode==SHOOT_OPEN&&((((USART_Rx_data.mode.bits.controls_mode == CONTROL_RC_CTRL && USART_Rx_data.rc_ctrl_s.bits.WHEEL_State == DOWN_SHORT) || (USART_Rx_data.mode.bits.controls_mode == CONTROL_KEYBOARD_CTRL && USART_Rx_data.rc_ctrl_s.bits.KEY_L_State == PUSH_SHORT)) && USART_Rx_data.mode.bits.vision_mode !=VISION_SMALL_BUFF && USART_Rx_data.mode.bits.vision_mode != VISION_BIG_BUFF) ||
 					       (((USART_Rx_data.mode.bits.controls_mode == CONTROL_RC_CTRL && USART_Rx_data.rc_ctrl_s.bits.WHEEL_State == DOWN_SHORT) || (USART_Rx_data.mode.bits.controls_mode == CONTROL_KEYBOARD_CTRL && USART_Rx_data.rc_ctrl_s.bits.KEY_L_State == PUSH_SHORT)) && (USART_Rx_data.mode.bits.vision_mode ==VISION_SMALL_BUFF || USART_Rx_data.mode.bits.vision_mode == VISION_BIG_BUFF) && USART_Rx_data.flag.bits.fire_flag))  && TRIGGER.flag_if_single_over == 1 && TRIGGER.weak_flag==0)
 				 {
 				   trigger_mode = TRIGGER_SINGLE;
@@ -94,7 +94,7 @@ void infantry_trigger_state_ctrl(void)
 		case TRIGGER_SINGLE:
          if(( USART_Rx_data.rc_ctrl_s.bits.s_r == 2 && USART_Rx_data.mode.bits.controls_mode == CONTROL_RC_CTRL)  || USART_Rx_data.flag.bits.detect_flag == DETECT_NONE)//|| ( mode.controls_state == KEY_ctrl)
 					 trigger_mode = TRIGGER_IDLE;
-			   else if(TRIGGER.flag_if_flug[0] == 1)
+			   else if(USART_Rx_data.mode.bits.shoot_mode==SHOOT_OPEN&&TRIGGER.flag_if_flug[0] == 1)
 				 {
 				   trigger_mode = TRIGGER_BACK;
 					 TRIGGER.flag_if_back = 1;
@@ -102,7 +102,7 @@ void infantry_trigger_state_ctrl(void)
 					 TRIGGER.flag_if_single_over = 1;
 				 	 TRIGGER.tire_retreat_current = 0;
 				 }
-			   else if( TRIGGER.flag_if_single_over == 0&&TRIGGER.weak_flag==0 )
+			   else if( USART_Rx_data.mode.bits.shoot_mode==SHOOT_OPEN&&TRIGGER.flag_if_single_over == 0&&TRIGGER.weak_flag==0 )
 					 trigger_mode = TRIGGER_SINGLE;
 				 else
 					 trigger_mode = TRIGGER_STATIC;
@@ -111,13 +111,13 @@ void infantry_trigger_state_ctrl(void)
 		case TRIGGER_LONG:
 			   if(( USART_Rx_data.rc_ctrl_s.bits.s_r == 2 && USART_Rx_data.mode.bits.controls_mode == CONTROL_RC_CTRL)  || USART_Rx_data.flag.bits.detect_flag == DETECT_NONE)//|| ( mode.controls_state == KEY_ctrl)
 					 trigger_mode = TRIGGER_IDLE;
-			   else if(TRIGGER.flag_if_flug[0] == 1)
+			   else if(USART_Rx_data.mode.bits.shoot_mode==SHOOT_OPEN&&TRIGGER.flag_if_flug[0] == 1)
 				 {
 				   trigger_mode = TRIGGER_BACK;
 					 TRIGGER.flag_if_back = 1;
 					 TRIGGER.flag_if_back_over = 0;
 				 }
-				 else if((((USART_Rx_data.mode.bits.controls_mode == CONTROL_RC_CTRL && USART_Rx_data.rc_ctrl_s.bits.WHEEL_State == DOWN_LONG) || (USART_Rx_data.mode.bits.controls_mode == CONTROL_KEYBOARD_CTRL && USART_Rx_data.rc_ctrl_s.bits.KEY_L_State == PUSH_LONG)) || (USART_Rx_data.mode.bits.vision_mode == VISION_ARMOR && USART_Rx_data.flag.bits.fire_flag))&&TRIGGER.weak_flag==0)
+				 else if(USART_Rx_data.mode.bits.shoot_mode==SHOOT_OPEN&&(((USART_Rx_data.mode.bits.controls_mode == CONTROL_RC_CTRL && USART_Rx_data.rc_ctrl_s.bits.WHEEL_State == DOWN_LONG) || (USART_Rx_data.mode.bits.controls_mode == CONTROL_KEYBOARD_CTRL && USART_Rx_data.rc_ctrl_s.bits.KEY_L_State == PUSH_LONG)) || (USART_Rx_data.mode.bits.vision_mode == VISION_ARMOR && USART_Rx_data.flag.bits.fire_flag))&&TRIGGER.weak_flag==0)
 					 trigger_mode = TRIGGER_LONG;
 				 else
 					 trigger_mode = TRIGGER_STATIC;
@@ -126,9 +126,9 @@ void infantry_trigger_state_ctrl(void)
 		case TRIGGER_BACK:
 				 if(( USART_Rx_data.rc_ctrl_s.bits.s_r == 2 && USART_Rx_data.mode.bits.controls_mode == CONTROL_RC_CTRL)  || USART_Rx_data.flag.bits.detect_flag == DETECT_NONE)//|| ( mode.controls_state == KEY_ctrl)
 					 trigger_mode = TRIGGER_IDLE;
-			   else if(TRIGGER.flag_if_back_over == 0 && TRIGGER.flag_if_flug[1] == 0)
+			   else if(USART_Rx_data.mode.bits.shoot_mode==SHOOT_OPEN&&USART_Rx_data.mode.bits.shoot_mode==SHOOT_OPEN&&TRIGGER.flag_if_back_over == 0 && TRIGGER.flag_if_flug[1] == 0)
 				   trigger_mode = TRIGGER_BACK;
-				 else
+				 else 
 				 {
 					 trigger_mode = TRIGGER_STATIC;
 					 TRIGGER.flag_if_back_over = 1;

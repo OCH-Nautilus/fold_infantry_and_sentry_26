@@ -47,9 +47,9 @@ void PowerState_up(void)
 		PowerState_control=FullCAP;
 	else if(USART_Rx_data.mode.bits.controls_mode==CONTROL_KEYBOARD_CTRL&&USART_Rx_data.key.bits.Key_Shift==0)
 		PowerState_control=HalCAP;
-	if(USART_Rx_data.mode.bits.controls_mode==CONTROL_RC_CTRL&&USART_Rx_data.rc_ctrl_s.bits.s_l!=3)
+	if(USART_Rx_data.mode.bits.controls_mode==CONTROL_RC_CTRL&&USART_Rx_data.rc_ctrl_s.bits.s_l==3)
 		PowerState_control=FullCAP;
-	else if(USART_Rx_data.mode.bits.controls_mode==CONTROL_RC_CTRL&&USART_Rx_data.rc_ctrl_s.bits.s_l==3)
+	else if(USART_Rx_data.mode.bits.controls_mode==CONTROL_RC_CTRL&&USART_Rx_data.rc_ctrl_s.bits.s_l!=3)
 		PowerState_control=HalCAP;
 }
 
@@ -74,12 +74,23 @@ void cal_powerSet(Power_Limit_type *power_limit,PowerState_control_t PowerState_
 	{
 		case FullCAP:
 		#ifdef CAP
-		if( power_limit->referee_max_power>= 40.0f&&power_limit->capEnergy>powerlimit.Min_capEnergy)//机器人未进入“节能”状态,并且当前电容能量＞最小电容能量
-			power_limit->set_power = power_limit->No_limited_Power;//set_power-动态功率上限， No_limited_Power-没有限制时跑的功率
-		else if(power_limit->referee_max_power < 40.0f&&power_limit->capEnergy>powerlimit.Min_capEnergy)
-			power_limit->set_power = 180;		
-		if(power_limit->capEnergy<powerlimit.Min_capEnergy)
-			power_limit->set_power = power_limit->referee_max_power + power_limit->P_remainEngry*(power_limit->remainEnergy - power_limit->Min_remainEnergy);
+//		if( power_limit->referee_max_power>= 40.0f&&power_limit->capEnergy>powerlimit.Min_capEnergy)//机器人未进入“节能”状态,并且当前电容能量＞最小电容能量
+//			power_limit->set_power = power_limit->No_limited_Power;//set_power-动态功率上限， No_limited_Power-没有限制时跑的功率
+//		else if(power_limit->referee_max_power < 40.0f&&power_limit->capEnergy>powerlimit.Min_capEnergy)
+//			power_limit->set_power = 180;		
+//		if(power_limit->capEnergy<powerlimit.Min_capEnergy)
+//			power_limit->set_power = power_limit->referee_max_power + power_limit->P_remainEngry*(power_limit->remainEnergy - power_limit->Min_remainEnergy);
+		if(USART_Rx_data.flag.bits.super_cap_mode==0)
+		{
+			if( power_limit->referee_max_power>= 40.0f&&power_limit->capEnergy>powerlimit.Min_capEnergy)//机器人未进入“节能”状态,并且当前电容能量＞最小电容能量
+				power_limit->set_power = power_limit->No_limited_Power;//set_power-动态功率上限， No_limited_Power-没有限制时跑的功率
+			else if(power_limit->referee_max_power < 40.0f&&power_limit->capEnergy>powerlimit.Min_capEnergy)
+				power_limit->set_power = 180;		
+			if(power_limit->capEnergy<powerlimit.Min_capEnergy)
+				power_limit->set_power = power_limit->referee_max_power + power_limit->P_remainEngry*(power_limit->remainEnergy - power_limit->Min_remainEnergy);
+		}
+		else
+			power_limit->set_power = 25;
 		#endif  
 		#ifdef BAT      
 		if (power_limit->remainEnergy < power_limit->Min_remainEnergy)
@@ -101,10 +112,20 @@ void cal_powerSet(Power_Limit_type *power_limit,PowerState_control_t PowerState_
 		else
 			power_limit->HalfCAP_Power = power_limit->referee_max_power + power_limit->Add_HalfCAP_Power;
 		#ifdef CAP			
-		if (power_limit->capEnergy < power_limit->Min_capEnergy)//当前电容能量小于最小电容能量
-			power_limit->set_power = power_limit->referee_max_power + power_limit->P_capEngry*(power_limit->capEnergy - power_limit->Min_capEnergy); //capEnergy-电容能量;Min_capEnergy-最小电容能量
-		else//最小阈值之前都是恒功率
-			power_limit->set_power = power_limit->HalfCAP_Power;  //HalfCAP_Power 半电容功率
+//		if (power_limit->capEnergy < power_limit->Min_capEnergy)//当前电容能量小于最小电容能量
+//			power_limit->set_power = power_limit->referee_max_power + power_limit->P_capEngry*(power_limit->capEnergy - power_limit->Min_capEnergy); //capEnergy-电容能量;Min_capEnergy-最小电容能量
+//		else//最小阈值之前都是恒功率
+//			power_limit->set_power = power_limit->HalfCAP_Power;  //HalfCAP_Power 半电容功率
+		
+		if(USART_Rx_data.flag.bits.super_cap_mode==0)
+		{
+			if (power_limit->capEnergy < power_limit->Min_capEnergy)//当前电容能量小于最小电容能量
+				power_limit->set_power = power_limit->referee_max_power + power_limit->P_capEngry*(power_limit->capEnergy - power_limit->Min_capEnergy); //capEnergy-电容能量;Min_capEnergy-最小电容能量
+			else//最小阈值之前都是恒功率
+				power_limit->set_power = power_limit->HalfCAP_Power;  //HalfCAP_Power 半电容功率
+		}		
+		else
+			power_limit->set_power =25;
 		#endif
 		#ifdef BAT
 			if (power_limit->remainEnergy < power_limit->Min_remainEnergy)
@@ -119,10 +140,10 @@ void cal_powerSet(Power_Limit_type *power_limit,PowerState_control_t PowerState_
 		break;
 	}
 	
-//	if(power_limit->capEnergy<300)
-//		power_limit->set_power=powerlimit.referee_max_power-power_limit->capEnergy/9.0f;
-//	 if(powerlimit.remainEnergy<25)
-//		power_limit->set_power=powerlimit.referee_max_power-(35.0f-powerlimit.remainEnergy)/2.0f;
+	if(power_limit->capEnergy<300)
+		power_limit->set_power=powerlimit.referee_max_power-power_limit->capEnergy/9.0f;
+	 if(powerlimit.remainEnergy<25)
+		power_limit->set_power=powerlimit.referee_max_power-(35.0f-powerlimit.remainEnergy)/2.0f;
 	
 }
 

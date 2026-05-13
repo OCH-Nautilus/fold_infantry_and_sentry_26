@@ -69,3 +69,17 @@ gimbal\navigation.o: ../referee/referee.h
 gimbal\navigation.o: ../Bsp/CAN_receive.h
 gimbal\navigation.o: ../Inc/can.h
 gimbal\navigation.o: ../Bsp/config.h
+gimbal\navigation.o: ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h
+gimbal\navigation.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+gimbal\navigation.o: ../Inc/FreeRTOSConfig.h
+gimbal\navigation.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+gimbal\navigation.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+gimbal\navigation.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+gimbal\navigation.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+gimbal\navigation.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+gimbal\navigation.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+gimbal\navigation.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+gimbal\navigation.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h
+gimbal\navigation.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h
+gimbal\navigation.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h
+gimbal\navigation.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h

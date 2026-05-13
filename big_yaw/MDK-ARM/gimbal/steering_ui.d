@@ -84,3 +84,4 @@ gimbal\steering_ui.o: ../Bsp/bsp_transmit.h
 gimbal\steering_ui.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 gimbal\steering_ui.o: ../SuperCAP/SuperCAP.h
 gimbal\steering_ui.o: ../task/trigger_task.h
+gimbal\steering_ui.o: ../SuperCAP/chassis_power.h

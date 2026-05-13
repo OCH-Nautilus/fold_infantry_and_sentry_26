@@ -284,6 +284,9 @@ void vision_tx(void)
 
 void tx_handle(SendRobotCmdData *data)
 {
+	static float big_yaw_in_world=0;
+	big_yaw_in_world=INS.Yaw+95.0f;
+	
     data->cmd_ID       = 0x02;
     data->time_stamp   = HAL_GetTick();
     data->yaw          = INS.Yaw;
@@ -313,7 +316,9 @@ void tx_handle(SendRobotCmdData *data)
 			break;
 	}
    
-    data->big_yaw_in_world = USART_Rx_data.ins_big_yaw;    // 世界坐标系下大yaw角
+	big_yaw_in_world=zero_180(big_yaw_in_world);
+	
+    data->big_yaw_in_world = big_yaw_in_world;//USART_Rx_data.ins_big_yaw;    // 世界坐标系下大yaw角
 }
 
 void send_vision()
@@ -436,8 +441,13 @@ bool IF_DISCERN(void)
 //是否开火
 bool IF_FIRE(void)
 {
-	//if((Vision_Rx.target_id!=6&&fabs(INS.Yaw-Vision_Rx.yaw)<0.5f&&fabs(INS.Pitch+Vision_Rx.pitch)<0.3f)||(Vision_Rx.target_id==6&&Vision_Rx.fire_advice&&fabs(INS.Yaw-Vision_Rx.yaw)<0.5f&&fabs(INS.Pitch+Vision_Rx.pitch)<0.3f))//(Vision_Rx.enable_yaw_diff/0.3f)Vision_Rx.enable_pitch_diff
-	if(fabs(INS.Yaw-Vision_Rx.yaw)<0.5f&&fabs(INS.Pitch+Vision_Rx.pitch)<0.3f)
+	if(mode.vision_switch_state==VISION_ARMOR&&Vision_Rx.target_id!=6&&fabs(INS.Yaw-Vision_Rx.yaw)<0.2f&&fabs(INS.Pitch+Vision_Rx.pitch)<0.3f)//(Vision_Rx.enable_yaw_diff/0.3f)Vision_Rx.enable_pitch_diff
+		return 1;
+	else if(mode.vision_switch_state==VISION_ARMOR&&Vision_Rx.target_id!=6&&Vision_Rx.target_id==6&&fabs(INS.Yaw-Vision_Rx.target_yaw)<0.7f&&fabs(INS.Pitch+Vision_Rx.pitch)<0.3f)//(Vision_Rx.enable_yaw_diff/0.3f)Vision_Rx.enable_pitch_diff
+		return 1;
+	else if(mode.vision_switch_state==VISION_ARMOR&&Vision_Rx.target_id==6&&Vision_Rx.target_id==6&&fabs(INS.Yaw-Vision_Rx.target_yaw)<0.2f&&fabs(INS.Pitch+Vision_Rx.pitch)<0.3f)//(Vision_Rx.enable_yaw_diff/0.3f)Vision_Rx.enable_pitch_diff
+		return 1;
+	else if(mode.vision_switch_state==VISION_SMALL_BUFF||mode.vision_switch_state==VISION_BIG_BUFF)
 		return 1;
 	else
 		return 0;

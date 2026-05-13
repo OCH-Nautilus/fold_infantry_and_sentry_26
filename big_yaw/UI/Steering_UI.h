@@ -318,7 +318,6 @@ extern FloInt_Data_t energy_1;
 
 
 
-extern Sentry_cmd_t Sentry_cmd;
 //extern void Sentry_cmd_update();
 
 

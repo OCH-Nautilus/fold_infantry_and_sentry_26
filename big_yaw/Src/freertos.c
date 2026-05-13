@@ -57,6 +57,7 @@ osThreadId detect_taskHandle;
 osThreadId VOFATaskHandle;
 osThreadId myTask09Handle;
 osThreadId UI_TASKHandle;
+osThreadId NavigationTaskHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -73,6 +74,7 @@ void DETECT_task(void const * argument);
 void StartVOFATask(void const * argument);
 void Transmit_Data_Task(void const * argument);
 void UI_Task(void const * argument);
+void navigation_task(void const * argument);
 
 extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -153,12 +155,16 @@ void MX_FREERTOS_Init(void) {
   VOFATaskHandle = osThreadCreate(osThread(VOFATask), NULL);
 
   /* definition and creation of myTask09 */
-  osThreadDef(myTask09, Transmit_Data_Task, osPriorityHigh, 0, 512);
+  osThreadDef(myTask09, Transmit_Data_Task, osPriorityAboveNormal, 0, 512);
   myTask09Handle = osThreadCreate(osThread(myTask09), NULL);
 
   /* definition and creation of UI_TASK */
   osThreadDef(UI_TASK, UI_Task, osPriorityAboveNormal, 0, 1024);
   UI_TASKHandle = osThreadCreate(osThread(UI_TASK), NULL);
+
+  /* definition and creation of NavigationTask */
+  osThreadDef(NavigationTask, navigation_task, osPriorityAboveNormal, 0, 512);
+  NavigationTaskHandle = osThreadCreate(osThread(NavigationTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -349,6 +355,24 @@ __weak void UI_Task(void const * argument)
     osDelay(1);
   }
   /* USER CODE END UI_Task */
+}
+
+/* USER CODE BEGIN Header_navigation_task */
+/**
+* @brief Function implementing the NavigationTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_navigation_task */
+__weak void navigation_task(void const * argument)
+{
+  /* USER CODE BEGIN navigation_task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END navigation_task */
 }
 
 /* Private application code --------------------------------------------------*/

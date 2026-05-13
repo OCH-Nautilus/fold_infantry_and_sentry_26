@@ -64,9 +64,10 @@ void USART_Data_init(USART_TX_data_t *data_init)
     data_init->chassis_given_current = 0;
     data_init->chassis_speed_rpm = 0;
     data_init->tail = 0;
-
+		data_init->key_cmd='A';
     data_init->flag_tx.flag_pack = 0;
 }
+extern  float yaw_nv,yaw_tu;
 
 void USART_Data_Handle(USART_TX_data_t *data)
 {
@@ -90,12 +91,12 @@ void USART_Data_Handle(USART_TX_data_t *data)
     data->ins_big_yaw         = INS.Yaw;
     data->big_yaw_target      = GIMBAL.big_yaw_target;
     data->chassis_power_limit = robot_status.chassis_power_limit;
-    data->real_power          = err_yaw;
+    data->real_power          = SuperCAP.real_power;
     data->buffer_energy       = power_heat_data.buffer_energy;
     data->cap_v               = SuperCAP.cap_v;
     data->Communication_count = HAL_GetTick();
-    data->chassis_given_current = qqq11;
-    data->chassis_speed_rpm   = chassis_motor[0].speed_rpm;
+    data->chassis_given_current = SuperCAP.cap_wrong_code;
+    data->chassis_speed_rpm   = powerlimit.set_power;
     data->speed_out           = CHASSIS.output[0];
 
     /* ©¤©¤ ±êÖ¾Î» ©¤©¤ */
@@ -109,7 +110,12 @@ void USART_Data_Handle(USART_TX_data_t *data)
     data->flag_tx.bits.navi_need_tunnel = navigation_rx.need_tunnel;  // bit6
     data->flag_tx.bits.if_lost_navi     = navigation_rx.if_lost_navi; // bit7
     data->flag_tx.bits.reserved_flags_2 = 0;                          // bit8-14
-
+		
+		if(map_command.cmd_keyboard=='D')
+			data->key_cmd='D';
+		else if(map_command.cmd_keyboard=='A')
+			data->key_cmd='A';
+		
     /* ©¤©¤ Ö¡Î² ©¤©¤ */
     data->tail = USART_TX_END;
 }
@@ -138,7 +144,8 @@ void USART_Data_Send(USART_TX_data_t *data, uint8_t *buff)
     memcpy(buff + 35, &data->chassis_given_current,2);   // [35-36]
     memcpy(buff + 37, &data->chassis_speed_rpm,    2);   // [37-38]
     memcpy(buff + 39, &data->flag_tx.flag_pack,    2);   // [39-40]
-    memcpy(buff + 41, &data->tail,                 1);   // [41]
+		memcpy(buff + 41, &data->key_cmd,                 1);   // [41]
+    memcpy(buff + 42, &data->tail,                 1);   // [41]
 
     HAL_UART_Transmit_DMA(&huart6, buff, USART_DATA_COUNT);  // = 42
 }

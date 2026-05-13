@@ -123,6 +123,8 @@ void USART_Data_Handle(USART_TX_data_t *data)
     data->flag.bits.DT_OVER_FLAG    = GIMBAL.IF_DT_OVER & 0x01;
     data->flag.bits.fire_flag       = IF_FIRE();        // TODO: 填入
 		data->flag.bits.small_pitch_fold_over=GIMBAL.small_pitch_fold_over;
+    data->flag.bits.super_cap_mode=mode.super_cap_state&0x01;
+	data->flag.bits.super_cap_wrong=rc_ctrl.keyboard.flag_Z;    
     data->flag.bits.re_flag         = 0;        // TODO: 填入（6 bits）
 		
 
@@ -220,10 +222,13 @@ void Head1_data_Handle(uint8_t *buff, USART_Rx_data_t *data)
         data->chassis_given_current = chassis_given_current.data;
         data->chassis_speed_rpm     = chassis_speed_rpm.data;
 
+				
+				
         /* ── 标志位 ── */
         data->flag_rx.flag_pack = (uint16_t)buff[39] | ((uint16_t)buff[40] << 8);
+				
+				data->key_cmd=buff[41];
     }
-
     /* ── 通信超时检测 ── */
     if (last_Communication_count == data->Communication_count)
         err_cnt++;

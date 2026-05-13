@@ -288,6 +288,9 @@ static void sbus_to_rc(volatile const uint8_t *sbus_buf, RC_ctrl_t *rc_ctrl)
     rc_ctrl->keyboard.flag_F = !rc_ctrl->keyboard.flag_F;
     rc_ctrl->keyboard.last_F = rc_ctrl->keyboard.key_F;
 		
+    if (rc_ctrl->keyboard.key_B == 1 && rc_ctrl->keyboard.last_B == 0)
+    rc_ctrl->keyboard.flag_B = !rc_ctrl->keyboard.flag_B;
+    rc_ctrl->keyboard.last_B = rc_ctrl->keyboard.key_B;
 		WHEEL_STATE_Ctrl();//²¦ÂÖ×´Ì¬±æÊ¶
 		KEY_STATE_Ctrl();//Êó±ê×ó¼ü×´Ì¬±æÊ¶
 }

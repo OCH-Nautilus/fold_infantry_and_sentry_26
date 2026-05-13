@@ -73,7 +73,7 @@ void MX_FREERTOS_Init(void);
 /**
   * @brief  The application entry point.
   * @retval int
-  */int yuu=0;
+  */
 int main(void)
 {
 
@@ -109,13 +109,13 @@ int main(void)
   MX_USART1_UART_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
+	MX_USB_DEVICE_Init();
 	can1_user_init();
 	can2_user_init();
 	HAL_GPIO_WritePin(GPIOH,LED_R_Pin,GPIO_PIN_SET);
 	DWT_Init(168);
     while (BMI088_init(&hspi1, 1) != BMI088_NO_ERROR)
         ;
-		yuu++;
 		
   /* USER CODE END 2 */
 

@@ -16,6 +16,7 @@
 #include "CRC8_CRC16.h"
 #include "protocol.h"
 #include <stdbool.h>
+#include "navigation.h"
 // 裁判系统数据
 frame_header_struct_t referee_receive_header;
 frame_header_struct_t referee_send_header;
@@ -225,6 +226,7 @@ float speed_gun_1;
 float speed_gun_2;
 uint8_t buff_test[40];int asd;
 uint8_t plplk;
+uint8_t ikikik;
 void referee_data_solve(uint8_t *frame)
 {
     uint16_t cmd_id = 0;
@@ -331,6 +333,7 @@ void referee_data_solve(uint8_t *frame)
     break;
     case SENTRY_INFO_CMD_ID: // 0x020D
     {
+			ikikik++;
         memcpy(&sentry_info, frame + index, sizeof(sentry_info_t));
     }
     break;
@@ -353,7 +356,7 @@ void referee_data_solve(uint8_t *frame)
     case MAP_COMMAND_CMD_ID: // 0x0303
     {
         memcpy(&map_command, frame + index, sizeof(map_command_t));
-        if_update = 1;
+        Decision_tx.if_get_manual_msg=1;
     }
     break;
     case MAP_ROBOT_DATA_CMD_ID: // 0x0305

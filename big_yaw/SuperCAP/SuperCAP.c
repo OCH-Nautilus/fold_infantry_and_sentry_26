@@ -88,10 +88,10 @@ void Send_SupPower(CAN_HandleTypeDef *hcan)
       Power_Buffer = robot_status.chassis_power_limit *100;    //缓冲能量
       
 //    pid_init(&pid_buff,0,0,0,0,0);
-    Power_Buffer = 100;
+//    Power_Buffer = 100;
 
     limit_100 = limit * 100; 
-    Power_Buffer_100 = Power_Buffer * 100; 
+    Power_Buffer_100 = Power_Buffer; 
 //    sendbuf[0] = limit_100 >> 8 ;//工作模式
 //        sendbuf[1] = limit_100 ;
 //    sendbuf[2] = Power_Buffer_100 >> 8 ;//裁判系统限制功率

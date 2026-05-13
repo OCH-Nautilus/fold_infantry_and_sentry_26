@@ -36,6 +36,7 @@ extern pid_type_def pid_pitch_angle;
 extern pid_type_def pid_pitch_speed;
 extern pid_type_def pid_trigger_speed_long,pid_yaw_vision_outpost_angle;
 extern shoot_t SHOOT;
+extern int qww;
 
 void StartVOFATask(void const * argument)
 {
@@ -49,7 +50,7 @@ void StartVOFATask(void const * argument)
 		//Vofa_Send_Data8(small_yaw._torq,VisionToGimbal.yaw_acc.d,VisionToGimbal.yaw_vel.d,0,0,0,0,0);
 		//Vofa_Send_Data8(TRIGGER.if_back_flag,TRIGGER.back_over_flag,TRIGGER.err_cnt,TRIGGER.once_target_ecd,0,0,0,0);
 		//Vofa_Send_Data8(Vision_Rx.yaw,INS.Yaw,Vision_Rx.v_yaw,Vision_Rx.enable_yaw_diff,Vision_Rx.appear,IF_FIRE(),IF_DISCERN(),mode.trigger_state);
-//Vofa_Send_Data8(Vision_Rx.yaw,INS.Yaw,-Vision_Rx.pitch,INS.Pitch,INS.Gyro[2],pid_yaw_vision_outpost_angle.out,Vision_Rx.v_yaw,IF_FIRE());
+Vofa_Send_Data8(Vision_Rx.yaw,INS.Yaw,-Vision_Rx.pitch,INS.Pitch,Vision_Rx.target_id,frictiongear_l.speed_rpm,frictiongear_r.speed_rpm,Vision_Rx.appear);
 		//Vofa_Send_Data8(mode.gimbal_state,mode.vision_switch_state,mode.trigger_state,0,0,0,0,0);
 		//Vofa_Send_Data8(USART_Rx_data.chassis_speed_rpm,USART_Rx_data.real_power,USART_Rx_data.buffer_energy,USART_Rx_data.cap_v,mode.chassis_speed_state,0,0,0);
 		//Vofa_Send_Data8(USART_Rx_data.shooter_barrel_heat_limit,USART_Rx_data.shooter_barrel_cooling_value,USART_Rx_data.shooter_17mm_1_barrel_heat,USART_Rx_data.chassis_speed_rpm,0,0,0,0);
@@ -59,7 +60,8 @@ void StartVOFATask(void const * argument)
 		//Vofa_Send_Data8(USART_Rx_data.real_power,USART_Rx_data.chassis_given_current,USART_Rx_data.big_yaw_target,USART_Rx_data.ins_big_yaw,0,0,0,0);
 		//Vofa_Send_Data8(GIMBAL.yaw_target,INS.Yaw,GIMBAL.pitch_target,INS.Pitch,mode.controls_state,mode.gimbal_state,rc_ctrl.rc.wheel,GIMBAL.output_pitch);
 		//Vofa_Send_Data8(GIMBAL.output_yaw,GIMBAL.output_pitch,big_pitch.Angle,mode.infantry_sentry_state,USART_Rx_data.buffer_energy,0,USART_Rx_data.flag_rx.bits.vision_color,USART_Rx_data.flag_rx.bits.robot_id);
-		Vofa_Send_Data8(USART_Rx_data.chassis_given_current,USART_Rx_data.chassis_speed_rpm,USART_Rx_data.speed_out,USART_Rx_data.buffer_energy,USART_Rx_data.cap_v,0,0,0);
+		//Vofa_Send_Data8(USART_Rx_data.chassis_given_current,USART_Rx_data.real_power,USART_Rx_data.chassis_speed_rpm,USART_Rx_data.buffer_energy,USART_Rx_data.cap_v,0,qww,small_yaw.ecd);
+		//Vofa_Send_Data8(USART_Rx_data.real_power,USART_Rx_data.cap_v,USART_Rx_data.chassis_given_current,GIMBAL.small_pitch_fold_over,0,0,0,0);
 		vTaskDelay(10);
   }
 }

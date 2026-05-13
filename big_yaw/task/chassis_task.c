@@ -11,6 +11,7 @@
 #include "chassis_power.h"
 #include "navigation.h"
 #include "big_gimbal_task.h"
+#include "ins_task.h"
 CHASSIS_t CHASSIS;
 pid_type_def speed[4];
 pid_type_def pid_yaw_follow;
@@ -70,6 +71,7 @@ void chassis_init()
 	CHASSIS.last_HP=robot_status.current_HP;
     CHASSIS.front_set[0] = FRONT_SET_1;
     CHASSIS.front_set[1] = FRONT_SET_2;
+	CHASSIS.cap_front_set = CAP_FRONT_SET;
     PID_init(&speed[FL], PID_MOTOR_MODE, PID_MOTOR_KP, PID_MOTOR_KI, PID_MOTOR_KD, PID_MOTOR_IOUT_MAX, PID_MOTOR_OUT_MAX);
 	PID_init(&speed[RL], PID_MOTOR_MODE, PID_MOTOR_KP, PID_MOTOR_KI, PID_MOTOR_KD, PID_MOTOR_IOUT_MAX, PID_MOTOR_OUT_MAX);
 	PID_init(&speed[FR], PID_MOTOR_MODE, PID_MOTOR_KP, PID_MOTOR_KI, PID_MOTOR_KD, PID_MOTOR_IOUT_MAX, PID_MOTOR_OUT_MAX);
@@ -121,11 +123,17 @@ void infantry_chassis_assignment(CHASSIS_t *ch)
  */
 void sentry_chassis_assignment(CHASSIS_t *ch) 
 {
-	if(USART_Rx_data.mode.bits.controls_mode==CONTROL_AUTO_CTRL)
+	float yaw_err=navigation_rx.navigate_yaw_target-INS.Yaw;
+	if(yaw_err>180.0f)
+		yaw_err-=360.0f;
+	else if(yaw_err<-180.0f)
+		yaw_err+=360.0f;
+	
+	if(USART_Rx_data.mode.bits.controls_mode==CONTROL_AUTO_CTRL)//自动
 	{
-		if(navigation_rx.if_control && !navigation_rx.if_arrived 
+		if(navigation_rx.If_get_path && !navigation_rx.if_arrived 
 			&& navigation_rx.if_lost_navi==0
-			&& ((USART_Rx_data.mode.bits.gimbal_mode==GIMBAL_FOLD && USART_Rx_data.flag.bits.down_over_flag&&USART_Rx_data.flag.bits.small_pitch_fold_over && fabs(CHASSIS.crd) < 10.0f)
+			&& ((USART_Rx_data.mode.bits.gimbal_mode==GIMBAL_FOLD && USART_Rx_data.flag.bits.down_over_flag && fabs(CHASSIS.crd) < 10.0f&&fabs(yaw_err)<5.0f)//&&USART_Rx_data.flag.bits.small_pitch_fold_over
 				|| (USART_Rx_data.mode.bits.gimbal_mode==GIMBAL_CRUISE || USART_Rx_data.mode.bits.gimbal_mode==GIMBAL_VISION)))
 		{
 			ch->Vx = navigation_rx.chassis_vx;
@@ -137,7 +145,7 @@ void sentry_chassis_assignment(CHASSIS_t *ch)
 			ch->Vy = 0;
 		}
 	}
-	else
+	else//遥控器控制
 	{
 		ch->Vx = USART_Rx_data.rc_ctrl_r_vy * SENSITIVITY_CHASSIS_RC_X;
 		ch->Vy = -USART_Rx_data.rc_ctrl_r_vx * SENSITIVITY_CHASSIS_RC_Y;
@@ -209,10 +217,13 @@ void sentry_chassis_ecdz()
 		 * need_tunnel：过洞时需底盘对准大yaw方向，用FOLLOW
 		 * 其他AUTO（巡航/视觉/到达/无路径）：小陀螺TOP全向机动
 		 */
-		if(navigation_rx.need_tunnel)
-			CHASSIS.Vz = PID_calc(&pid_yaw_follow, -CHASSIS.crd, 0);
-		
-		if (CHASSIS.last_HP - robot_status.current_HP >= 10)
+		if(navigation_rx.need_tunnel&&USART_Rx_data.flag.bits.down_over_flag)
+			CHASSIS.Vz = PID_calc(&pid_yaw_follow, CHASSIS.crd, 0);
+		else if(navigation_rx.need_tunnel&&USART_Rx_data.flag.bits.down_over_flag==0)
+			CHASSIS.Vz =0;
+		else
+		{
+			if (CHASSIS.last_HP - robot_status.current_HP >= 10)
 			{
 					last_attacked_tick = HAL_GetTick();
 			}
@@ -236,9 +247,11 @@ void sentry_chassis_ecdz()
 					CHASSIS.Vz =  base_speed;
 			else
 					CHASSIS.Vz = -base_speed;
+		}
+		
 	}
-	else
-		CHASSIS.Vz = speed_limit_top();
+//	else
+//		CHASSIS.Vz = speed_limit_top();
 
 	CHASSIS.last_HP = robot_status.current_HP;
 }
@@ -251,8 +264,11 @@ void infantry_chassis_ecdz()
 	else if (yaw_angle < -180.0f)
 		yaw_angle += 360.0f;
 
-	CHASSIS.crd = yaw_angle - CHASSIS.front_set[CHASSIS.front_set_num];//
-
+	if(USART_Rx_data.flag.bits.super_cap_mode==0)
+		CHASSIS.crd = yaw_angle - CHASSIS.front_set[CHASSIS.front_set_num];//
+	else
+		CHASSIS.crd = yaw_angle - CHASSIS.cap_front_set;
+	
 	if (CHASSIS.crd > 180.0f)
 		CHASSIS.crd -= 360.0f;
 	else if (CHASSIS.crd < -180.0f)

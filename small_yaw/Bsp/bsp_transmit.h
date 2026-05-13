@@ -10,7 +10,7 @@
 
 #define DATA_COUNT_RX	320
 #define DATA_COUNT_TX	82
-#define DATA_COUNT	42//接收字节数
+#define DATA_COUNT	43//接收字节数
 
 #define USART_RX_HAED   0XA5
 #define USART_RX_END    0XAA
@@ -56,10 +56,10 @@ uint8_t head;
                 uint8_t navi_close_flag :1; // //是否靠近目标点 阈值 1.0m
                 uint8_t navi_need_tunnel :1;//是否需要过洞 在靠近洞且规划路径需要过洞时为1
                 uint8_t if_lost_navi :1; // 是否丢失导航 0正常 1丢失
-                uint8_t reserved_flags_2 :7; // 位8-15，保留
+                uint8_t reserved_flags_2 :8; // 位8-15，保留
             }bits;
          } flag_rx;
-			
+				uint8_t key_cmd;
 	uint8_t tail;
 }USART_Rx_data_t;
 
@@ -138,7 +138,9 @@ typedef struct
 								uint8_t DT_OVER_FLAG : 1;
                 uint8_t fire_flag :1;
 								uint8_t small_pitch_fold_over:1;
-								uint8_t re_flag : 5; // 位8-15，保留位										
+                                uint8_t super_cap_mode :1 ;
+                                uint8_t super_cap_wrong:1;//清除超电错误码
+								uint8_t re_flag : 3; // 位8-15，保留位										
             }bits;
          } flag;
     

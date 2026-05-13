@@ -71,3 +71,12 @@ gimbal\chassis_task.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
 gimbal\chassis_task.o: ../SuperCAP/chassis_power.h
 gimbal\chassis_task.o: ..\task\navigation.h
 gimbal\chassis_task.o: ..\task\big_gimbal_task.h
+gimbal\chassis_task.o: ..\task\ins_task.h
+gimbal\chassis_task.o: ../Components/Devices/BMI088driver.h
+gimbal\chassis_task.o: ../Components/Algorithm/QuaternionEKF.h
+gimbal\chassis_task.o: ../Components/kalman_filter.h
+gimbal\chassis_task.o: ../arm/arm_math.h
+gimbal\chassis_task.o: ../Drivers/CMSIS/Include/core_cm4.h
+gimbal\chassis_task.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+gimbal\chassis_task.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+gimbal\chassis_task.o: ..\task\ins_task.h

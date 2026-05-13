@@ -72,7 +72,7 @@ void frictiongear_calc()
 {
 
     if(mode.shoot_state==SHOOT_OPEN)
-        SHOOT.frictiongear_speed=6600;
+        SHOOT.frictiongear_speed=6000;
     else
         SHOOT.frictiongear_speed=0;
 		
@@ -81,11 +81,11 @@ void frictiongear_calc()
 		else
 			SHOOT.shoot_target_speed=0;
 		
-    // SHOOT.output[0]=PID_calc(&pid_frictiongear_l,frictiongear_l.speed_rpm,-SHOOT.shoot_target_speed);//l
-    // SHOOT.output[1]=PID_calc(&pid_frictiongear_r,frictiongear_r.speed_rpm,SHOOT.shoot_target_speed);//r
+ SHOOT.output[0]=PID_calc(&pid_frictiongear_l,frictiongear_l.speed_rpm,-SHOOT.shoot_target_speed);//l
+ SHOOT.output[1]=PID_calc(&pid_frictiongear_r,frictiongear_r.speed_rpm,SHOOT.shoot_target_speed);//r
 
-	SHOOT.output[0] = Vel_SMC_calc(&Vel_SMC_left_shoot, frictiongear_l.speed_rpm*0.10472f, -SHOOT.shoot_target_speed*0.10472f)*52445.58f;
-    SHOOT.output[1] = Vel_SMC_calc(&Vel_SMC_right_shoot,frictiongear_r.speed_rpm*0.10472f, SHOOT.shoot_target_speed*0.10472f)*52445.58f;
+//	SHOOT.output[0] = Vel_SMC_calc(&Vel_SMC_left_shoot, frictiongear_l.speed_rpm*0.10472f, -SHOOT.shoot_target_speed*0.10472f)*52445.58f;
+//    SHOOT.output[1] = Vel_SMC_calc(&Vel_SMC_right_shoot,frictiongear_r.speed_rpm*0.10472f, SHOOT.shoot_target_speed*0.10472f)*52445.58f;
 }
 
 /**
